@@ -1,8 +1,6 @@
 from sqlalchemy import *
 from sqlalchemy.orm import relationship, backref 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, scoped_session
-
 from socket import inet_pton, inet_ntop, AF_INET, AF_INET6
 from struct import pack, unpack
 import sqlalchemy.types as types
@@ -48,24 +46,20 @@ class User(Base):
     streampassword = Column(String(128))
     shows = relationship('Show', secondary='user_shows', backref='users')
     
-    PASS_MD5 = '1'
-    PASS_BCRYPT = '2a'
-    PASS_SHA1 = '3'
-    
     def __init__(self, name, password, streampassword):
         self.name = name
         self.password = password
         self.streampassword = streampassword
 
     def checkPassword(self, password):
-        p = self.password.split('$')
-        print p
-        if p[1] == User.PASS_BCRYPT :
+        try:
             return bcrypt.hashpw(password, self.password) == self.password
-        elif p[1] == User.PASS_MD5 :
-            return hashlib.md5(password) == p[3]
-        elif p[1] == User.PASS_SHA1 :
-            return hashlib.sha1(password) == p[3]
+        except ValueError:
+            if hashlib.sha1(password) == self.password :
+                self.password = User.makePassword(password)
+                return True
+            else:
+                return False
     
     def checkUsername(self, username):
         if username.contains('|'):
@@ -76,17 +70,8 @@ class User(Base):
             return True
     
     @staticmethod        
-    def makePassword(password, encryption=PASS_BCRYPT):
-        '''returns passwordstring $hashmethod$salt$hash'''
-        salt = ''
-        hash = ''
-        if encryption == User.PASS_BCRYPT:
-            return bcrypt.hashpw(password, bcrypt.gensalt())
-        elif encryption == User.PASS_MD5:
-            hash = hashlib.md5(password).hexdigest()
-        elif encryption == User.PASS_SHA1:
-            hash = hashlib.sha1(password).hexdigest()
-        return '$%d$%s$%s' % (encryption, salt, hash)
+    def makePassword(password):
+        return bcrypt.hashpw(password, bcrypt.gensalt())
 
 class IRCUser(Base):
     __tablename__ = 'ircusers'
@@ -109,7 +94,6 @@ class Series(Base):
 class Show(Base):
     __tablename__ = 'shows'
     show = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    user = Column(Integer(unsigned=True), ForeignKey('users.user', onupdate="CASCADE", ondelete="RESTRICT"))
     series = Column(Integer(unsigned=True), ForeignKey('series.series', onupdate="CASCADE", ondelete="RESTRICT"))
     begin = Column(DateTime)
     end = Column(DateTime)
@@ -117,8 +101,10 @@ class Show(Base):
     description = Column(Text)
     flags = Column(Integer(unsigned=True))
     
-    SHOW_DELETED = 1
-    SHOW_RECORD = 2
+    SHOW_DELETED   = 1
+    SHOW_RECORD    = 2
+    SHOW_PLANNED   = 4
+    SHOW_UNPLANNED = 8
     #users = relationship('User', secondary='user_shows', backref='shows')
 
 class Artist(Base):
@@ -183,7 +169,7 @@ class Relay(Base):
 class Stream(Base):
     __tablename__ = 'streams'
     stream = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    relays = relationship('Relay', backref='streams')
+    relays = relationship('Relay', secondary='stream_relays', backref='streams')
 
 class Listener(Base):
     __tablename__ = 'listeners'
@@ -192,76 +178,3 @@ class Listener(Base):
     disconnect = Column(DateTime)
     address = Column(INetAddress)
     
-    
-
-class SAEnginePlugin(plugins.SimplePlugin):
-    def __init__(self, bus):
-        """
-        The plugin is registered to the CherryPy engine and therefore
-        is part of the bus (the engine *is* a bus) registery.
- 
-        We use this plugin to create the SA engine. At the same time,
-        when the plugin starts we create the tables into the database
-        using the mapped class of the global metadata.
- 
-        Finally we create a new 'bind' channel that the SA tool
-        will use to map a session to the SA engine at request time.
-        """
-        plugins.SimplePlugin.__init__(self, bus)
-        self.sa_engine = None
-        self.bus.subscribe("bind", self.bind)
- 
-    def start(self):
-        db_path = os.path.abspath(os.path.join(os.curdir, 'data.db'))
-        self.sa_engine = create_engine('sqlite:///%s' % db_path, echo=True)
-        '''remove line below'''
-        Base.metadata.create_all(self.sa_engine)
- 
-    def stop(self):
-        if self.sa_engine:
-            self.sa_engine.dispose()
-            self.sa_engine = None
- 
-    def bind(self, session):
-        session.configure(bind=self.sa_engine)
- 
-class SATool(cherrypy.Tool):
-    def __init__(self):
-        """
-        The SA tool is responsible for associating a SA session
-        to the SA engine and attaching it to the current request.
-        Since we are running in a multithreaded application,
-        we use the scoped_session that will create a session
-        on a per thread basis so that you don't worry about
-        concurrency on the session object itself.
-
-        This tools binds a session to the engine each time
-        a requests starts and commits/rollbacks whenever
-        the request terminates.
-        """
-        cherrypy.Tool.__init__(self, 'on_start_resource',
-                               self.bind_session,
-                               priority=20)
-
-        self.session = scoped_session(sessionmaker(autoflush=True,
-                                                  autocommit=False))
-
-    def _setup(self):
-        cherrypy.Tool._setup(self)
-        cherrypy.request.hooks.attach('on_end_resource',
-                                      self.commit_transaction,
-                                      priority=80)
-
-    def bind_session(self):
-        cherrypy.engine.publish('bind', self.session)
-        cherrypy.request.db = self.session
-
-    def commit_transaction(self):
-        cherrypy.request.db = None
-        try:
-            self.session.commit()
-        except:
-            self.session.rollback()  
-            raise
-        finally:
-            self.session.remove()
