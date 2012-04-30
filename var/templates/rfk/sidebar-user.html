@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+block.super
+{% endblock %}
+{% block sidebar %}
+<div id='subcontent'>
+{% if user_self %}
+	<div class='infoblock'>
+	<h3>{% lang L_SETTINGS %}</h3>
+		<ul>
+			<li><a href="settings.php">{% lang L_USERSETTINGS %}</a></li>
+			<li><a href="showsettings.php">{% lang L_SHOWSETTINGS %}</a></li>
+			<!--<li>Statistiken</li>-->
+		</ul>
+	</div>
+	<div class='infoblock'>
+        <ul>
+            <li><a href="apiregistration.php">{% lang L_APIREGISTRATION %}</a></li>
+        </ul>
+    </div>
+{% endif %}
+</div>
+{% endblock %}

@@ -1,15 +1,23 @@
 from sqlalchemy import *
 from sqlalchemy.orm import relationship, backref 
 from sqlalchemy.ext.declarative import declarative_base
-from socket import inet_pton,inet_ntop,AF_INET,AF_INET6
+from sqlalchemy.orm import sessionmaker, scoped_session
+
+from socket import inet_pton, inet_ntop, AF_INET, AF_INET6
 from struct import pack, unpack
 import sqlalchemy.types as types
 import hashlib
 import bcrypt
 
-engine = create_engine('sqlite:///data.db', echo=True)
-Base = declarative_base()
 
+import os, os.path
+ 
+import cherrypy
+from cherrypy.process import wspbus, plugins
+
+
+
+Base = declarative_base()
 
 class INetAddress(types.TypeDecorator):
     '''INET_ATON/NTOA Datatype
@@ -19,7 +27,7 @@ class INetAddress(types.TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         _addr = inet_pton(AF_INET, value)
-        return unpack('!L',_addr)
+        return unpack('!L', _addr)
         
 
     def process_result_value(self, value, dialect):
@@ -84,7 +92,7 @@ class IRCUser(Base):
     __tablename__ = 'ircusers'
     ircuser = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     hostmask = Column(String(255))
-    user_id = Column('user',Integer(unsigned=True), ForeignKey('users.user', onupdate="CASCADE", ondelete="RESTRICT"))
+    user_id = Column('user', Integer(unsigned=True), ForeignKey('users.user', onupdate="CASCADE", ondelete="RESTRICT"))
     user = relationship('User', backref='ircusers')
 
 user_shows = Table('user_shows', Base.metadata,
@@ -110,7 +118,7 @@ class Show(Base):
     flags = Column(Integer(unsigned=True))
     
     SHOW_DELETED = 1
-    SHOW_RECORD  = 2
+    SHOW_RECORD = 2
     #users = relationship('User', secondary='user_shows', backref='shows')
 
 class Artist(Base):
@@ -167,9 +175,9 @@ stream_relays = Table('stream_relays', Base.metadata,
 class Relay(Base):
     __tablename__ = 'relays'
     relay = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    name  = Column(String(50))
+    name = Column(String(50))
     address = Column(INetAddress)
-    port  = Column(Integer(unsigned=True))
+    port = Column(Integer(unsigned=True))
 
 
 class Stream(Base):
@@ -183,8 +191,77 @@ class Listener(Base):
     connect = Column(DateTime)
     disconnect = Column(DateTime)
     address = Column(INetAddress)
+    
+    
 
-def createDB():
-    Base.metadata.create_all(engine)
+class SAEnginePlugin(plugins.SimplePlugin):
+    def __init__(self, bus):
+        """
+        The plugin is registered to the CherryPy engine and therefore
+        is part of the bus (the engine *is* a bus) registery.
+ 
+        We use this plugin to create the SA engine. At the same time,
+        when the plugin starts we create the tables into the database
+        using the mapped class of the global metadata.
+ 
+        Finally we create a new 'bind' channel that the SA tool
+        will use to map a session to the SA engine at request time.
+        """
+        plugins.SimplePlugin.__init__(self, bus)
+        self.sa_engine = None
+        self.bus.subscribe("bind", self.bind)
+ 
+    def start(self):
+        db_path = os.path.abspath(os.path.join(os.curdir, 'data.db'))
+        self.sa_engine = create_engine('sqlite:///%s' % db_path, echo=True)
+        '''remove line below'''
+        Base.metadata.create_all(self.sa_engine)
+ 
+    def stop(self):
+        if self.sa_engine:
+            self.sa_engine.dispose()
+            self.sa_engine = None
+ 
+    def bind(self, session):
+        session.configure(bind=self.sa_engine)
+ 
+class SATool(cherrypy.Tool):
+    def __init__(self):
+        """
+        The SA tool is responsible for associating a SA session
+        to the SA engine and attaching it to the current request.
+        Since we are running in a multithreaded application,
+        we use the scoped_session that will create a session
+        on a per thread basis so that you don't worry about
+        concurrency on the session object itself.
 
-createDB()
+        This tools binds a session to the engine each time
+        a requests starts and commits/rollbacks whenever
+        the request terminates.
+        """
+        cherrypy.Tool.__init__(self, 'on_start_resource',
+                               self.bind_session,
+                               priority=20)
+
+        self.session = scoped_session(sessionmaker(autoflush=True,
+                                                  autocommit=False))
+
+    def _setup(self):
+        cherrypy.Tool._setup(self)
+        cherrypy.request.hooks.attach('on_end_resource',
+                                      self.commit_transaction,
+                                      priority=80)
+
+    def bind_session(self):
+        cherrypy.engine.publish('bind', self.session)
+        cherrypy.request.db = self.session
+
+    def commit_transaction(self):
+        cherrypy.request.db = None
+        try:
+            self.session.commit()
+        except:
+            self.session.rollback()  
+            raise
+        finally:
+            self.session.remove()

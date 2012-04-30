@@ -1,0 +1,109 @@
+<div>
+<h1>{{ show.name }}</h1>
+<br />
+<table>
+<tr><td>{% lang L_TITLE %}</td><td style="text-align:right;">
+<input class="ui-corner-all" style="padding:0.4em 1em;width:250px;" id="name" name="name" value="{{show.name}}"/></td></tr>
+<tr><td>{% lang L_THREAD %}</td><td style="text-align:right;">
+<input class="ui-corner-all" style="padding:0.4em 1em;width:250px;" id="thread" name="thread" value="{{show.thread}}"/></td></tr>
+<tr><td>{% lang L_BEGIN %}</td><td style="text-align:right;">
+<input class="ui-corner-all" style="padding:0.4em 1em;width:100px;" id="startd" name="date" value="{{show.date}}"/>
+<select class="ui-corner-all" style="padding:0.4em 1em;" id="startt" name="startt">
+{% for time in start %}
+<option value="{{time.value}}" {% if time.selected %} selected="selected" {% endif %}>{{ time.val }}</option>
+{% endfor %}
+</select></td></tr>
+<tr><td>{% lang L_LENGTH %}</td><td style="text-align:right;">
+<select  class="ui-corner-all" id="length" name="length" style="padding:0.4em 1em;">
+{% for time in length %}
+<option value="{{time.value}}" {% if time.selected %} selected="selected" {% endif %}>{{ time.val }}</option>
+{% endfor %}
+</select>
+</td></tr>
+<tr><td>{% lang L_DESCRIPTION %}</td><td style="text-align:right;">
+<textarea class="ui-corner-all" style="padding:0.4em 1em;width:250px;height:100px;" id="description" name="description">{{show.description}}</textarea></td></tr>
+<tr><td>&nbsp;</td>
+<td>
+<select id="action" class="ui-corner-all" style="padding: 0.4em 1em;">
+    <option value="edit">{% lang L_EDIT %}</option>
+    <option value="new">{% lang L_NEW %}</option>
+    <option value="delete">{% lang L_DELETE %}</option>
+</select>
+<input id="showid" type="hidden" value="{{show.show}}" />
+<input id="submit" type="button" onclick="submitEditShow();" value="{% lang L_ENTER %}" /></td>
+</table>
+</div>
+<script type="text/javascript">
+$('#startd').datepicker({ firstDay : 1, minDate : 0, dateFormat: 'dd.mm.yy'});
+$('#submit').button();
+
+function submitEditShow() {
+    $('#submit').button('disable');
+    if($('#action').val() == 'edit'){
+        $.post('{{ WEBROOT }}api/site/show.php?w=edit',
+                'name='+encodeURIComponent($('#name').val())+
+                '&description='+encodeURIComponent($('#description').val())+
+                '&length='+$('#length').val()+
+                '&startt='+$('#startt').val()+
+                '&thread='+encodeURIComponent($('#thread').val())+
+                '&startd='+encodeURIComponent($('#startd').val())+
+                '&showid='+$('#showid').val()
+                ,
+                function(data) {
+                    var obj = data;
+                    if(obj.error){
+                        alert(obj.error[0]['errid']+": "+obj.error[0]['desc']);
+                        $('#submit').button('enable');
+                    }else if(obj.ok == 0){
+                        newshow = new Array();
+                        clearFreeClassNames();
+                        addingshow = false;
+                        alert('{% lang L_EDITSUCCESS %}');
+                        window.location.reload();
+                    }
+                }
+                ,"json");
+    }else if($('#action').val() == 'new'){
+        $.post('{{ WEBROOT }}api/site/show.php?w=addshowform',
+                'name='+encodeURIComponent($('#name').val())+
+                '&description='+encodeURIComponent($('#description').val())+
+                '&length='+$('#length').val()+
+                '&startt='+$('#startt').val()+
+                '&thread='+encodeURIComponent($('#thread').val())+
+                '&startd='+encodeURIComponent($('#startd').val())
+                ,
+                function(data) {
+                    var obj = data;
+                    if(obj.error){
+                        alert(obj.error[0]['errid']+": "+obj.error[0]['desc']);
+                        $('#submit').button('enable');
+                    }else if(obj.ok){
+                        newshow = new Array();
+                        clearFreeClassNames();
+                        addingshow = false;
+                        alert('{% lang L_EDITSUCCESS %}');
+                        window.location.reload();
+                    }
+                }
+                ,"json");
+    }else if($('#action').val() == 'delete'){
+        $.post('{{ WEBROOT }}api/site/show.php?w=delete',
+                '&showid='+$('#showid').val()
+                ,
+                function(data) {
+                    var obj = data;
+                    if(obj.error){
+                        alert(obj.error[0]['errid']+": "+obj.error[0]['desc']);
+                        $('#submit').button('enable');
+                    }else if(obj.ok == 0){
+                        newshow = new Array();
+                        clearFreeClassNames();
+                        addingshow = false;
+                        alert('{% lang L_DELSUCCESS %}');
+                        window.location.reload();
+                    }
+                }
+                ,"json");
+    }
+}
+</script>

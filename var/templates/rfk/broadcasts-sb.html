@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+block.super
+{% endblock %}
+{% block sidebar %}
+<div id='subcontent'>
+<div class='infoblock'>
+    <h3>{% lang L_SERVERTIME %}</h3>
+    <ul>
+        <li>
+            {{ sb_time }}
+        </li>
+    </ul>
+</div>
+<div class='infoblock'>
+<h3>{% lang L_NEXTSHOWS %}</h3>
+<script type="text/javascript">
+function nextShowInfo(showid){
+    loadDialog('{{ WEBROOT }}show.php?action=show&ajax=true&tstamp=true&show='+showid,true);
+}
+
+var currweek =      '{{ currweek }}';
+var webroot =       '{{ WEBROOT }}';
+var lshow =         '{% lang L_SHOW %}';
+var lsavesuccess =  '{% lang L_SAVESUCCESS %}';
+var lnodatafield =  '{% lang L_NO_DATA_FIELD %}';
+var lnospanning =   '{% lang L_NO_SPANNING %}';
+var lerrwrongtime = '{% lang L_ERR_WRONG_TIME %}';
+</script>
+<script type="text/javascript" src="{{ WEBROOT }}js/show.js"></script>
+<ul>
+{% for show in nextshows %}
+<li><a href="javascript:nextShowInfo({{show.showid}});">{{show.showname}} ({{show.streamer}})</a></li>
+{% endfor %}
+</ul>
+</div>
+{% if user_logged_in %}
+{% if show_is_of_add %}
+<div class='infoblock'>
+<h3>{% lang L_ACTIONS %}</h3>
+	<a href="javascript:addShow();" id="addshowlink">{% lang L_ADDSHOW %}</a>
+	<div id="addshow" style="display:none;width:100%;">
+		<form>
+		<table>
+		<tr><td>{% lang L_BEGIN %}</td><td><a class="abutton" href="javascript:newShowUp();">u</a><a class="abutton" href="javascript:newShowDown();">d</a></td><td><span id="showbegin">??:??</span></td></tr>
+		<tr><td>{% lang L_END %}</td><td><a class="abutton" href="javascript:newShowPlus();">+</a><a class="abutton" href="javascript:newShowMinus();">-</a></td><td><span id="showend">??:??</span></td></tr>
+		<tr><td>{% lang L_TITLE %}</td><td colspan=2><input id="showname" name="name" value="" size="15" /></td></tr>
+		<tr><td>{% lang L_THREAD %}</td><td colspan=2><input id="showthread" name="name" value="" size="15" /></td></tr>
+		<tr><td colspan=3><textarea id="showdescription" name="desc" style="width:100%;"></textarea></td></tr>
+		<tr><td><a href="javascript:commitAddShow();" />{% lang L_ENTER %}</a></td><td><a href="javascript:abortAddShow();" />{% lang L_CANCEL %}</a></td></tr>
+		</table>
+		</form>
+	</div>
+</div>
+{% endif %}
+{% endif %}
+</div>
+{% endblock %}
