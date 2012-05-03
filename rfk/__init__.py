@@ -3,6 +3,8 @@ from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 from socket import inet_pton, inet_ntop, AF_INET, AF_INET6
 from struct import pack, unpack
+from time import time
+from ConfigParser import SafeConfigParser
 import sqlalchemy.types as types
 import hashlib
 import bcrypt
@@ -17,15 +19,17 @@ from cherrypy.process import wspbus, plugins
 
 Base = declarative_base()
 
+config = SafeConfigParser()
+
 class INetAddress(types.TypeDecorator):
     '''INET_ATON/NTOA Datatype
     '''
 
-    impl = types.Binary
+    impl = types.Integer
 
     def process_bind_param(self, value, dialect):
         _addr = inet_pton(AF_INET, value)
-        return unpack('!L', _addr)
+        return unpack('!L', _addr)[0]
         
 
     def process_result_value(self, value, dialect):
@@ -33,7 +37,7 @@ class INetAddress(types.TypeDecorator):
         return inet_ntop(AF_INET, _addr)
 
     def copy(self):
-        return INetAddress(self.impl.length)
+        return INetAddress(self)
 
 
 
@@ -82,7 +86,8 @@ class IRCUser(Base):
 
 user_shows = Table('user_shows', Base.metadata,
      Column('user', Integer(unsigned=True), ForeignKey('users.user'), primary_key=True),
-     Column('show', Integer(unsigned=True), ForeignKey('shows.show'), primary_key=True)
+     Column('show', Integer(unsigned=True), ForeignKey('shows.show'), primary_key=True),
+     Column('role', Integer(unsigned=True))
 )
 
 class Series(Base):
@@ -112,6 +117,17 @@ class Artist(Base):
     artist = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     name = Column(String(255))
     
+    @staticmethod
+    def checkArtist(session, artist):
+        metaArtist = session.query(MetaArtist).filter(MetaArtist.name==artist).first()
+        if metaArtist == None :
+            metaArtist = MetaArtist(name=artist)
+            session.add(metaArtist)
+            art = Artist(name=artist)
+            session.add(art)
+            metaArtist.artist = art
+        return metaArtist.artist
+
 class Title(Base):
     __tablename__ = 'titles'
     title = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
@@ -119,14 +135,27 @@ class Title(Base):
     artist = relationship('Artist', backref='titles')
     name = Column(String(255))
     duration = Column(Integer)
+    
+    @staticmethod
+    def checkTitle(session,artist, title, begin=None, end=None):
+        metaTitle = session.query(MetaTitle).filter(MetaTitle.name==title).join(Title).join(Artist).join(MetaArtist).filter(MetaArtist.name==artist).first()
+        if metaTitle == None :
+            metaTitle = MetaTitle(name=title)
+            session.add(metaTitle)
+            tit = Title(name=title)
+            tit.artist = Artist.checkArtist(session, artist)
+            metaTitle.title = tit
+            session.add(tit)
+        if begin != None and end != None:
+            metaTitle.addDuration(begin, end)
+        return metaTitle.title
 
 class MetaArtist(Base):
     __tablename__ = 'metaArtists'
     metaArtist = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     artist_id = Column('artist', Integer(unsigned=True), ForeignKey('artists.artist', onupdate="CASCADE", ondelete="RESTRICT"))
     artist = relationship('Artist', backref='metaArtists')
-    
-    name = Column(String(255))
+    name = Column(String(255), unique=True)
     
 class MetaTitle(Base):
     __tablename__ = 'metaTitles'
@@ -138,10 +167,16 @@ class MetaTitle(Base):
     duration = Column(Integer(unsigned=True))
     durationWeight = Column(Integer(unsigned=True))
     
-    def addDuration(self, duration):
+    def addDuration(self, begin, end):
         '''adds a new duration to this metaTitle'''
-        self.duration = ((self.duration * self.durationWeight) + duration) / (self.durationWeight + 1)
-        self.durationWeight += 1
+        diff = end-begin
+        duration = diff.days*86400+diff.seconds
+        if self.durationWeight > 0 :
+            self.duration = ((self.duration * self.durationWeight) + duration) / (self.durationWeight + 1)
+            self.durationWeight += 1
+        else :
+            self.duration = duration
+            self.durationWeight = 1
         
 class Song(Base):
     __tablename__ = 'songs'
@@ -160,16 +195,43 @@ stream_relays = Table('stream_relays', Base.metadata,
 
 class Relay(Base):
     __tablename__ = 'relays'
-    relay = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    name = Column(String(50))
-    address = Column(INetAddress)
-    port = Column(Integer(unsigned=True))
+    relay    = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
+    name     = Column(String(50))
+    hostname = Column(String(128))
+    port     = Column(Integer(unsigned=True))
+    type     = Column(Integer)
+    bandwidth = Column(Integer)
+    traffic   = Column(Integer)
+    status    = Column(Integer)
+    queryMethod = Column(Integer)
+    queryUsername = Column(String(50))
+    queryPassword = Column(String(50))
+    
+    TYPE_MASTER = 1
+    TYPE_RELAY = 2
+    
+    STATUS_OFFLINE = 0
+    STATUS_ONLINE = 1
+    
+    QUERY_VNSTAT = 1
+    QUERY_ICECAST_KH = 2
 
 
 class Stream(Base):
     __tablename__ = 'streams'
     stream = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     relays = relationship('Relay', secondary='stream_relays', backref='streams')
+    mountpoint    = Column(String(50))
+    name          = Column(String(50))
+    description   = Column(String(50))
+    type          = Column(Integer)
+    quality       = Column(Integer)
+    username      = Column(String(50))
+    password      = Column(String(50))
+    
+    TYPE_MP3 = 1
+    TYPE_AACP = 2
+    TYPE_OGG = 2
 
 class Listener(Base):
     __tablename__ = 'listeners'
@@ -177,4 +239,28 @@ class Listener(Base):
     connect = Column(DateTime)
     disconnect = Column(DateTime)
     address = Column(INetAddress)
+    useragent = Column(String)
+    relay_id = Column('relay', Integer(unsigned=True), ForeignKey('relays.relay', onupdate="CASCADE", ondelete="RESTRICT"))
+    relay    = relationship('Relay', backref='listeners')
+    stream_id = Column('stream', Integer(unsigned=True), ForeignKey('streams.stream', onupdate="CASCADE", ondelete="RESTRICT"))
+    stream    = relationship('Stream', backref='listeners')
+    client = Column(Integer)
     
+class ApiKey(Base):
+    __tablename__ = 'apikeys'
+    apikey = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
+    application = Column(String(128))
+    description = Column(Text)
+    key         = Column(String(128), unique=True)
+    user_id     = Column('user', Integer(unsigned=True), ForeignKey('users.user', onupdate="CASCADE", ondelete="CASCADE"))
+    user        = relationship('User', backref='apikeys')
+    flag        = Column(Integer(unsigned=True))
+    def __init__(self, application, description, user):
+        self.application = application
+        self.description = description
+        self.user = user
+        self.flag = 0
+        
+    def genKey(self):
+        key = hashlib.sha1("%s%s%d"%(self.application, self.description, time()))
+        
