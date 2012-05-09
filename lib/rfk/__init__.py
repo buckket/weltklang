@@ -280,7 +280,7 @@ class Stream(Base):
     
     TYPE_MP3 = 1
     TYPE_AACP = 2
-    TYPE_OGG = 2
+    TYPE_OGG = 3
     
     def getURL(self, session):
         relay = Relay.getBestRelay(session)

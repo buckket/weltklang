@@ -15,6 +15,7 @@ Disconnect: streamingclient disconnects
 import rfk
 import argparse
 import json
+import os
 
 current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -24,7 +25,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyRfK Interface for liquidsoap',
                                      epilog='Anyways this should normally not called manually')
     parser.add_argument('--debug')
-    parser.add_argument('command',metavar='command',choices=['auth','metadata','connect','disconnect'],
+    parser.add_argument('command',metavar='command',choices=['auth','metadata','connect','disconnect', 'playlist'],
                         help='command to execute')
     parser.add_argument('data',metavar='data', help='mostly some json encoded string from liquidsoap')
     args = parser.parse_args()
