@@ -11,7 +11,7 @@ from sqlalchemy.orm import relationship, backref,sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
-current_dir = os.path.dirname(os.path.abspath(__file__))
+current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 rfk.config.read(os.path.join(current_dir,'etc','config.cfg'))
 
