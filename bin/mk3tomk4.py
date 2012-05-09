@@ -104,7 +104,7 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 def copy_users():
-    streamer = oldsession.query(Streamer).all()
+    streamer = oldsession.query(Streamer).yield_per(50)
     
     for olduser in streamer:
         print olduser.username
@@ -116,7 +116,7 @@ def copy_users():
     
     
 def copy_shows():
-    shows = oldsession.query(Show).all()
+    shows = oldsession.query(Show).yield_per(50)
     for oldshow in shows:
         print oldshow.show
         show = rfk.Show(name=oldshow.name, description=oldshow.description, begin=oldshow.begin, end=oldshow.end)
@@ -134,7 +134,7 @@ def copy_shows():
     session.commit()
 
 def copy_mounts():
-    relays = oldsession.query(Relay).all()
+    relays = oldsession.query(Relay).yield_per(50)
     for oldrelay in relays:
         print oldrelay.type
         qm = rfk.Relay.QUERY_VNSTAT
@@ -170,7 +170,7 @@ def copy_mounts():
     session.commit()
 
 def copy_listener():
-    listeners = oldsession.query(Listener).all()
+    listeners = oldsession.query(Listener).yield_per(50)
     
     
     for oldlistener in listeners:
