@@ -73,7 +73,9 @@ class User(Base):
                 return True
             else:
                 return False
-    
+    def checkStreamPassword(self, password):
+        return bcrypt.hashpw(password, self.streampassword) == self.streampassword
+
     def checkUsername(self, username):
         if username.contains('|'):
             return False

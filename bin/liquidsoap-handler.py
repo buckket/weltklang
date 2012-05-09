@@ -16,40 +16,16 @@ import rfk
 import argparse
 import json
 import os
+from sqlalchemy import *
+from sqlalchemy.orm import sessionmaker
 
 current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 rfk.config.read(os.path.join(current_dir,'etc','config.cfg'))
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='PyRfK Interface for liquidsoap',
-                                     epilog='Anyways this should normally not called manually')
-    parser.add_argument('--debug')
-    parser.add_argument('command',metavar='command',choices=['auth','metadata','connect','disconnect', 'playlist'],
-                        help='command to execute')
-    parser.add_argument('data',metavar='data', help='mostly some json encoded string from liquidsoap')
-    args = parser.parse_args()
-    data = json.loads(args.data);
-    engine = create_engine("%s://%s:%s@%s/%s?charset=utf8" % (rfk.config.get('database', 'engine'),
-                                                              rfk.config.get('database', 'username'),
-                                                              rfk.config.get('database', 'password'),
-                                                              rfk.config.get('database', 'host'),
-                                                              rfk.config.get('database', 'database')))
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    if data.command == 'auth':
-        doAuth(data,session)
-    elif data.command == 'metadata':
-        doMetaData(data,session)
-    elif data.command == 'connect':
-        doConnect(data,session)
-    elif data.command == 'disconnect':
-        doDisconnect(data,session)
-    session.close()
-    
-def doAuth(data,session):
-    user = session.query(rfk.User).filter(rfk.User.name == data.username).first();
-    if user != None and user.checkPassword(data.password):
+def doAuth(username,password,session):
+    user = session.query(rfk.User).filter(rfk.User.name == username).first();
+    if user != None and user.checkStreamPassword(password):
         print 'true'
     else:
         print 'false'
@@ -80,3 +56,47 @@ def doConnect(data,session):
 
 def doDisconnect(data,session):
     pass
+
+def doPlaylist(session):
+    pass
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='PyRfK Interface for liquidsoap',
+                                     epilog='Anyways this should normally not called manually')
+    parser.add_argument('--debug',action='store_true')
+    subparsers = parser.add_subparsers(dest='command',help='sub-command help')
+    
+    authparser = subparsers.add_parser('auth', help='a help')
+    authparser.add_argument('username')
+    authparser.add_argument('password')
+    
+    metadataparser = subparsers.add_parser('metadata', help='a help')
+    metadataparser.add_argument('data',metavar='data', help='mostly some json encoded string from liquidsoap')
+    connectparser = subparsers.add_parser('connect', help='a help')
+    connectparser.add_argument('data',metavar='data', help='mostly some json encoded string from liquidsoap')
+    disconnectparser = subparsers.add_parser('disconnect', help='a help')
+    disconnectparser.add_argument('data',metavar='data', help='mostly some json encoded string from liquidsoap')
+    playlistparser = subparsers.add_parser('playlist', help='a help')
+    
+    args = parser.parse_args()
+    engine = create_engine("%s://%s:%s@%s/%s?charset=utf8" % (rfk.config.get('database', 'engine'),
+                                                              rfk.config.get('database', 'username'),
+                                                              rfk.config.get('database', 'password'),
+                                                              rfk.config.get('database', 'host'),
+                                                              rfk.config.get('database', 'database')))
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    if args.command == 'auth':
+        doAuth(args.username,args.password,session)
+    elif args.command == 'metadata':
+        data = json.loads(args.data);
+        doMetaData(data,session)
+    elif args.command == 'connect':
+        data = json.loads(args.data);
+        doConnect(data,session)
+    elif args.command == 'disconnect':
+        data = json.loads(args.data);
+        doDisconnect(data,session)
+    elif args.command == 'playlist':
+        doPlaylist(session)
+    session.close()
