@@ -140,6 +140,7 @@ def copy_mounts():
         qm = rfk.Relay.QUERY_VNSTAT
         if oldrelay.query_method == 'REMOTE_ICECAST2_KH':
             qm = rfk.Relay.QUERY_ICECAST_KH
+            
         type = rfk.Relay.TYPE_MASTER
         if oldrelay.query_method == 'RELAY':
             type = rfk.Relay.TYPE_RELAY
@@ -156,6 +157,13 @@ def copy_mounts():
         session.add(relay)
     mounts = oldsession.query(Mount).all()
     for oldmount in mounts:
+        type = 0
+        if oldmount.type == 'MP3':
+            type = rfk.Stream.TYPE_MP3
+        elif oldmount.type == 'AACP':
+            type = rfk.Stream.TYPE_AACP
+        elif oldmount.type == 'OGG':
+            type = rfk.Stream.TYPE_OGG
         mount = rfk.Stream(mountpoint=oldmount.path,
                            name=oldmount.name,
                            description=oldmount.description,
