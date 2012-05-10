@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import telnetlib
 import rfk
 import os
@@ -95,7 +94,7 @@ def writemeta(mdata)
 end
 """ % (liquidInterface,liquidInterface,liquidInterface,liquidInterface)
     #script += makeRecordScript(dir)
-    script += """
+    script += u"""
 live = input.harbor(port= %s,on_connect = live_start, on_disconnect = live_stop, buffer=0., max = 10., auth = auth, "/live.ogg")
 
 playlist = request.dynamic({ request.create("bar:foo", indicators= get_process_lines("%s playlist"))})
@@ -203,7 +202,7 @@ def makeOutputOGG(stream):
        stream.mountpoint,
        rfk.config.get('site', 'url'),
        stream.description)
-    return script
+    return script.encode('utf-8')
 
 def makeOutputAACP(stream):
     script = """
@@ -221,8 +220,7 @@ def makeOutputAACP(stream):
        stream.mountpoint,
        rfk.config.get('site', 'url'),
        stream.description)
-    return script
-    return ''
+    return script.encode('utf-8')
 
 def makeOutputMP3(stream):
     script = """
@@ -240,4 +238,4 @@ def makeOutputMP3(stream):
        stream.mountpoint,
        rfk.config.get('site', 'url'),
        stream.description)
-    return script
+    return script.encode('utf-8')
