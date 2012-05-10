@@ -58,7 +58,8 @@ def doDisconnect(data,session):
     pass
 
 def doPlaylist(session):
-    pass
+    item = rfk.Playlist.getCurrentItem(session)
+    print os.path.join(current_dir,'var','music',item.file)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyRfK Interface for liquidsoap',

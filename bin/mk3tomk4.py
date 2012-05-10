@@ -158,12 +158,13 @@ def copy_mounts():
     mounts = oldsession.query(Mount).all()
     for oldmount in mounts:
         type = 0
-        if oldmount.type == 'MP3':
+        if oldmount.type == 'LAMEVBR':
             type = rfk.Stream.TYPE_MP3
         elif oldmount.type == 'AACP':
             type = rfk.Stream.TYPE_AACP
         elif oldmount.type == 'OGG':
             type = rfk.Stream.TYPE_OGG
+            
         mount = rfk.Stream(mountpoint=oldmount.path,
                            name=oldmount.name,
                            description=oldmount.description,
@@ -195,8 +196,20 @@ def copy_listener():
     session.commit()
 
 if __name__ == '__main__':
-    copy_users()
-    copy_shows()
-    copy_mounts()
-    copy_listener()
-    
+    #copy_users()
+    #copy_shows()
+    #copy_mounts()
+    #copy_listener()
+    mounts = oldsession.query(Mount).all()
+    for oldmount in mounts:
+        type = 0
+        if oldmount.type == 'LAMEVBR':
+            type = rfk.Stream.TYPE_MP3
+        elif oldmount.type == 'AACP':
+            type = rfk.Stream.TYPE_AACP
+        elif oldmount.type == 'OGG':
+            type = rfk.Stream.TYPE_OGG
+        
+        print type
+        
+        

@@ -114,7 +114,28 @@ class Series(Base):
     series = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     name = Column(String(50))
     description = Column(Text)
+
+class Tag(Base):
+    __tablename__ = 'tags'
+    tag = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
+    name = name = Column(String(50), unique=True)
+
+    @staticmethod
+    def parseTags(session, tags):
+        r = []
+        for tag in tags.split(' '):
+            t = session.query(Tag).filter(Tag.name == tag).first()
+            if t == None:
+                t = Tag(name=tag)
+                session.add(t)
+            r.append(t)
+        return r
     
+show_tags = Table('show_tags', Base.metadata,
+     Column('show', INTEGER(unsigned=True), ForeignKey('shows.show'), primary_key=True),
+     Column('tag', INTEGER(unsigned=True), ForeignKey('tags.tag'), primary_key=True),
+)
+
 class Show(Base):
     __tablename__ = 'shows'
     show = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
@@ -123,30 +144,43 @@ class Show(Base):
     end = Column(DateTime)
     name = Column(String(50))
     description = Column(Text)
+    tags = relationship('Tag', secondary='show_tags', backref='shows')
     flags = Column(INTEGER(unsigned=True))
+    
     
     SHOW_DELETED = 1
     SHOW_RECORD = 2
     SHOW_PLANNED = 4
     SHOW_UNPLANNED = 8
-    #users = relationship('User', secondary='user_shows', backref='shows')
     
     @staticmethod
-    def getCurrentShow(session, user=None):
+    def getCurrentShows(session, user=None):
         qry = session.query(Show).filter(and_(Show.begin >= datetime.datetime.today(), or_(Show.end <= datetime.datetime.today(), Show.end == None)))
         if user != None:
             qry.join('user_shows').join(User).filter(User == user)
         qry.order_by(Show.end.desc())
         return qry.all()
     
+    def getUserRole(self, session, user):
+        return session.query(user_shows).filter_by(show=self.show, user=user.user).first()[2]
+    
     def getListener(self, session):
-        return session.query(Listener).join(Show).filter(and_(Show.show==self.show,and_(Show.begin < Listener.disconnect) and (Show.end > Listener.connect))).all()
+        return session.query(Listener).join(Show).filter(and_(Show.show == self.show, and_(Show.begin < Listener.disconnect) and (Show.end > Listener.connect))).all()
+    
+    def updateTags(self, session, tags):
+        newtags = Tag.parseTags(session, tags)
+        for tag in newtags:
+            if tag not in self.tags:
+                self.tags.append(tag)
+        for tag in self.tags:
+            if tag not in newtags:
+                self.tags.remove(tag)
 
 class Artist(Base):
     __tablename__ = 'artists'
     artist = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     name = Column(String(255))
-    flags  = Column(INTEGER(unsigned=True))
+    flags = Column(INTEGER(unsigned=True))
     @staticmethod
     def getTopArtists(session):
         return session.query(Artist, func.count()).join(Title).join(Song).group_by(Artist.artist).order_by(func.count().desc())[:50]
@@ -169,7 +203,7 @@ class Title(Base):
     artist = relationship('Artist', backref='titles')
     name = Column(String(255))
     duration = Column(INTEGER(unsigned=True))
-    flags  = Column(INTEGER(unsigned=True))
+    flags = Column(INTEGER(unsigned=True))
     @staticmethod
     def getTopTitles(session):
         return session.query(Title, func.count()).join(Song).group_by(Title.title).order_by(func.count().desc())[:50]
@@ -224,6 +258,10 @@ class Song(Base):
     title = relationship('Title', backref='songs')
     show_id = Column('show', INTEGER(unsigned=True), ForeignKey('shows.show', onupdate="CASCADE", ondelete="RESTRICT"))
     show = relationship('Show', backref='songs')
+    
+    @staticmethod
+    def getCurrentSong(session):
+        return session.query(Song).filter(Song.end == None).order_by(Song.song.desc()).first()
     
 stream_relays = Table('stream_relays', Base.metadata,
      Column('stream', INTEGER(unsigned=True), ForeignKey('streams.stream'), primary_key=True),
@@ -287,6 +325,12 @@ class Stream(Base):
     def getURL(self, session):
         relay = Relay.getBestRelay(session)
         return "http://%s:%d%s" % (relay.hostname, relay.port, self.mountpoint)
+    
+    def add(self, session, relay):
+        session.query(Listener).filter(and_(Listener.relay == relay, Listener.stream == self, Listener.disconnect == None)).update({Listener.disconnect: datetime.datetime.today()})
+    def remove(self, session, relay):
+        session.query(Listener).filter(and_(Listener.relay == relay, Listener.stream == self, Listener.disconnect == None)).update({Listener.disconnect: datetime.datetime.today()})
+
 
 class Listener(Base):
     __tablename__ = 'listeners'
@@ -301,6 +345,11 @@ class Listener(Base):
     stream = relationship('Stream', backref='listeners')
     client = Column(INTEGER(unsigned=True))
     
+    @staticmethod
+    def setDisconnected(session, relay, mount, client):
+        listener = session.query(Listener).filter(and_(Listener.relay == relay, Listener.mount == mount, Listener.client == client, Listener.disconnect == None)).first()
+        listener.disconnected = datetime.datetime.today()
+        
 class ApiKey(Base):
     __tablename__ = 'apikeys'
     apikey = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
@@ -319,3 +368,14 @@ class ApiKey(Base):
     def genKey(self):
         key = hashlib.sha1("%s%s%d" % (self.application, self.description, time()))
         
+class Playlist(Base):
+    __tablename__ = 'playlist'
+    playlist = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
+    begin = Column(Time)
+    end = Column(Time)
+    file = Column(String(128))
+    
+    @staticmethod
+    def getCurrentItem(session):
+        all = session.query(Playlist).filter(between(datetime.datetime.today().time(),Playlist.begin,Playlist.end)).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Playlist.end, Playlist.begin)))).asc()).first()
+        return all
