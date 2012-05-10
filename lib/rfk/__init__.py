@@ -11,7 +11,7 @@ import datetime
 from ConfigParser import SafeConfigParser
 import sqlalchemy.types as types
 import hashlib
-import bcrypt
+from passlib.hash import bcrypt
 
 
 import os, os.path
@@ -86,7 +86,7 @@ class User(Base):
     
     @staticmethod        
     def makePassword(password):
-        return bcrypt.hashpw(password, bcrypt.gensalt())
+        return bcrypt.encrypt(password)
     
     @staticmethod
     def getTopUserByShow(session):
