@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import telnetlib
 import rfk
 import os
