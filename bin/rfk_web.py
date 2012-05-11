@@ -23,7 +23,9 @@ if __name__ == '__main__':
                             'log.screen': True,
                             'tools.sessions.on': True,
                             'tools.auth.on': True,
-                            'server.socket_port': 8070
+                            'server.socket_host': rfk.config.get('site', 'listen'),
+                            'server.socket_port': rfk.config.getint('site', 'port')
+                            
                             })
     
     conf = {'/'      : {'tools.db.on': True,
