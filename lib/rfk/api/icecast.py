@@ -12,7 +12,7 @@ class IcecastAPI(object):
     '''
     @cherrypy.expose
     def index(self, server, mount, action, ip, client, agent):
-        
+        print "%s %s %s %s %s %s" % (server,mount,action, ip, client, agent)
         mount = cherrypy.request.db.query(rfk.Stream).filter(rfk.Stream.mountpoint == mount).first()
         if mount == None:
             cherrypy.response.headers['icecast-auth-message'] = 'unknown mountpoint'

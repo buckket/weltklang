@@ -22,7 +22,8 @@ if __name__ == '__main__':
                             'log.error_file': os.path.join(current_dir, 'var','log','site.log'),
                             'log.screen': True,
                             'tools.sessions.on': True,
-                            'tools.auth.on': True
+                            'tools.auth.on': True,
+                            'server.socket_port': 8070
                             })
     
     conf = {'/'      : {'tools.db.on': True,
