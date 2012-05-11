@@ -3,7 +3,7 @@ Created on 04.05.2012
 
 @author: teddydestodes
 '''
-import rfk.db
+import rfk
 import os
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
@@ -16,7 +16,7 @@ if __name__ == '__main__':
                                                               rfk.config.get('database', 'password'),
                                                               rfk.config.get('database', 'host'),
                                                               rfk.config.get('database', 'database')), echo=True)
-    rfk.db.Base.metadata.create_all(engine)
+    rfk.Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
     
