@@ -25,7 +25,6 @@ class SAEnginePlugin(plugins.SimplePlugin):
         self.bus.subscribe("bind", self.bind)
  
     def start(self):
-        db_path = os.path.abspath(os.path.join(os.curdir, 'data.db'))
         self.sa_engine = create_engine("%s://%s:%s@%s/%s?charset=utf8" % (rfk.config.get('database', 'engine'),
                                                               rfk.config.get('database', 'username'),
                                                               rfk.config.get('database', 'password'),

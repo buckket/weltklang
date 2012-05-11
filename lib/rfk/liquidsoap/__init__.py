@@ -44,12 +44,12 @@ def genScript(session, dir):
     bin = os.path.join(dir,'bin')
     liquidInterface = os.path.join(bin,'liquidsoap-handler.py')
     
-    script  = "set('log.file.path','%s')\n" % os.path.join(dir,'var','log', 'liquidsoap.log')
-    script += "set('log.stdout', true)\n"
-    script += "set('server.telnet', true)\n"
-    script += "set('harbor.bind_addr','%s')\n" % rfk.config.get('liquidsoap', 'address')
+    script  = u"set('log.file.path','%s')\n" % os.path.join(dir,'var','log', 'liquidsoap.log')
+    script += u"set('log.stdout', true)\n"
+    script += u"set('server.telnet', true)\n"
+    script += u"set('harbor.bind_addr','%s')\n" % rfk.config.get('liquidsoap', 'address')
     
-    script += """
+    script += u"""
 def crossfade(a,b)
     add(normalize=false,
     [ sequence([ blank(duration=5.),
@@ -75,7 +75,7 @@ def outfade(old, new)
     add([new, old])
 end
 """
-    script += """
+    script += u"""
 def auth(login,password) =
     ret = get_process_lines("%s auth #{quote(login)} #{quote(password)}")
     ret = list.hd(ret)
@@ -107,7 +107,7 @@ playlist = rewrite_metadata([("artist","Radio freies Krautchan")], playlist)
 live = on_metadata(writemeta , live)
 """ % (rfk.config.get('liquidsoap', 'port'),liquidInterface)
     script += makeLastFMScript()
-    script += """
+    script += u"""
 full = fallback(track_sensitive=false,transitions=[crossfade],[live,playlist])
 """
     script += makeOutput(session)
@@ -117,7 +117,7 @@ full = fallback(track_sensitive=false,transitions=[crossfade],[live,playlist])
 def makeRecordScript(dir):
     bin = os.path.join(dir,'bin')
     liquidInterface = os.path.join(bin,'liquidsoap-handler.py')
-    script = """
+    script = u"""
 def dump_closed(filename)
     # Tu irgendwas damit
     log("File \'#{filename}\' closed...")
@@ -169,13 +169,13 @@ server.register(namespace="dump",
     return script
 
 def makeLastFMScript():
-    script = """
+    script = u"""
 live = lastfm.submit.full(user="'.$_config['lastfm'][0].'", password="'.$_config['lastfm'][1].'", delay=0., force=true, live)
     """
     return script;
 
 def makeOutput(session):
-    script = ""
+    script = u""
     streams = session.query(rfk.Stream).all()
     for stream in streams:
         print stream.type
@@ -188,7 +188,7 @@ def makeOutput(session):
     return script
 
 def makeOutputOGG(stream):
-    script = """
+    script = u"""
 %s=output.icecast(%%vorbis(samplerate=44100, channels=2, quality=0.%s),
                     host="%s",port=%s,protocol="http",
                     user="%s",password="%s",
@@ -203,10 +203,10 @@ def makeOutputOGG(stream):
        stream.mountpoint,
        rfk.config.get('site', 'url'),
        stream.description)
-    return script.encode('utf-8')
+    return script
 
 def makeOutputAACP(stream):
-    script = """
+    script = u"""
 %s=output.icecast(%%aacplus(channels=2, samplerate=44100, bitrate=%s),
                     host="%s",port=%s,protocol="http",
                     user="%s",password="%s",
@@ -221,10 +221,10 @@ def makeOutputAACP(stream):
        stream.mountpoint,
        rfk.config.get('site', 'url'),
        stream.description)
-    return script.encode('utf-8')
+    return script
 
 def makeOutputMP3(stream):
-    script = """
+    script = u"""
 %s=output.icecast(%%mp3.vbr(stereo=true, samplerate=44100, quality=%s,id3v2=true),
                     host="%s",port=%s,protocol="http",
                     user="%s",password="%s",
@@ -239,4 +239,4 @@ def makeOutputMP3(stream):
        stream.mountpoint,
        rfk.config.get('site', 'url'),
        stream.description)
-    return script.encode('utf-8')
+    return script

@@ -1,5 +1,4 @@
 #!/usr/bin/python2.7
-# -*- coding: utf-8 -*-
 import rfk
 import rfk.liquidsoap
 import os
@@ -14,19 +13,19 @@ current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 rfk.config.read(os.path.join(current_dir,'etc','config.cfg'))
 
 engine = create_engine("%s://%s:%s@%s/%s?charset=utf8" % (rfk.config.get('database', 'engine'),
-                                                              rfk.config.get('database', 'username'),
-                                                              rfk.config.get('database', 'password'),
-                                                              rfk.config.get('database', 'host'),
-                                                              rfk.config.get('database', 'database')))
+                                                          rfk.config.get('database', 'username'),
+                                                          rfk.config.get('database', 'password'),
+                                                          rfk.config.get('database', 'host'),
+                                                          rfk.config.get('database', 'database')))
 process = None
 
 def cleanup():
-    if process:
+    if process.returncode == None:
         print 'shutting down liquidsoap'
         process.terminate()
 
 if __name__ == '__main__':
-    args = ['liquidsoap','','-']
+    args = ['liquidsoap','-']
     Session = sessionmaker(bind=engine)
     session = Session()
     atexit.register(cleanup)
@@ -34,12 +33,12 @@ if __name__ == '__main__':
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
     print 'starting'
-    print process.stdin.write(rfk.liquidsoap.genScript(session, current_dir))
+    print process.stdin.write(rfk.liquidsoap.genScript(session, current_dir).encode('utf-8'))
     process.stdin.close()
     print 'started'
     while process.returncode == None:
         print process.stdout.readline()
-        print process.stderr.readline()
+        #print process.stderr.readline()
         process.poll()
     
     session.close()
