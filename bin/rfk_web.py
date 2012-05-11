@@ -1,3 +1,4 @@
+#!/usr/bin/python2.7
 '''
 Created on 30.04.2012
 

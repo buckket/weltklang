@@ -16,6 +16,7 @@ import rfk
 import argparse
 import json
 import os
+import base64
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
 
@@ -36,7 +37,7 @@ def doMetaData(data,session):
 def doConnect(data,session):
     auth = data.Authorization.strip().split(' ')
     if auth[0].lower() == 'basic':
-        a = auth[1].split(':',1)
+        a = base64.b64decode(auth[1]).split(':',1)
         if a[0] == 'source':
             a = a[1].split(':',1)
         username = a[0]

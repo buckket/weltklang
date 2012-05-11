@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 import subprocess
 from threading  import Thread
 import atexit
+import time
 
 current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -23,6 +24,10 @@ def cleanup():
     if process.returncode == None:
         print 'shutting down liquidsoap'
         process.terminate()
+        time.sleep(2)
+        if process.returncode == None:
+            print 'killing liquidsoap'
+            process.kill()
 
 if __name__ == '__main__':
     args = ['liquidsoap','-']
