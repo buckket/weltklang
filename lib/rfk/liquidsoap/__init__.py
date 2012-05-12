@@ -84,6 +84,10 @@ end
 
 userid = ref "none"
 
+def append_userid(mdata) =
+  [("userid",!userid)]
+end
+
 def live_start(mdata)
     ret = get_process_lines("/home/pyrfk/bin/liquidsoap-handler.py connect #{quote(json_of(compact=true,$
     ignore(userid := list.hd(ret))
@@ -108,6 +112,7 @@ playlist = rewrite_metadata([("title","Kein Strömbernd")], playlist)
 playlist = rewrite_metadata([("artist","Radio freies Krautchan")], playlist)
 #playlist = mksave(playlist)
 
+live = map_metadata(append_userid,live)
 live = on_metadata(writemeta , live)
 """ % (rfk.config.get('liquidsoap', 'port'),liquidInterface)
     script += makeLastFMScript()

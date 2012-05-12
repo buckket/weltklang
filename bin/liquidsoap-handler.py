@@ -26,9 +26,9 @@ from datetime import datetime
 username_delimiter = '|'
 
 current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-rfk.config.read(os.path.join(current_dir,'etc','config.cfg'))
+rfk.config.read(os.path.join(current_dir, 'etc', 'config.cfg'))
 
-def doAuth(username,password,session):
+def doAuth(username, password, session):
     if username == 'source':
         username, password = password.split(username_delimiter)
     user = session.query(rfk.User).filter(rfk.User.name == username).first();
@@ -37,7 +37,7 @@ def doAuth(username,password,session):
     else:
         sys.stdout.write('false')
 
-def doMetaData(data,session):
+def doMetaData(data, session):
     if 'userid' not in data or data['userid'] == 'none':
         print 'no userid'
         return
@@ -48,31 +48,29 @@ def doMetaData(data,session):
     artist = data['artist'] or ''
     title = data['title'] or ''
     if 'song' in data:
-        song = data['song'].split(' - ',1)
+        song = data['song'].split(' - ', 1)
         if ('artist' not in data) or (len(data['artist'].strip()) == 0):
             artist = song[0]
         if ('title' not in data) or (len(data['title'].strip()) == 0):
             title = song[1]
     shows = rfk.Show.getCurrentShows(session, user)
     currshow = None
-    print shows
     for show in shows:
         if currshow and show.end is None:
             print show.show
             show.end = datetime.today()
             break
         currshow = show
-    print currshow.show
     song = rfk.Song.beginSong(session, datetime.today(), artist, title, currshow)
     session.add(song)
     session.commit()
 
-def doConnect(data,session):
+def doConnect(data, session):
     auth = data['Authorization'].strip().split(' ')
     if auth[0].lower() == 'basic':
-        a = base64.b64decode(auth[1]).split(':',1)
+        a = base64.b64decode(auth[1]).split(':', 1)
         if a[0] == 'source':
-            a = a[1].split(username_delimiter,1)
+            a = a[1].split(username_delimiter, 1)
         username = a[0]
         password = a[1]
     user = session.query(rfk.User).filter(rfk.User.name == username).first();
@@ -95,7 +93,7 @@ def doConnect(data,session):
                 pass
         print user.user
 
-def doDisconnect(userid,session):
+def doDisconnect(userid, session):
     if userid == "none":
         print "Whooops no userid?"
         return
@@ -111,24 +109,24 @@ def doDisconnect(userid,session):
 
 def doPlaylist(session):
     item = rfk.Playlist.getCurrentItem(session)
-    print os.path.join(current_dir,'var','music',item.file)
+    print os.path.join(current_dir, 'var', 'music', item.file)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyRfK Interface for liquidsoap',
                                      epilog='Anyways this should normally not called manually')
-    parser.add_argument('--debug',action='store_true')
-    subparsers = parser.add_subparsers(dest='command',help='sub-command help')
+    parser.add_argument('--debug', action='store_true')
+    subparsers = parser.add_subparsers(dest='command', help='sub-command help')
     
     authparser = subparsers.add_parser('auth', help='a help')
     authparser.add_argument('username')
     authparser.add_argument('password')
     
     metadataparser = subparsers.add_parser('metadata', help='a help')
-    metadataparser.add_argument('data',metavar='data', help='mostly some json encoded string from liquidsoap')
+    metadataparser.add_argument('data', metavar='data', help='mostly some json encoded string from liquidsoap')
     connectparser = subparsers.add_parser('connect', help='a help')
-    connectparser.add_argument('data',metavar='data', help='mostly some json encoded string from liquidsoap')
+    connectparser.add_argument('data', metavar='data', help='mostly some json encoded string from liquidsoap')
     disconnectparser = subparsers.add_parser('disconnect', help='a help')
-    disconnectparser.add_argument('data',metavar='data', help='mostly some json encoded string from liquidsoap')
+    disconnectparser.add_argument('data', metavar='data', help='mostly some json encoded string from liquidsoap')
     playlistparser = subparsers.add_parser('playlist', help='a help')
     
     args = parser.parse_args()
@@ -140,16 +138,16 @@ if __name__ == '__main__':
     Session = sessionmaker(bind=engine)
     session = Session()
     if args.command == 'auth':
-        doAuth(args.username,args.password,session)
+        doAuth(args.username, args.password, session)
     elif args.command == 'metadata':
         data = json.loads(args.data);
-        doMetaData(data,session)
+        doMetaData(data, session)
     elif args.command == 'connect':
         data = json.loads(args.data);
-        doConnect(data,session)
+        doConnect(data, session)
     elif args.command == 'disconnect':
         data = json.loads(args.data);
-        doDisconnect(data,session)
+        doDisconnect(data, session)
     elif args.command == 'playlist':
         doPlaylist(session)
     session.close()

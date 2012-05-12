@@ -9,7 +9,7 @@ from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
 if __name__ == '__main__':
     current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    rfk.config.read(os.path.join(current_dir,'etc','config.cfg'))
+    rfk.config.read(os.path.join(current_dir, 'etc', 'config.cfg'))
 
     engine = create_engine("%s://%s:%s@%s/%s?charset=utf8" % (rfk.config.get('database', 'engine'),
                                                               rfk.config.get('database', 'username'),
