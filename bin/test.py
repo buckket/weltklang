@@ -14,11 +14,28 @@ if __name__ == '__main__':
     engine = create_engine("%s://%s:%s@%s/%s?charset=utf8" % (rfk.config.get('database', 'engine'),
                                                               rfk.config.get('database', 'username'),
                                                               rfk.config.get('database', 'password'),
-                                                              rfk.config.get('database', 'host'),
+                                                              #rfk.config.get('database', 'host'),
+                                                              '192.168.2.101',
                                                               rfk.config.get('database', 'database')), echo=True)
+    
+    
     rfk.Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
+    
+    user = session.query(rfk.User).get(124)
+    shows = rfk.Show.getCurrentShows(session, user)
+    
+    currshow = None
+    print shows
+    for show in shows:
+        if currshow and show.end is None:
+            print show.show
+            show.end = datetime.today()
+            break
+        currshow = show
+    print currshow.show
+    
     
     """show = session.query(rfk.Show).get(180)
     
@@ -27,8 +44,8 @@ if __name__ == '__main__':
     
     show.updateTags(session,tags)
     """
-    import datetime
-    
-    
-    print rfk.db.Playlist.getCurrentItem(session).file
+    """
+    user = session.query(rfk.User).filter(rfk.User.name == 'teddydestodes').first()
+    print rfk.Show.getCurrentShows(session, user)
     session.commit()
+    """

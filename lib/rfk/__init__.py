@@ -74,7 +74,7 @@ class User(Base):
             else:
                 return False
     def checkStreamPassword(self, password):
-        return bcrypt.hashpw(password, self.streampassword) == self.streampassword
+        return bcrypt.verify(password, self.streampassword)
 
     def checkUsername(self, username):
         if username.contains('|'):
@@ -155,12 +155,19 @@ class Show(Base):
     
     @staticmethod
     def getCurrentShows(session, user=None):
-        qry = session.query(Show).filter(and_(Show.begin >= datetime.datetime.today(), or_(Show.end <= datetime.datetime.today(), Show.end == None)))
+        clauses = []
+        clauses.append(and_(Show.begin <= datetime.datetime.today(), or_(Show.end >= datetime.datetime.today(), Show.end == None)))
         if user != None:
-            qry.join('user_shows').join(User).filter(User == user)
-        qry.order_by(Show.end.desc())
-        return qry.all()
+            clauses.append(User.user == user.user)
+        return session.query(Show).join(user_shows).join(User).filter(*clauses).order_by(Show.begin.desc(),Show.end.asc()).all()
     
+    def endShow(self,now=datetime.datetime.today()):
+        if self.end == None:
+            self.end = now
+        for song in self.songs:
+            if song.end == None:
+                song.end = now
+        
     def getUserRole(self, session, user):
         return session.query(user_shows).filter_by(show=self.show, user=user.user).first()[2]
     
@@ -260,6 +267,21 @@ class Song(Base):
     show = relationship('Show', backref='songs')
     
     @staticmethod
+    def beginSong(session,begin,artist,title,show):
+        song = Song.getCurrentSong(session)
+        if song:
+            song.endSong(session)
+        
+        title = Title.checkTitle(session, artist, title, begin)
+        song = Song(begin=begin, title=title, show=show)
+        return song
+
+    def endSong(self,session):
+        self.end = datetime.datetime.today()
+        #ohh gawd, i failed at desining the database
+        #Title.checkTitle(session, self.title., title, self.end,self.end)
+    
+    @staticmethod
     def getCurrentSong(session):
         return session.query(Song).filter(Song.end == None).order_by(Song.song.desc()).first()
     
@@ -328,6 +350,7 @@ class Stream(Base):
     
     def add(self, session, relay):
         session.query(Listener).filter(and_(Listener.relay == relay, Listener.stream == self, Listener.disconnect == None)).update({Listener.disconnect: datetime.datetime.today()})
+        
     def remove(self, session, relay):
         session.query(Listener).filter(and_(Listener.relay == relay, Listener.stream == self, Listener.disconnect == None)).update({Listener.disconnect: datetime.datetime.today()})
 
@@ -346,9 +369,9 @@ class Listener(Base):
     client = Column(INTEGER(unsigned=True))
     
     @staticmethod
-    def setDisconnected(session, relay, mount, client):
-        listener = session.query(Listener).filter(and_(Listener.relay == relay, Listener.mount == mount, Listener.client == client, Listener.disconnect == None)).first()
-        listener.disconnected = datetime.datetime.today()
+    def setDisconnected(session, relay, stream, client):
+        listener = session.query(Listener).filter(and_(Listener.relay == relay, Listener.stream == stream, Listener.client == client, Listener.disconnect == None)).first()
+        listener.disconnect = datetime.datetime.today()
         
 class ApiKey(Base):
     __tablename__ = 'apikeys'

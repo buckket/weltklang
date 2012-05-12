@@ -11,11 +11,16 @@ class IcecastAPI(object):
     Icecast HTTPAPI
     '''
     @cherrypy.expose
-    def index(self, server=None, mount=None, action=None, ip=None, client=None, agent=None):
-        cherrypy.log().error("peh: %s %s %s %s %s %s" % (server,mount,action, ip, client, agent))
+    def index(self, **data):
+        print data
+        server = data['server']
+        mount = data['mount']
+        action = data['action']
+        ip = data['ip']
         mount = cherrypy.request.db.query(rfk.Stream).filter(rfk.Stream.mountpoint == mount).first()
         if mount == None:
             cherrypy.response.headers['icecast-auth-message'] = 'unknown mountpoint'
+            print 'unknown mountpoint'
             return 'unknown mountpoint'
         
         relay = cherrypy.request.db.query(rfk.Relay).filter(rfk.Relay.hostname == server).first()
@@ -27,25 +32,32 @@ class IcecastAPI(object):
                 cherrypy.request.db.add(relay)
             else:
                 cherrypy.response.headers['icecast-auth-message'] = 'unknown or not registered server'
+            print 'unknown or not registered server'
             return 'unknown or not registered server'
         
         if action in ['mount_add', 'listener_add', 'listener_remove']:
             relay.status = rfk.Relay.STATUS_ONLINE
-        
-        if action == 'listener_add':
+        if action == 'stream_auth':
+            user = data['user']
+            password = data['pass']
+        elif action == 'listener_add':
             #@todo: icecast need to be filtered
             # something like /^Icecast/
-            listener = rfk.Listener(connect=datetime.today(), address=ip, client=client, useragent=agent, relay=relay, mount=mount)
+            agent = data['agent']
+            client = data['client']
+            listener = rfk.Listener(connect=datetime.today(), address=ip, client=client, useragent=agent, relay=relay, stream=mount)
             cherrypy.request.db.add(listener)
         elif action == 'listener_remove':
-            rfk.Listener.setDisconnected(cherrypy.response.db, relay, mount, client)
+            client = data['client']
+            rfk.Listener.setDisconnected(cherrypy.request.db, relay, mount, client)
         elif action == 'mount_add':
-            mount.add(cherrypy.response.db, relay)
+            mount.add(cherrypy.request.db, relay)
         elif action == 'mount_remove':
-            mount.disconnect(cherrypy.response.db, relay)
-        cherrypy.response.db.commit()
-        cherrypy.response.headers['icecast-auth-user'] = '1'
+            mount.remove(cherrypy.request.db, relay)
         
+        cherrypy.request.db.commit()
+        cherrypy.response.headers['icecast-auth-user'] = '1'
+        return 'ok'
 
     def __init__(self):
         '''

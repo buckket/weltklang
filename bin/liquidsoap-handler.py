@@ -16,47 +16,98 @@ import rfk
 import argparse
 import json
 import os
+import sys
 import base64
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
+from datetime import datetime
+
+
+username_delimiter = '|'
 
 current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 rfk.config.read(os.path.join(current_dir,'etc','config.cfg'))
 
 def doAuth(username,password,session):
+    if username == 'source':
+        username, password = password.split(username_delimiter)
     user = session.query(rfk.User).filter(rfk.User.name == username).first();
     if user != None and user.checkStreamPassword(password):
-        print 'true'
+        sys.stdout.write('true')
     else:
-        print 'false'
+        sys.stdout.write('false')
 
 def doMetaData(data,session):
-    pass
+    if 'userid' not in data or data['userid'] == 'none':
+        print 'no userid'
+        return
+    user = session.query(rfk.User).get(int(data['userid']))
+    if user == None:
+        print 'user not found'
+        return
+    artist = data['artist'] or ''
+    title = data['title'] or ''
+    if 'song' in data:
+        song = data['song'].split(' - ',1)
+        if ('artist' not in data) or (len(data['artist'].strip()) == 0):
+            artist = song[0]
+        if ('title' not in data) or (len(data['title'].strip()) == 0):
+            title = song[1]
+    shows = rfk.Show.getCurrentShows(session, user)
+    currshow = None
+    print shows
+    for show in shows:
+        if currshow and show.end is None:
+            print show.show
+            show.end = datetime.today()
+            break
+        currshow = show
+    print currshow.show
+    song = rfk.Song.beginSong(session, datetime.today(), artist, title, currshow)
+    session.add(song)
+    session.commit()
 
 def doConnect(data,session):
-    auth = data.Authorization.strip().split(' ')
+    auth = data['Authorization'].strip().split(' ')
     if auth[0].lower() == 'basic':
         a = base64.b64decode(auth[1]).split(':',1)
         if a[0] == 'source':
-            a = a[1].split(':',1)
+            a = a[1].split(username_delimiter,1)
         username = a[0]
         password = a[1]
-    
     user = session.query(rfk.User).filter(rfk.User.name == username).first();
-    if user != None and user.checkPassword(password):
-        shows = rfk.Show.getCurrentShow(session, user)
+    if user != None and user.checkStreamPassword(password):
+        shows = rfk.Show.getCurrentShows(session, user)
         if len(shows) == 0:
-            show = rfk.Show()
-            session.add(Show)
+            show = rfk.Show(begin=datetime.today())
+            session.add(show)
+            show.users.append(user)
+            if True:
+                if 'ice-genre' in data:
+                    show.updateTags(session, data['ice-genre'])
+                if 'ice-name' in data:
+                    show.name = data['ice-name']
+                if 'ice-description' in data:
+                    show.description = data['ice-description']
             session.commit()
         else:
             for show in shows:
                 pass
-        print 'true'
+        print user.user
 
-def doDisconnect(data,session):
-    pass
+def doDisconnect(userid,session):
+    if userid == "none":
+        print "Whooops no userid?"
+        return
+    
+    user = session.query(rfk.User).get(int(userid))
+    if user:
+        shows = rfk.Show.getCurrentShows(session, user)
+        for show in shows:
+            show.endShow()
+        session.commit()
+    else:
+        print "no user found"
 
 def doPlaylist(session):
     item = rfk.Playlist.getCurrentItem(session)
@@ -85,7 +136,7 @@ if __name__ == '__main__':
                                                               rfk.config.get('database', 'username'),
                                                               rfk.config.get('database', 'password'),
                                                               rfk.config.get('database', 'host'),
-                                                              rfk.config.get('database', 'database')))
+                                                              rfk.config.get('database', 'database')), echo=False)
     Session = sessionmaker(bind=engine)
     session = Session()
     if args.command == 'auth':

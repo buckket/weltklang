@@ -20,6 +20,7 @@ class Site(object):
     
     @cherrypy.expose
     def loom(self,param=None):
+        rfk.Tag.parseTags(cherrypy.request.db, 'penis blah')
         return 'loom ist ein pups %s' % param
     
     def __init__(self):

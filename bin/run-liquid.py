@@ -24,7 +24,7 @@ def cleanup():
     if process.returncode == None:
         print 'shutting down liquidsoap'
         process.terminate()
-        time.sleep(2)
+        time.sleep(5)
         if process.returncode == None:
             print 'killing liquidsoap'
             process.kill()

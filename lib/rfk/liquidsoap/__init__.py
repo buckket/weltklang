@@ -82,12 +82,16 @@ def auth(login,password) =
     bool_of_string(ret)
 end
 
+userid = ref "none"
+
 def live_start(mdata)
-    ignore(system("%s connect #{quote(json_of(compact=true,mdata))}"))
+    ret = get_process_lines("/home/pyrfk/bin/liquidsoap-handler.py connect #{quote(json_of(compact=true,$
+    ignore(userid := list.hd(ret))
 end
 
 def live_stop()
-    ignore(test_process("%s disconnect"))
+    test_process("/home/pyrfk/bin/liquidsoap-handler.py disconnect #{quote(json_of(compact=true,!userid))$
+    ignore(userid := "none")
 end
 
 def writemeta(mdata)
@@ -111,6 +115,7 @@ live = on_metadata(writemeta , live)
 full = fallback(track_sensitive=false,transitions=[crossfade],[live,playlist])
 """
     script += makeOutput(session)
+    print script
     return script
 
 
