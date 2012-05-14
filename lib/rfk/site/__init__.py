@@ -3,7 +3,7 @@ import auth
 import rfk
 from rfk.api import API
 import os
-
+import postmarkup
 
 class Site(object):
     '''
@@ -14,9 +14,20 @@ class Site(object):
     api   = API()
     
     @cherrypy.expose
+    @cherrypy.tools.jinja(template='index.html')
     def index(self):
-        tmpl = rfk.env.get_template('index.html')
-        return tmpl.render()
+        nq = cherrypy.request.db.query(rfk.News).order_by(rfk.News.time.desc()).all()
+        
+        news = []
+        markup = postmarkup.PostMarkup()
+        markup.default_tags()
+        
+        for n in nq:
+            news.append({'time':n.time,
+                         'title': markup.render_to_html(n.title),
+                         'content': markup.render_to_html(n.content)})
+        
+        return {'news':news}
     
     @cherrypy.expose
     def loom(self,param=None):
