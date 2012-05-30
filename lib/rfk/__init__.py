@@ -82,6 +82,16 @@ class User(Base):
         else:
             return True
     
+    def getStreamTime(self,session):
+        return session.query(User, func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin))))).join(user_shows).join(Show).filter(Show.end != None, User.user == self.user, Show.begin <= datetime.datetime.today()).group_by(User.user).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin)))).desc()).first()
+    
+    def connect(self, session):
+        session.query(User).filter(User.status == User.STATUS_STREAMING).update(status=User.STATUS_STREAMING)
+        self.status = User.STATUS_STREAMING
+        
+    def disconnect(self):
+        self.status = User.STATUS_NONE
+        
     @staticmethod        
     def makePassword(password):
         return bcrypt.encrypt(password)
@@ -150,6 +160,11 @@ show_tags = Table('show_tags', Base.metadata,
      Column('tag', INTEGER(unsigned=True), ForeignKey('tags.tag'), primary_key=True),
 )
 
+show_listener = Table('show_listener', Base.metadata,
+     Column('show', INTEGER(unsigned=True), ForeignKey('shows.show'), primary_key=True),
+     Column('listener', INTEGER(unsigned=True), ForeignKey('listeners.listener'), primary_key=True),
+)
+
 class Show(Base):
     __tablename__ = 'shows'
     show = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
@@ -159,6 +174,7 @@ class Show(Base):
     name = Column(String(50))
     description = Column(Text)
     tags = relationship('Tag', secondary='show_tags', backref='shows')
+    listeners = relationship('Listener', secondary='show_listener', backref='shows')
     flags = Column(INTEGER(unsigned=True))
     
     
@@ -186,7 +202,7 @@ class Show(Base):
         return session.query(user_shows).filter_by(show=self.show, user=user.user).first()[2]
     
     def getListener(self, session):
-        return session.query(Listener).join(Show).filter(and_(Show.show == self.show, and_(Show.begin < Listener.disconnect) and (Show.end > Listener.connect))).all()
+        return session.query(Listener).filter(self.begin < Listener.disconnect,self.end > Listener.connect).all()
     
     def updateTags(self, session, tags):
         newtags = Tag.parseTags(session, tags)

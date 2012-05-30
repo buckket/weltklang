@@ -6,7 +6,9 @@ Created on 14.05.2012
 
 import rfk
 import cherrypy
-
+import postmarkup
+import datetime
+from babel.dates import format_time
 def nowPlaying():
     song = cherrypy.request.db.query(rfk.Song).filter(rfk.Song.end == None).first()
     title = "%s - %s" % (song.title.artist.name,song.title.name)
@@ -20,3 +22,19 @@ def nowPlaying():
             'showname': show.name,
             'showdescription': show.description
             }
+    
+markup = postmarkup.PostMarkup()
+markup.default_tags()
+def bbcode(value):
+    return markup.render_to_html(value)
+
+def timedelta(value):
+    days = value.days
+    hours, remainder = divmod(value.seconds,3600)
+    minutes, seconds = divmod(remainder,60)
+    return u"{days} Days, {hours} Hours, {minutes} Minutes and {seconds} Seconds".format(days=days,
+                                                                                         hours=hours,
+                                                                                         minutes=minutes,
+                                                                                         seconds=seconds)
+
+    return format_time((datetime.datetime.min + value).time())

@@ -656,6 +656,13 @@ a:hover {
 	width: 145px;
 }
 
+.panel {
+    background-color: #80c3a2;
+    margin-bottom: 15px;
+    padding: 8px;
+    color: #444;
+}
+
 .newscontainer {
 	background-color: #80c3a2;
 	margin-bottom: 15px;

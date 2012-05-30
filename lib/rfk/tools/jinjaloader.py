@@ -44,8 +44,9 @@ class JinjaLoader(object):
     def __init__(self, templatedir):
         self.env = jinja2.Environment(loader=jinja2.FileSystemLoader(templatedir))
 
-    def __call__(self, template):
-        cherrypy.request.handler = JinjaHandler(self.env, template, cherrypy.request.handler)
+    def __call__(self, template=None):
+        if template:
+            cherrypy.request.handler = JinjaHandler(self.env, template, cherrypy.request.handler)
 
     def add_filter(self, func):
         """Decorator which adds the given function to jinja's filters."""

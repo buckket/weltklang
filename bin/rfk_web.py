@@ -30,6 +30,8 @@ if __name__ == '__main__':
     conf = {'/'      : {'tools.db.on': True,
                         'tools.jinja.on': True,
              },
+            '/api' :{'tools.jinja.on': False,
+                     },
             '/static': {'tools.staticdir.on': True,
                         'tools.jinja.on': False,
                         'tools.staticdir.dir': os.path.join(current_dir, 'web_static'),
@@ -48,6 +50,8 @@ if __name__ == '__main__':
     import rfk.site
     import rfk.site.helper
     loader.add_global(rfk.site.helper.nowPlaying)
+    loader.add_filter(rfk.site.helper.bbcode)
+    loader.add_filter(rfk.site.helper.timedelta)
     cherrypy.tree.mount(rfk.site.Site(), '/', config=conf)
     cherrypy.engine.start()
     cherrypy.engine.block()

@@ -2,6 +2,7 @@ import cherrypy
 import auth
 import rfk
 from rfk.api import API
+from user import User
 import os
 import postmarkup
 
@@ -12,6 +13,7 @@ class Site(object):
     
     login = auth.AuthController()
     api   = API()
+    user = User()
     
     @cherrypy.expose
     @cherrypy.tools.jinja(template='index.html')
@@ -28,11 +30,6 @@ class Site(object):
                          'content': markup.render_to_html(n.content)})
         
         return {'news':news}
-    
-    @cherrypy.expose
-    def loom(self,param=None):
-        rfk.Tag.parseTags(cherrypy.request.db, 'penis blah')
-        return 'loom ist ein pups %s' % param
     
     def __init__(self):
         '''
