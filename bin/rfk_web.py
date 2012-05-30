@@ -7,8 +7,7 @@ Created on 30.04.2012
 import cherrypy
 import os
 import rfk
-from rfk.site import Site
-from jinja2 import Environment, FileSystemLoader
+from rfk.tools.jinjaloader import JinjaLoader, JinjaHandler
 from rfk.tools import SAEnginePlugin, SATool
 
 if __name__ == '__main__':
@@ -29,19 +28,26 @@ if __name__ == '__main__':
                             })
     
     conf = {'/'      : {'tools.db.on': True,
-             #           'tools.template.on': True
+                        'tools.jinja.on': True,
              },
             '/static': {'tools.staticdir.on': True,
+                        'tools.jinja.on': False,
                         'tools.staticdir.dir': os.path.join(current_dir, 'web_static'),
                         'tools.staticdir.content_types': {'rss': 'application/xml',
                                                           'atom': 'application/atom+xml'}},
-            '/favicon.ico': {'tools.staticfile.on': True,  
+            '/favicon.ico': {'tools.staticfile.on': True,
+                             'tools.jinja.on': False,  
                              'tools.staticfile.filename': '/web_static/favicon.ico',  
             }}
     
-
+    loader = JinjaLoader(os.path.join(current_dir,'var','template'))#
+    
+    cherrypy.tools.jinja = cherrypy.Tool('before_handler', loader, priority=70)
     SAEnginePlugin(cherrypy.engine).subscribe()
     cherrypy.tools.db = SATool()
-    cherrypy.tree.mount(Site(), '/', config=conf)
+    import rfk.site
+    import rfk.site.helper
+    loader.add_global(rfk.site.helper.nowPlaying)
+    cherrypy.tree.mount(rfk.site.Site(), '/', config=conf)
     cherrypy.engine.start()
     cherrypy.engine.block()

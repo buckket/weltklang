@@ -7,6 +7,8 @@ import rfk
 import os
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
+import postmarkup
+
 if __name__ == '__main__':
     current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     rfk.config.read(os.path.join(current_dir, 'etc', 'config.cfg'))
@@ -14,12 +16,18 @@ if __name__ == '__main__':
     engine = create_engine("%s://%s:%s@%s/%s?charset=utf8" % (rfk.config.get('database', 'engine'),
                                                               rfk.config.get('database', 'username'),
                                                               rfk.config.get('database', 'password'),
-                                                              #rfk.config.get('database', 'host'),
-                                                              '192.168.2.101',
+                                                              rfk.config.get('database', 'host'),
+                                                              #'192.168.2.101',
                                                               rfk.config.get('database', 'database')), echo=True)
     
     
     rfk.Base.metadata.create_all(engine)
+    
+    markup = postmarkup.PostMarkup()
+    markup.default_tags()
+    print markup.render_to_html('[b]sldfklsdnf[/b]')
+    
+    """
     Session = sessionmaker(bind=engine)
     session = Session()
     
@@ -35,7 +43,7 @@ if __name__ == '__main__':
             break
         currshow = show
     print currshow.show
-    
+    """
     
     """show = session.query(rfk.Show).get(180)
     

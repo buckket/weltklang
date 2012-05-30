@@ -24,12 +24,6 @@ from jinja2 import Environment, FileSystemLoader
 Base = declarative_base()
 config = SafeConfigParser()
 
-env = None
-
-def initEnv(dir):
-    Environment(loader=FileSystemLoader(dir))
-
-
 class INetAddress(types.TypeDecorator):
     '''INET_ATON/NTOA Datatype
     '''
@@ -58,7 +52,11 @@ class User(Base):
     password = Column(String(128))
     streampassword = Column(String(128))
     shows = relationship('Show', secondary='user_shows', backref='users')
-    
+    status = Column(INTEGER(unsigned=True))
+
+    STATUS_NONE = 0
+    STATUS_STREAMING = 1
+
     def __init__(self, name, password, streampassword):
         self.name = name
         self.password = password
@@ -95,7 +93,23 @@ class User(Base):
     def getTopUserByShowLength(session):
         return session.query(User, func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin))))).join(user_shows).join(Show).filter(Show.end != None).group_by(User.user).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin)))).desc())[:50]
     
+class UserSetting(Base):
+    __tablename__ = 'usersettings'
+    usersetting = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
+    user_id = Column('user', INTEGER(unsigned=True), ForeignKey('users.user', onupdate="CASCADE", ondelete="RESTRICT"))
+    user = relationship('User', backref='usersettings')
+    key = Column(String(255))
+    value = Column(String(255))
     
+class News(Base):
+    __tablename__ = 'news'
+    news = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
+    time = Column(DateTime)
+    user_id = Column('user', INTEGER(unsigned=True), ForeignKey('users.user', onupdate="CASCADE", ondelete="RESTRICT"))
+    user = relationship('User', backref='news')
+    title = Column(String(255))
+    content = Column(Text)
+
 class IRCUser(Base):
     __tablename__ = 'ircusers'
     ircuser = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
@@ -318,7 +332,7 @@ class Relay(Base):
     
     @staticmethod
     def getBestRelay(session):
-        relays = session.query(Relay).all()
+        relays = session.query(Relay).filter(Relay.status == Relay.STATUS_ONLINE).all()
         minLoad = 1
         bestRelay = None
         for relay in relays:
@@ -344,8 +358,7 @@ class Stream(Base):
     TYPE_AACP = 2
     TYPE_OGG = 3
     
-    def getURL(self, session):
-        relay = Relay.getBestRelay(session)
+    def getURL(self, relay):
         return "http://%s:%d%s" % (relay.hostname, relay.port, self.mountpoint)
     
     def add(self, session, relay):

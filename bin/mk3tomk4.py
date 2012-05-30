@@ -85,6 +85,15 @@ class Listener(Base):
     disconnected = Column(DateTime)
     client = Column(Integer)
     
+class News(Base):
+    __tablename__ = 'news'
+    news = Column(Integer, primary_key=True, autoincrement=True)
+    streamer_id = Column('streamer', Integer(unsigned=True), ForeignKey('streamer.streamer', onupdate="CASCADE", ondelete="RESTRICT"))
+    streamer = relationship('Streamer', backref='news')
+    time = Column(DateTime)
+    description = Column(String)
+    text = Column(Text)
+    
 old_engine = create_engine("%s://%s:%s@%s/%s?charset=utf8" % (rfk.config.get('olddatabase', 'engine'),
                                                               rfk.config.get('olddatabase', 'username'),
                                                               rfk.config.get('olddatabase', 'password'),
@@ -195,21 +204,20 @@ def copy_listener():
         session.add(listener)
     session.commit()
 
+def copy_news():
+    news = oldsession.query(News).yield_per(50)
+    print news
+    for oldnews in news:
+        user = session.query(rfk.User).filter(rfk.User.name == oldnews.streamer.username).first()
+        news = rfk.News(user=user,content=oldnews.text, title=oldnews.description, time=oldnews.time)
+        session.add(news)
+        session.commit()
+
 if __name__ == '__main__':
     #copy_users()
     #copy_shows()
     #copy_mounts()
     #copy_listener()
-    mounts = oldsession.query(Mount).all()
-    for oldmount in mounts:
-        type = 0
-        if oldmount.type == 'LAMEVBR':
-            type = rfk.Stream.TYPE_MP3
-        elif oldmount.type == 'AACP':
-            type = rfk.Stream.TYPE_AACP
-        elif oldmount.type == 'OGG':
-            type = rfk.Stream.TYPE_OGG
-        
-        print type
+    copy_news()
         
         

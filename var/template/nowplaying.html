@@ -1,0 +1,25 @@
+{%set np = nowPlaying() %}
+<h1>On Air</h1>
+<div id="nowplaying">
+	<table cellspacing="0" cellpadding="0" width="100%">
+		<tr>
+			<td width="100%">
+				<div id="currtitle">
+					{{ np.title }}
+				</div>
+				<div id="showname">
+					{{ np.showname }}
+				</div>
+				<div id="showuser">
+					{{ np.users|join(', ') }}
+				</div>
+				<div id="showdescription">
+					{{ np.showdescription }}
+				</div>
+			</td>
+			<td>
+				<img id="showimage" src="http://h11.abload.de/img/13335631210018dja0.gif" />
+			</td>
+		</tr>
+	</table>
+</div>
