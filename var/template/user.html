@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}<h1>{{ username }}</h1>
+<h2>Info</h2>
+<div class="panel">
+	{{ username }} streamed for {{ info.totaltime | timedelta }}
+</div>
+<h2>Shows</h2>
+<div class="panel">
+	<h3>Upcomming</h3>
+	{% for show in shows.upcomming%}
+	   {{ show.name }}<br />
+	{% endfor %}
+	<h3>Last</h3>
+	{% for show in shows.last%}
+       {{ show.name }} - {{ show.description | bbcode }}<br />
+    {% endfor %}
+</div>
+{% endblock %}
