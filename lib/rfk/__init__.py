@@ -418,7 +418,7 @@ class ApiKey(Base):
         self.flag = 0
         
     def genKey(self):
-        key = hashlib.sha1("%s%s%d" % (self.application, self.description, time()))
+        self.key = hashlib.sha1("%s%s%d" % (self.application, self.description, time())).hexdigest()
         
 class Playlist(Base):
     __tablename__ = 'playlist'
