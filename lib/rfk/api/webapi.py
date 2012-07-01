@@ -10,8 +10,8 @@ def checkAPIKey():
     key = params['key']
     del params['key']
 
-    if key == '1234':
-            return
+    if rfk.ApiKey.checkKey(key, cherrypy.request.db):
+        return
     else:
         raise cherrypy.InternalRedirect('/api/web/error', 'ecode=401&emessage=Wrong Key')
 

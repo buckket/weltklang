@@ -417,8 +417,25 @@ class ApiKey(Base):
         self.user = user
         self.flag = 0
         
-    def genKey(self):
-        self.key = hashlib.sha1("%s%s%d" % (self.application, self.description, time())).hexdigest()
+    def genKey(self, session):
+        c = 0
+        while True:
+            key = hashlib.sha1("%s%s%d%d" % (self.application, self.description, time(), c)).hexdigest()
+            if session.query(ApiKey).filter(ApiKey.key==key).first() == None:
+                break
+        self.key = key
+    
+    @staticmethod
+    def checkKey(key, session):
+        '''
+        Checks an Apikey for exsistence
+        @todo: other stuff like ratelimiting
+        '''
+        apikey = session.query(ApiKey).filter(ApiKey.key==key).first()
+        if apikey != None:
+            return True
+        else:
+            return False
         
 class Playlist(Base):
     __tablename__ = 'playlist'
