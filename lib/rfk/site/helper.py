@@ -11,17 +11,20 @@ import datetime
 from babel.dates import format_time
 def nowPlaying():
     song = cherrypy.request.db.query(rfk.Song).filter(rfk.Song.end == None).first()
-    title = "%s - %s" % (song.title.artist.name,song.title.name)
-    users = []
-    for user in song.show.users:
-        users.append(user.name)
-    show = song.show
-    return {
-            'title': title,
-            'users': users,
-            'showname': show.name,
-            'showdescription': show.description
-            }
+    if song:
+        title = "%s - %s" % (song.title.artist.name,song.title.name)
+        users = []
+        for user in song.show.users:
+            users.append(user.name)
+        show = song.show
+        return {
+                'title': title,
+                'users': users,
+                'showname': show.name,
+                'showdescription': show.description
+                }
+    else:
+        return None
     
 markup = postmarkup.PostMarkup()
 markup.default_tags()

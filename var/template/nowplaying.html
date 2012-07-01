@@ -1,6 +1,7 @@
 {%set np = nowPlaying() %}
 <h1>On Air</h1>
 <div id="nowplaying">
+    {% if np %}
 	<table cellspacing="0" cellpadding="0" width="100%">
 		<tr>
 			<td width="100%">
@@ -22,4 +23,7 @@
 			</td>
 		</tr>
 	</table>
+	{% else %}
+	   <b>... and there were silence ...</b>
+	{% endif %}
 </div>
