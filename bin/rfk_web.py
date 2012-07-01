@@ -39,7 +39,7 @@ if __name__ == '__main__':
                                                           'atom': 'application/atom+xml'}},
             '/favicon.ico': {'tools.staticfile.on': True,
                              'tools.jinja.on': False,  
-                             'tools.staticfile.filename': '/web_static/favicon.ico',  
+                             'tools.staticfile.filename': os.path.join(current_dir, 'web_static', 'favicon.ico'),  
             }}
     
     loader = JinjaLoader(os.path.join(current_dir,'var','template'))#
