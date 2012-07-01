@@ -5,11 +5,12 @@ Complete rewrite aka MK IV
 
 
 Requirements:
-* Python 2.7
-* CherryPy
+* Python 2.7 (actually 2.6)
+* CherryPy >= 3.2.0
 * SQLAlchemy
 * jinja2
-* bcrypt
+* passlib
+* babel
 
 * Some kind of database (tested with MySQL)
 * liquidsoap
