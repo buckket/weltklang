@@ -214,10 +214,10 @@ def copy_news():
         session.commit()
 
 if __name__ == '__main__':
-    #copy_users()
-    #copy_shows()
-    #copy_mounts()
-    #copy_listener()
+    copy_users()
+    copy_shows()
+    copy_mounts()
+    copy_listener()
     copy_news()
         
         

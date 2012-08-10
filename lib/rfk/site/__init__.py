@@ -1,38 +1,27 @@
-import cherrypy
-import auth
+from flask import Flask, session, g, render_template
+from flask_sqlalchemy import SQLAlchemy
 import rfk
-from rfk.api import API
-from user import User
-import os
-import postmarkup
+from . import helper
 
-class Site(object):
-    '''
-    classdocs
-    '''
-    
-    login = auth.AuthController()
-    api   = API()
-    user = User()
-    
-    @cherrypy.expose
-    @cherrypy.tools.jinja(template='index.html')
-    def index(self):
-        nq = cherrypy.request.db.query(rfk.News).order_by(rfk.News.time.desc()).all()
-        
-        news = []
-        markup = postmarkup.PostMarkup()
-        markup.default_tags()
-        
-        for n in nq:
-            news.append({'time':n.time,
-                         'title': markup.render_to_html(n.title),
-                         'content': markup.render_to_html(n.content)})
-        
-        return {'news':news}
-    
-    def __init__(self):
-        '''
-        Constructor
-        '''
-        
+app = Flask(__name__, template_folder='/home/teddydestodes/src/PyRfK/var/template/',
+                      static_folder='/home/teddydestodes/src/PyRfK/web_static/',
+                      static_url_path='/static')
+app.config['SQLALCHEMY_DATABASE_URI'] = "%s://%s:%s@%s/%s?charset=utf8" % (rfk.config.get('database', 'engine'),
+                                                              rfk.config.get('database', 'username'),
+                                                              rfk.config.get('database', 'password'),
+                                                              rfk.config.get('database', 'host'),
+                                                              rfk.config.get('database', 'database'))
+app.config['DEBUG'] = True
+
+app.jinja_env.globals['nowPlaying'] = helper.nowPlaying
+app.jinja_env.filters['bbcode'] = helper.bbcode
+app.jinja_env.filters['timedelta'] = helper.timedelta
+
+db = SQLAlchemy(app)
+db.Model = rfk.Base
+
+@app.route('/')
+def index():
+    news = db.session.query(rfk.News).all()
+    print app.template_folder
+    return render_template('index.html', news=news)

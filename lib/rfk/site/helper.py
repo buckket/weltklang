@@ -4,13 +4,13 @@ Created on 14.05.2012
 @author: teddydestodes
 '''
 
+import rfk.site
 import rfk
-import cherrypy
 import postmarkup
 import datetime
 from babel.dates import format_time
 def nowPlaying():
-    song = cherrypy.request.db.query(rfk.Song).filter(rfk.Song.end == None).first()
+    song = rfk.site.db.session.query(rfk.Song).filter(rfk.Song.end == None).first()
     if song:
         title = "%s - %s" % (song.title.artist.name,song.title.name)
         users = []

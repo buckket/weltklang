@@ -22,7 +22,6 @@ class User(object):
             out = {}
             out['username'] = user.name
             out['info'] = {'totaltime': user.getStreamTime(cherrypy.request.db)[1]}
-            print out
             ushows = cherrypy.request.db.query(rfk.Show).join(rfk.user_shows).join(rfk.User).filter(rfk.User.user==user.user, rfk.Show.begin > datetime.today()).order_by(rfk.Show.begin.asc())[:5]
             lshows = cherrypy.request.db.query(rfk.Show).join(rfk.user_shows).join(rfk.User).filter(rfk.User.user==user.user, rfk.Show.end <= datetime.today()).order_by(rfk.Show.end.desc())[:5]
             

@@ -166,6 +166,7 @@ body {
 	background-color: #fefefe;
 	color: #444;
 	font-family: 'Ubuntu Mono';
+	word-wrap: break-word;
 }
 
 /*

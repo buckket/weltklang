@@ -8,7 +8,7 @@
 		</div>
 		<span>{{ n.title }}</span>
 	</div>
-	{{ n.content }}
+	{{ n.content |bbcode|safe }}
 </div>
 {% endfor %}
 {% endblock %}
