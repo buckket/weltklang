@@ -15,10 +15,6 @@ from passlib.hash import bcrypt
 
 
 import os, os.path
- 
-import cherrypy
-from cherrypy.process import wspbus, plugins
-from jinja2 import Environment, FileSystemLoader
 
 
 Base = declarative_base()
