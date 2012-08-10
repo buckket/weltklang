@@ -1,15 +1,10 @@
-import cherrypy
-from rfk.api.icecast import IcecastAPI
-from rfk.api.webapi import WebAPI
+from flask import Blueprint
 
-class API(object):
+api = Blueprint('api', __name__)
+from rfk.api.apitest import *
+#from rfk.api.webapi import *
+#from rfk.api.icecast import *
     
-    icecast = IcecastAPI()
-    web = WebAPI()
-    
-    @cherrypy.expose
-    def index(self):
-        
-        return 'apiindex'
-    
-    
+@api.route('/')
+def index():
+    return "LOLAPI"
