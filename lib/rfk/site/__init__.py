@@ -20,8 +20,24 @@ app.jinja_env.filters['timedelta'] = helper.timedelta
 db = SQLAlchemy(app)
 db.Model = rfk.Base
 
+from rfk.api import api
+app.register_blueprint(api, url_prefix='/api')
+
 @app.route('/')
 def index():
     news = db.session.query(rfk.News).all()
     print app.template_folder
     return render_template('index.html', news=news)
+
+@app.route('/shutdown')
+def shutdown():
+    shutdown_server()
+    return 'Server shutting down...'
+
+
+from flask import request
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()

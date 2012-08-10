@@ -1,4 +1,3 @@
-import cherrypy
 import rfk
 
 
