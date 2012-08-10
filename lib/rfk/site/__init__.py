@@ -19,7 +19,8 @@ app.jinja_env.filters['timedelta'] = helper.timedelta
 
 db = SQLAlchemy(app)
 db.Model = rfk.Base
-
+from . import user
+app.register_blueprint(user.user, url_prefix='/user')
 @app.route('/')
 def index():
     news = db.session.query(rfk.News).all()
