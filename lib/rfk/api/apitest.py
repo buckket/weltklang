@@ -1,6 +1,8 @@
-from rfk.api import api
+from rfk.api import api, wrapper
+from flask import jsonify
 
 @api.route('/apitest')
 def apitest():
-    return "LOLAPITEST"
+    data = 'HUNDESOHN'
+    return jsonify(wrapper(data))
     
