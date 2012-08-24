@@ -2,13 +2,13 @@
 {% block content %}<h1>News</h1>
 {% for n in news %}
 <div class="newscontainer">
-	<div class="newsheader">
-		<div class="date">
-			{{ n.time }}
-		</div>
-		<span>{{ n.title }}</span>
-	</div>
-	{{ n.content |bbcode|safe }}
+    <div class="newsheader">
+        <div class="date">
+            {{ n.time }}
+        </div>
+        <span>{{ n.title }}</span>
+    </div>
+    {{ n.content |bbcode|safe }}
 </div>
 {% endfor %}
 {% endblock %}

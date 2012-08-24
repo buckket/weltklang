@@ -3,32 +3,24 @@ Created on 13.05.2012
 
 @author: teddydestodes
 '''
-import cherrypy
 import rfk
+from flask import Blueprint, make_response
+from rfk.site import db
+listen = Blueprint('listen',__name__)
 
+@listen.route('/playlist/<stream>')
+def playlist(stream):
+    stream = db.session.query(rfk.Stream).filter(rfk.Stream.name == stream).first()
+    m3u  = "#EXTM3U\r\n";
+    m3u += "#EXTINF:0, Radio freies Krautchan %s\r\n" % stream.description;
+    m3u += "http://%s/listen/%s\r\n" % (rfk.config.get('site', 'url'), stream);
+    return make_response(m3u, 200, {'Content-Type': 'audio/x-mpegurl','Content-Disposition':'attachment; filename="%s.m3u"' % stream.mountpoint[1:]})
 
-class Listen(object):
-    '''
-    stream loadbalancer
-    '''
-    
-    @cherrypy.expose
-    def index(self, stream):
-        stream = cherrypy.request.db.query(rfk.Stream).get(int(stream))
-        cherrypy.response.headers['Content-Type'] = 'audio/x-mpegurl';
-        cherrypy.response.headers['Content-Disposition'] = 'attachment; filename="rfk.m3u"';
-        response  = "#EXTM3U\r\n";
-        response += "#EXTINF:0, Radio freies Krautchan %s\r\n" % stream.description;
-        response += "http://%s/listen/%s\r\n" % (rfk.config.get('site', 'url'), stream);
-        return response
-    
-    @cherrypy.expose
-    def stream(self, stream):
-        """
-        redirect listener to best relay
-        """
-        stream = cherrypy.request.db.query(rfk.Stream).get(int(stream))
-        relay = rfk.Relay.getBestRelay(cherrypy.request.db)
-        cherrypy.response.headers['Location'] = stream.getURL(relay)
-        cherrypy.response.headers['X-LOAD'] = relay.getLoad()
-        return ''
+@listen.route('/stream/<stream>')
+def stream(stream):
+    """
+    redirect listener to best relay
+    """
+    stream = db.session.query(rfk.Stream).get(int(stream))
+    relay = rfk.Relay.get_best_relay(db.session)
+    return make_response('', 301, {'Location':stream.get_url(relay), 'X-LOAD':relay.get_load()})

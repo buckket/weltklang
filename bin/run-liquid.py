@@ -39,6 +39,10 @@ if __name__ == '__main__':
                                stderr=subprocess.PIPE)
     print 'starting'
     print process.stdin.write(rfk.liquidsoap.genScript(session, current_dir).encode('utf-8'))
+    file = open(os.path.join(current_dir,'penis.liq'),'w')
+    file.write(rfk.liquidsoap.genScript(session, current_dir).encode('utf-8'))
+    file.close()
+    
     process.stdin.close()
     print 'started'
     while process.returncode == None:

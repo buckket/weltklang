@@ -4,31 +4,17 @@ Created on 16.05.2012
 @author: teddydestodes
 '''
 
-import cherrypy
-import postmarkup
+from flask import Blueprint, render_template
 import rfk
-class Show(object):
-    '''
-    classdocs
-    '''
+from rfk.site import db
 
-    @cherrypy.expose
-    @cherrypy.tools.jinja(template='index.html')
-    def index(self):
-        nq = cherrypy.request.db.query(rfk.News).order_by(rfk.News.time.desc()).all()
-        
-        news = []
-        markup = postmarkup.PostMarkup()
-        markup.default_tags()
-        
-        for n in nq:
-            news.append({'time':n.time,
-                         'title': markup.render_to_html(n.title),
-                         'content': markup.render_to_html(n.content)})
-        
-        return {'news':news}
-    
-    def __init__(self):
-        '''
-        Constructor
-        '''
+show = Blueprint('show',__name__)
+
+@show.route('/')
+@show.route('/upcoming')
+def upcoming():
+    return 'penis'
+
+@show.route('/last')
+def last():
+    return 'blah'

@@ -57,16 +57,40 @@ class User(Base):
         self.name = name
         self.password = password
         self.streampassword = streampassword
-
-    def checkPassword(self, password):
+        self.authenticated = False
+    
+    def get_id(self):
+        return unicode(self.user)
+    
+    def is_anonymous(self):
+        return False
+    
+    def is_active(self):
+        return True
+    
+    def is_authenticated(self):
+        return True
+    
+    def check_password(self, password):
         try:
-            return bcrypt.hashpw(password, self.password) == self.password
+            return bcrypt.verify(password, self.password)
         except ValueError:
-            if hashlib.sha1(password) == self.password :
+            print  hashlib.sha1(password).hexdigest()
+            if hashlib.sha1(password).hexdigest() == self.password:
+                
                 self.password = User.makePassword(password)
                 return True
             else:
                 return False
+    
+    @staticmethod
+    def get_user(session,username=None, id=None):
+        if username:
+            return session.query(User).filter(User.name == username).first()
+        elif id:
+            return session.query(User).get(id)
+        return None
+    
     def checkStreamPassword(self, password):
         return bcrypt.verify(password, self.streampassword)
 
@@ -339,11 +363,11 @@ class Relay(Base):
     QUERY_VNSTAT = 1
     QUERY_ICECAST_KH = 2
     
-    def getLoad(self):
+    def get_load(self):
         return (self.traffic / self.bandwith)
     
     @staticmethod
-    def getBestRelay(session):
+    def get_best_relay(session):
         relays = session.query(Relay).filter(Relay.status == Relay.STATUS_ONLINE).all()
         minLoad = 1
         bestRelay = None
@@ -369,8 +393,9 @@ class Stream(Base):
     TYPE_MP3 = 1
     TYPE_AACP = 2
     TYPE_OGG = 3
+    TYPE_OPUS = 4
     
-    def getURL(self, relay):
+    def get_url(self, relay):
         return "http://%s:%d%s" % (relay.hostname, relay.port, self.mountpoint)
     
     def add(self, session, relay):

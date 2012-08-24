@@ -9,8 +9,14 @@ from rfk.site import db
 from datetime import datetime
 
 user = Blueprint('user',__name__)
+
+@user.route('/', methods=['get'])
+def list():
+    users = db.session.query(rfk.User).all()
+    return render_template('user/list.html', users=users)
+
 @user.route('/<user>')
-def default(user):
+def info(user):
     user = db.session.query(rfk.User).filter(rfk.User.name == user).first()
     if user:
         
@@ -23,8 +29,6 @@ def default(user):
         out['shows'] = {'upcomming': ushows,
                         'last': lshows
                         }
-        
-        
-        return render_template('user.html', username=user.name, info=out['info'], shows=out['shows'])
+        return render_template('user/info.html', username=user.name, info=out['info'], shows=out['shows'])
     else:
-        return render_template('user.html', undefined=True)
+        return render_template('user/info.html', undefined=True)

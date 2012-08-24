@@ -89,19 +89,19 @@ def append_userid(mdata) =
 end
 
 def live_start(mdata)
-    ret = get_process_lines("/home/pyrfk/bin/liquidsoap-handler.py connect #{quote(json_of(compact=true,$
+    ret = get_process_lines("/home/pyrfk/bin/liquidsoap-handler.py connect #{quote(json_of(compact=true,mdata))}")
     ignore(userid := list.hd(ret))
 end
 
 def live_stop()
-    test_process("/home/pyrfk/bin/liquidsoap-handler.py disconnect #{quote(json_of(compact=true,!userid))$
+    test_process("/home/pyrfk/bin/liquidsoap-handler.py disconnect #{quote(json_of(compact=true,!userid))}")
     ignore(userid := "none")
 end
 
 def writemeta(mdata)
     ignore(system("%s meta #{quote(json_of(compact=true,mdata))}"))
 end
-""" % (liquidInterface,liquidInterface,liquidInterface,liquidInterface)
+""" % (liquidInterface,liquidInterface)
     #script += makeRecordScript(dir)
     script += u"""
 live = input.harbor(port= %s,on_connect = live_start, on_disconnect = live_stop, buffer=0., max = 10., auth = auth, "/live.ogg")
@@ -195,6 +195,8 @@ def makeOutput(session):
             script += makeOutputAACP(stream)
         elif stream.type == rfk.Stream.TYPE_MP3:
             script += makeOutputMP3(stream)
+        elif stream.type == rfk.Stream.TYPE_OPUS:
+            script += makeOutputOPUS(stream)
     return script
 
 def makeOutputOGG(stream):
@@ -236,6 +238,24 @@ def makeOutputAACP(stream):
 def makeOutputMP3(stream):
     script = u"""
 %s=output.icecast(%%mp3.vbr(stereo=true, samplerate=44100, quality=%s,id3v2=true),
+                    host="%s",port=%s,protocol="http",
+                    user="%s",password="%s",
+                    mount="%s",
+                    url="%s",public=false,
+                    description="%s",
+                    fallible=true,
+                    full)
+""" % (stream.name, stream.quality,
+       rfk.config.get('icecast', 'internal-address'), rfk.config.get('icecast', 'port'),
+       stream.username, stream.password,
+       stream.mountpoint,
+       rfk.config.get('site', 'url'),
+       stream.description)
+    return script
+
+def makeOutputOPUS(stream):
+    script = u"""
+%s=output.icecast(%%external(channels=2, samplerate=48000, restart_on_crash=true,restart_on_new_track=true, process="opusenc --bitrate %s - -"),
                     host="%s",port=%s,protocol="http",
                     user="%s",password="%s",
                     mount="%s",
