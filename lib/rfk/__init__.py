@@ -103,7 +103,11 @@ class User(Base):
             return True
     
     def getStreamTime(self,session):
-        return session.query(User, func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin))))).join(user_shows).join(Show).filter(Show.end != None, User.user == self.user, Show.begin <= datetime.datetime.today()).group_by(User.user).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin)))).desc()).first()
+        time = session.query(User, func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin))))).join(user_shows).join(Show).filter(Show.end != None, User.user == self.user, Show.begin <= datetime.datetime.today()).group_by(User.user).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin)))).desc()).first()
+        if time == None:
+            return datetime.timedelta(0)
+        else:
+            return time[1]
     
     def connect(self, session):
         session.query(User).filter(User.status == User.STATUS_STREAMING).update(status=User.STATUS_STREAMING)

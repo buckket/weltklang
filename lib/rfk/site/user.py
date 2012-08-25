@@ -22,7 +22,7 @@ def info(user):
         
         out = {}
         out['username'] = user.name
-        out['info'] = {'totaltime': user.getStreamTime(db.session)[1]}
+        out['info'] = {'totaltime': user.getStreamTime(db.session)}
         ushows = db.session.query(rfk.Show).join(rfk.user_shows).join(rfk.User).filter(rfk.User.user==user.user, rfk.Show.begin > datetime.today()).order_by(rfk.Show.begin.asc())[:5]
         lshows = db.session.query(rfk.Show).join(rfk.user_shows).join(rfk.User).filter(rfk.User.user==user.user, rfk.Show.end <= datetime.today()).order_by(rfk.Show.end.desc())[:5]
         
