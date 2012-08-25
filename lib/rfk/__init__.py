@@ -71,6 +71,13 @@ class User(Base):
     def is_authenticated(self):
         return True
     
+    def is_admin(self, session):
+        result = session.query(UserSetting).filter(UserSetting.user_id == self.user).filter(UserSetting.key == 'admin').filter(UserSetting.value == 'true').first()
+        if result:
+            return True
+        else:
+            return False
+    
     def check_password(self, password):
         try:
             return bcrypt.verify(password, self.password)
@@ -102,7 +109,7 @@ class User(Base):
         else:
             return True
     
-    def getStreamTime(self,session):
+    def getStreamTime(self, session):
         time = session.query(User, func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin))))).join(user_shows).join(Show).filter(Show.end != None, User.user == self.user, Show.begin <= datetime.datetime.today()).group_by(User.user).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin)))).desc()).first()
         if time == None:
             return datetime.timedelta(0)
