@@ -47,7 +47,7 @@ app.register_blueprint(api, url_prefix='/api')
 @app.route('/')
 def index():
     news = db.session.query(rfk.News).all()
-    print app.template_folder
+    #print app.template_folder
     return render_template('index.html', news=news)
 
 @app.route('/shutdown')
@@ -60,7 +60,7 @@ def login():
     if request.method == "POST" and "username" in request.form:
         username = request.form["username"]
         user = rfk.User.get_user(db.session, username=username)
-        if user and user.check_password(request.form['password']):
+        if user and user.check_password(db.session, password=request.form['password']):
             user.authenticated = True
             remember = request.form.get("remember", "no") == "yes"
             if login_user(user, remember=remember):
@@ -69,7 +69,7 @@ def login():
             else:
                 flash("Sorry, but you could not log in.")
         else:
-            flash(u"Invalid username.")
+            flash(u"Invalid username or password.")
     return render_template("login.html")
 
 @app.route("/logout")

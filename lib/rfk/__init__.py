@@ -78,20 +78,20 @@ class User(Base):
         else:
             return False
     
-    def check_password(self, password):
+    def check_password(self, session, password):
         try:
             return bcrypt.verify(password, self.password)
         except ValueError:
             print  hashlib.sha1(password).hexdigest()
             if hashlib.sha1(password).hexdigest() == self.password:
-                
                 self.password = User.makePassword(password)
+                session.commit()
                 return True
             else:
                 return False
     
     @staticmethod
-    def get_user(session,username=None, id=None):
+    def get_user(session, username=None, id=None):
         if username:
             return session.query(User).filter(User.name == username).first()
         elif id:
