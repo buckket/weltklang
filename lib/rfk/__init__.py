@@ -98,10 +98,10 @@ class User(Base):
             return session.query(User).get(id)
         return None
     
-    def checkStreamPassword(self, password):
+    def check_stream_password(self, password):
         return bcrypt.verify(password, self.streampassword)
 
-    def checkUsername(self, username):
+    def check_username(self, username):
         if username.contains('|'):
             return False
         elif len(username) < 3:
@@ -109,7 +109,7 @@ class User(Base):
         else:
             return True
     
-    def getStreamTime(self, session):
+    def get_stream_time(self, session):
         time = session.query(User, func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin))))).join(user_shows).join(Show).filter(Show.end != None, User.user == self.user, Show.begin <= datetime.datetime.today()).group_by(User.user).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin)))).desc()).first()
         if time == None:
             return datetime.timedelta(0)
@@ -124,21 +124,21 @@ class User(Base):
         self.status = User.STATUS_NONE
         
     @staticmethod        
-    def makePassword(password):
+    def make_password(password):
         return bcrypt.encrypt(password)
     
     @staticmethod
-    def getTopUserByShow(session):
+    def get_top_user_by_show(session):
         return session.query(User, func.count()).join(user_shows).join(Show).group_by(User.user).order_by(func.count().desc())[:50]
     @staticmethod
-    def getTopUserByShowLength(session):
+    def get_top_user_by_show_length(session):
         return session.query(User, func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin))))).join(user_shows).join(Show).filter(Show.end != None).group_by(User.user).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin)))).desc())[:50]
     
 class UserSetting(Base):
-    __tablename__ = 'usersettings'
+    __tablename__ = 'user_settings'
     usersetting = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     user_id = Column('user', INTEGER(unsigned=True), ForeignKey('users.user', onupdate="CASCADE", ondelete="RESTRICT"))
-    user = relationship('User', backref='usersettings')
+    user = relationship('User', backref='user_settings')
     key = Column(String(255))
     value = Column(String(255))
     
@@ -176,7 +176,7 @@ class Tag(Base):
     name = name = Column(String(50), unique=True)
 
     @staticmethod
-    def parseTags(session, tags):
+    def parse_tags(session, tags):
         r = []
         for tag in tags.split(' '):
             t = session.query(Tag).filter(Tag.name == tag).first()
@@ -215,27 +215,27 @@ class Show(Base):
     SHOW_UNPLANNED = 8
     
     @staticmethod
-    def getCurrentShows(session, user=None):
+    def get_current_shows(session, user=None):
         clauses = []
         clauses.append(and_(Show.begin <= datetime.datetime.today(), or_(Show.end >= datetime.datetime.today(), Show.end == None)))
         if user != None:
             clauses.append(User.user == user.user)
         return session.query(Show).join(user_shows).join(User).filter(*clauses).order_by(Show.begin.desc(),Show.end.asc()).all()
     
-    def endShow(self,now=datetime.datetime.today()):
+    def end_show(self,now=datetime.datetime.today()):
         if self.end == None:
             self.end = now
         for song in self.songs:
             if song.end == None:
                 song.end = now
         
-    def getUserRole(self, session, user):
+    def get_user_role(self, session, user):
         return session.query(user_shows).filter_by(show=self.show, user=user.user).first()[2]
     
-    def getListener(self, session):
+    def get_listener(self, session):
         return session.query(Listener).filter(self.begin < Listener.disconnect,self.end > Listener.connect).all()
     
-    def updateTags(self, session, tags):
+    def update_tags(self, session, tags):
         newtags = Tag.parseTags(session, tags)
         for tag in newtags:
             if tag not in self.tags:
@@ -249,12 +249,13 @@ class Artist(Base):
     artist = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     name = Column(String(255))
     flags = Column(INTEGER(unsigned=True))
+    
     @staticmethod
-    def getTopArtists(session):
+    def get_top_artists(session):
         return session.query(Artist, func.count()).join(Title).join(Song).group_by(Artist.artist).order_by(func.count().desc())[:50]
     
     @staticmethod
-    def checkArtist(session, artist):
+    def check_artist(session, artist):
         metaArtist = session.query(MetaArtist).filter(MetaArtist.name == artist).first()
         if metaArtist == None :
             metaArtist = MetaArtist(name=artist)
@@ -272,11 +273,13 @@ class Title(Base):
     name = Column(String(255))
     duration = Column(INTEGER(unsigned=True))
     flags = Column(INTEGER(unsigned=True))
+    
     @staticmethod
-    def getTopTitles(session):
+    def get_top_titles(session):
         return session.query(Title, func.count()).join(Song).group_by(Title.title).order_by(func.count().desc())[:50]
+    
     @staticmethod
-    def checkTitle(session, artist, title, begin=None, end=None):
+    def check_title(session, artist, title, begin=None, end=None):
         metaTitle = session.query(MetaTitle).join(Title).join(Artist).join(MetaArtist).filter(and_(MetaTitle.name == title, MetaArtist.name == artist)).first()
         if metaTitle == None :
             metaTitle = MetaTitle(name=title)
@@ -304,18 +307,18 @@ class MetaTitle(Base):
     
     name = Column(String(255))
     duration = Column(INTEGER(unsigned=True))
-    durationWeight = Column(INTEGER(unsigned=True))
+    duration_weight = Column(INTEGER(unsigned=True))
     
-    def addDuration(self, begin, end):
+    def add_duration(self, begin, end):
         '''adds a new duration to this metaTitle'''
         diff = end - begin
         duration = diff.days * 86400 + diff.seconds
-        if self.durationWeight > 0 :
-            self.duration = ((self.duration * self.durationWeight) + duration) / (self.durationWeight + 1)
-            self.durationWeight += 1
+        if self.duration_weight > 0 :
+            self.duration = ((self.duration * self.duration_weight) + duration) / (self.duration_weight + 1)
+            self.duration_weight += 1
         else :
             self.duration = duration
-            self.durationWeight = 1
+            self.duration_weight = 1
         
 class Song(Base):
     __tablename__ = 'songs'
@@ -328,7 +331,7 @@ class Song(Base):
     show = relationship('Show', backref='songs')
     
     @staticmethod
-    def beginSong(session,begin,artist,title,show):
+    def begin_song(session,begin,artist,title,show):
         song = Song.getCurrentSong(session)
         if song:
             song.endSong(session)
@@ -337,13 +340,13 @@ class Song(Base):
         song = Song(begin=begin, title=title, show=show)
         return song
 
-    def endSong(self,session):
+    def end_song(self,session):
         self.end = datetime.datetime.today()
         #ohh gawd, i failed at desining the database
         #Title.checkTitle(session, self.title., title, self.end,self.end)
     
     @staticmethod
-    def getCurrentSong(session):
+    def get_current_song(session):
         return session.query(Song).filter(Song.end == None).order_by(Song.song.desc()).first()
     
 stream_relays = Table('stream_relays', Base.metadata,
@@ -361,9 +364,9 @@ class Relay(Base):
     bandwidth = Column(INTEGER(unsigned=True))
     traffic = Column(INTEGER(unsigned=True))
     status = Column(INTEGER(unsigned=True))
-    queryMethod = Column(INTEGER(unsigned=True))
-    queryUsername = Column(String(50))
-    queryPassword = Column(String(50))
+    query_method = Column(INTEGER(unsigned=True))
+    query_username = Column(String(50))
+    query_password = Column(String(50))
     
     TYPE_MASTER = 1
     TYPE_RELAY = 2
@@ -430,7 +433,7 @@ class Listener(Base):
     client = Column(INTEGER(unsigned=True))
     
     @staticmethod
-    def setDisconnected(session, relay, stream, client):
+    def set_disconnected(session, relay, stream, client):
         listener = session.query(Listener).filter(and_(Listener.relay == relay, Listener.stream == stream, Listener.client == client, Listener.disconnect == None)).first()
         listener.disconnect = datetime.datetime.today()
         
@@ -443,13 +446,14 @@ class ApiKey(Base):
     user_id = Column('user', INTEGER(unsigned=True), ForeignKey('users.user', onupdate="CASCADE", ondelete="CASCADE"))
     user = relationship('User', backref='apikeys')
     flag = Column(INTEGER(unsigned=True))
+    
     def __init__(self, application, description, user):
         self.application = application
         self.description = description
         self.user = user
         self.flag = 0
         
-    def genKey(self, session):
+    def gen_key(self, session):
         c = 0
         while True:
             key = hashlib.sha1("%s%s%d%d" % (self.application, self.description, time(), c)).hexdigest()
@@ -458,7 +462,7 @@ class ApiKey(Base):
         self.key = key
     
     @staticmethod
-    def checkKey(key, session):
+    def check_key(key, session):
         '''
         Checks an Apikey for exsistence
         @todo: other stuff like ratelimiting
@@ -477,6 +481,6 @@ class Playlist(Base):
     file = Column(String(128))
     
     @staticmethod
-    def getCurrentItem(session):
+    def get_current_item(session):
         all = session.query(Playlist).filter(between(datetime.datetime.today().time(),Playlist.begin,Playlist.end)).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Playlist.end, Playlist.begin)))).asc()).first()
         return all
