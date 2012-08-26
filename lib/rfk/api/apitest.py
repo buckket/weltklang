@@ -1,10 +1,10 @@
 import rfk
 from rfk.site import db
-from rfk.api import api, wrapper, check_auth
+from rfk.api import *
 from flask import jsonify, request, g
 
 @api.route('/web/dj')
-@check_auth
+@check_auth()
 def dj():
     id = request.args.get('id', None)
     name = request.args.get('name', None)
@@ -23,7 +23,7 @@ def dj():
     return jsonify(wrapper(data))
     
 @api.route('/web/current_dj')
-@check_auth
+@check_auth()
 def current_dj():
     result = db.session.query(rfk.User).filter(rfk.User.status == rfk.User.STATUS_STREAMING).first()
     if result:
@@ -32,5 +32,8 @@ def current_dj():
         data = {'current_dj': None}
     return jsonify(wrapper(data))
 
-
+@api.route('/web/kick_dj')
+@check_auth(required_permission=FLAG_KICK)
+def kick_dj():
+    return "TODO"
     
