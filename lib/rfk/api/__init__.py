@@ -5,14 +5,6 @@ from flask import Blueprint
 from flask import g, request, jsonify
 
 
-FLAG_DISABLED  = 1
-FLAG_VIEWIP    = 2
-FLAG_FASTQUERY = 4
-FLAG_KICK      = 8
-FLAG_BAN       = 16
-FLAG_AUTH      = 32
-
-
 api = Blueprint('api', __name__)
 
 
@@ -29,6 +21,10 @@ def check_auth(f=None, required_permission=None):
             response.status_code = 403
             return response
         g.key = "PENIS"
+        if required_permission is rfk.ApiKey.FLAG_KICK:
+            response = jsonify(wrapper(None, 403, 'FLAG_KICK required'))
+            response.status_code = 403
+            return response
         return f(*args, **kwargs)
     return decorated_function
 

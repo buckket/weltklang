@@ -33,7 +33,7 @@ def current_dj():
     return jsonify(wrapper(data))
 
 @api.route('/web/kick_dj')
-@check_auth(required_permission=FLAG_KICK)
+@check_auth(required_permission=rfk.ApiKey.FLAG_KICK)
 def kick_dj():
     return "TODO"
     

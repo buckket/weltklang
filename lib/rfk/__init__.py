@@ -447,6 +447,13 @@ class ApiKey(Base):
     user = relationship('User', backref='apikeys')
     flag = Column(INTEGER(unsigned=True))
     
+    FLAG_DISABLED  = 1
+    FLAG_VIEWIP    = 2
+    FLAG_FASTQUERY = 4
+    FLAG_KICK      = 8
+    FLAG_BAN       = 16
+    FLAG_AUTH      = 32
+    
     def __init__(self, application, description, user):
         self.application = application
         self.description = description
