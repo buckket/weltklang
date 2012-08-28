@@ -34,14 +34,12 @@ if __name__ == '__main__':
     Session = sessionmaker(bind=engine)
     session = Session()
     atexit.register(cleanup)
-    process = subprocess.Popen(args,bufsize=-1, stdin=subprocess.PIPE,
+    process = subprocess.Popen(args,bufsize=-1,
+                               stdin=subprocess.PIPE,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
     print 'starting'
-    print process.stdin.write(rfk.liquidsoap.genScript(session, current_dir).encode('utf-8'))
-    file = open(os.path.join(current_dir,'penis.liq'),'w')
-    file.write(rfk.liquidsoap.genScript(session, current_dir).encode('utf-8'))
-    file.close()
+    print process.stdin.write(rfk.liquidsoap.gen_script(session, current_dir).encode('utf-8'))
     
     process.stdin.close()
     print 'started'
