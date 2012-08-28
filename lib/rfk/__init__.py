@@ -135,10 +135,10 @@ class User(Base):
         return session.query(User, func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin))))).join(user_shows).join(Show).filter(Show.end != None).group_by(User.user).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin)))).desc())[:50]
     
 class UserSetting(Base):
-    __tablename__ = 'user_settings'
+    __tablename__ = 'usersettings'
     usersetting = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     user_id = Column('user', INTEGER(unsigned=True), ForeignKey('users.user', onupdate="CASCADE", ondelete="RESTRICT"))
-    user = relationship('User', backref='user_settings')
+    user = relationship('User', backref='usersettings')
     key = Column(String(255))
     value = Column(String(255))
     
