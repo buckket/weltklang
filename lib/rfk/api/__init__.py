@@ -1,8 +1,7 @@
 import rfk
 from rfk.site import db
 from functools import wraps, partial
-from flask import Blueprint
-from flask import g, request, jsonify
+from flask import Blueprint, g, request, jsonify
 
 
 api = Blueprint('api', __name__)

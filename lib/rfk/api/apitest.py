@@ -1,6 +1,6 @@
 import rfk
 from rfk.site import db
-from rfk.api import *
+from rfk.api import api, check_auth
 from flask import jsonify, request, g
 
 @api.route('/web/dj')
