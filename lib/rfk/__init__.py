@@ -4,10 +4,10 @@ from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.ext.compiler import compiles
-from socket import inet_pton, inet_ntop, AF_INET, AF_INET6
 from struct import pack, unpack
 from time import time
 import datetime
+import ipaddr
 from ConfigParser import SafeConfigParser
 import sqlalchemy.types as types
 import hashlib
@@ -30,15 +30,12 @@ class INetAddress(types.TypeDecorator):
         return dialect.type_descriptor(INTEGER(unsigned=True))
 
     def process_bind_param(self, value, dialect):
-        _addr = inet_pton(AF_INET, value)
+        _addr = ipaddr.IPAddress(value).packed()
         return unpack('!L', _addr)[0]
         
-
     def process_result_value(self, value, dialect):
         _addr = pack('!L', value)
-        return inet_ntop(AF_INET, _addr)
-
-
+        return ipaddr.IPAddress(_addr).exploded()
 
 
 class User(Base):
