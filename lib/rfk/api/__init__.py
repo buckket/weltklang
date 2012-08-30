@@ -10,20 +10,30 @@ api = Blueprint('api', __name__)
 def wrapper(data, ecode=0, emessage=None):
     return {'pyrfk':{'version':'0.1','codename':'Affenkot'},'status':{'code':ecode,'message':emessage},'data':data}
 
-def check_auth(f=None, required_permission=None):
+def check_auth(f=None, required_permissions=None):
     if f is None:
-        return partial(check_auth, required_permission=required_permission)
+        return partial(check_auth, required_permissions=required_permissions)
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        
+        def raise_error(text):
+            response = jsonify(wrapper(None, 403, text))
+            response.status_code = 403
+            return response
+        
         if not request.args.has_key('key'):
-            response = jsonify(wrapper(None, 403, 'api key missing'))
-            response.status_code = 403
-            return response
-        g.key = "PENIS"
-        if required_permission is rfk.ApiKey.FLAG_KICK:
-            response = jsonify(wrapper(None, 403, 'FLAG_KICK required'))
-            response.status_code = 403
-            return response
+            return raise_error('api key missing')
+            
+        key = request.args.get('key')
+        
+        if not rfk.ApiKey.check_key(key, db.session):
+            return raise_error('api key invalid')
+        else:
+            if required_permissions != None:
+                for required_permission in required_permissions:
+                    if not rfk.ApiKey.check_flag(key, db.session, required_permission):
+                        return raise_error('%s (%i) required' % (required_permission['name'], required_permission['code']))
+
         return f(*args, **kwargs)
     return decorated_function
 

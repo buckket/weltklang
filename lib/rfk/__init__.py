@@ -1,16 +1,18 @@
 from sqlalchemy import *
 from sqlalchemy.sql import expression
-from sqlalchemy.orm import relationship, backref 
+from sqlalchemy.orm import relationship, backref
+import sqlalchemy.types as types
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.ext.compiler import compiles
 from struct import pack, unpack
 from time import time
+
 import datetime
-import ipaddr
-from ConfigParser import SafeConfigParser
-import sqlalchemy.types as types
 import hashlib
+import ipaddr
+
+from ConfigParser import SafeConfigParser
 from passlib.hash import bcrypt
 
 
@@ -444,12 +446,12 @@ class ApiKey(Base):
     user = relationship('User', backref='apikeys')
     flag = Column(INTEGER(unsigned=True))
     
-    FLAG_DISABLED  = 1
-    FLAG_VIEWIP    = 2
-    FLAG_FASTQUERY = 4
-    FLAG_KICK      = 8
-    FLAG_BAN       = 16
-    FLAG_AUTH      = 32
+    FLAG_DISABLED  = {'code': 1,  'name': 'FLAG_DISABLED'}
+    FLAG_VIEWIP    = {'code': 2,  'name': 'FLAG_VIEWIP'}
+    FLAG_FASTQUERY = {'code': 4,  'name': 'FLAG_FASTQUERY'}
+    FLAG_KICK      = {'code': 8,  'name': 'FLAG_KICK'}
+    FLAG_BAN       = {'code': 16, 'name': 'FLAG_BAN'}
+    FLAG_AUTH      = {'code': 32, 'name': 'FLAG_AUTH'}
     
     def __init__(self, application, description, user):
         self.application = application
@@ -467,16 +469,27 @@ class ApiKey(Base):
     
     @staticmethod
     def check_key(key, session):
-        '''
-        Checks an Apikey for exsistence
-        @todo: other stuff like ratelimiting
-        '''
         apikey = session.query(ApiKey).filter(ApiKey.key==key).first()
         if apikey != None:
-            return True
+            if apikey.flag & ApiKey.FLAG_DISABLED['code']:
+                return False
+            else:
+                return True
         else:
             return False
         
+    @staticmethod
+    def check_flag(key, session, flag):
+        apikey = session.query(ApiKey).filter(ApiKey.key==key).first()
+        if apikey != None:
+            flags = apikey.flag
+            if flags & flag['code']:
+                return True
+            else:
+                return False
+        else:
+            return False
+    
 class Playlist(Base):
     __tablename__ = 'playlist'
     playlist = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
