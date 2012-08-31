@@ -25,13 +25,14 @@ def check_auth(f=None, required_permissions=None):
             return raise_error('api key missing')
             
         key = request.args.get('key')
+        apikey = rfk.ApiKey.check_key(key, db.session)
         
-        if not rfk.ApiKey.check_key(key, db.session):
+        if not apikey:
             return raise_error('api key invalid')
         else:
             if required_permissions != None:
                 for required_permission in required_permissions:
-                    if not rfk.ApiKey.check_flag(key, db.session, required_permission):
+                    if not apikey.flag & required_permission['code']:
                         return raise_error('%s (%i) required' % (required_permission['name'], required_permission['code']))
 
         return f(*args, **kwargs)

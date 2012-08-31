@@ -1,6 +1,6 @@
 from sqlalchemy import *
 from sqlalchemy.sql import expression
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship, backref, exc
 import sqlalchemy.types as types
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.mysql import INTEGER
@@ -469,26 +469,14 @@ class ApiKey(Base):
     
     @staticmethod
     def check_key(key, session):
-        apikey = session.query(ApiKey).filter(ApiKey.key==key).first()
-        if apikey != None:
-            if apikey.flag & ApiKey.FLAG_DISABLED['code']:
-                return False
-            else:
-                return True
-        else:
+        try:
+            apikey = session.query(ApiKey).filter(ApiKey.key==key).one()
+        except (exc.NoResultFound, exc.MultipleResultsFound):
             return False
-        
-    @staticmethod
-    def check_flag(key, session, flag):
-        apikey = session.query(ApiKey).filter(ApiKey.key==key).first()
-        if apikey != None:
-            flags = apikey.flag
-            if flags & flag['code']:
-                return True
-            else:
+        if apikey.flag & ApiKey.FLAG_DISABLED['code']:
                 return False
         else:
-            return False
+                return apikey
     
 class Playlist(Base):
     __tablename__ = 'playlist'

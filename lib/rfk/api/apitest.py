@@ -27,7 +27,7 @@ def dj():
         return jsonify(wrapper(None, 400, 'missing required query parameter'))
     
     if result:
-        data = {'dj': {'id': result.user, 'name': result.name, 'status': result.status}, 'key': g.key}
+        data = {'dj': {'id': result.user, 'name': result.name, 'status': result.status}}
     else:
         data = {'dj': None}
     return jsonify(wrapper(data))
