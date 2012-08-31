@@ -34,7 +34,9 @@ def check_auth(f=None, required_permissions=None):
                 for required_permission in required_permissions:
                     if not apikey.flag & required_permission['code']:
                         return raise_error('%s (%i) required' % (required_permission['name'], required_permission['code']))
-
+        
+        g.apikey = apikey
+        
         return f(*args, **kwargs)
     return decorated_function
 
@@ -49,6 +51,3 @@ def page_not_found(path):
     response = jsonify(wrapper(None, 404, "'%s' not found" % (path,)))
     response.status_code = 404
     return response
-
-    
-
