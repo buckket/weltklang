@@ -1,7 +1,17 @@
 import rfk
 from rfk.site import db
-from rfk.api import *
+from rfk.api import api, check_auth, wrapper
 from flask import jsonify, request, g
+
+
+# DEBUG
+@api.route('/web/gen_key')
+def gen_key():
+    key = rfk.ApiKey('Test', 'Test', rfk.User.get_user(db.session, username='MrLoom'))
+    key.gen_key(db.session)
+    db.session.commit()
+    return key.key
+# DEBUG
 
 @api.route('/web/dj')
 @check_auth()
@@ -17,7 +27,7 @@ def dj():
         return jsonify(wrapper(None, 400, 'missing required query parameter'))
     
     if result:
-        data = {'dj': {'id': result.user, 'name': result.name, 'status': result.status}, 'key': g.key}
+        data = {'dj': {'id': result.user, 'name': result.name, 'status': result.status}}
     else:
         data = {'dj': None}
     return jsonify(wrapper(data))
@@ -33,7 +43,7 @@ def current_dj():
     return jsonify(wrapper(data))
 
 @api.route('/web/kick_dj')
-@check_auth(required_permission=FLAG_KICK)
+@check_auth(required_permissions=[rfk.ApiKey.FLAG_KICK])
 def kick_dj():
     return "TODO"
     

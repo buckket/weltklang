@@ -4,8 +4,9 @@ from ConfigParser import SafeConfigParser
 from itertools import count, izip
 from collections import OrderedDict, Set
 import os
-CONFIG = SafeConfigParser()
 
+
+CONFIG = SafeConfigParser()
 
 
 class SET(Set):
