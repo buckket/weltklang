@@ -554,11 +554,11 @@ textarea {
 
 /* Colors for form validity */
 input:valid,textarea:valid {
-	
+	border: thin solid #ccc;
 }
 
 input:invalid,textarea:invalid {
-	background-color: #f0dddd;
+	border: thin solid #c00;
 }
 
 /* =============================================================================
