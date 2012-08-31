@@ -4,15 +4,15 @@ from flask.ext.login import LoginManager, UserMixin, login_user, login_required,
 
 import rfk
 from . import helper
-
+from rfk.model import User, News
 app = Flask(__name__, template_folder='/home/teddydestodes/src/PyRfK/var/template/',
                       static_folder='/home/teddydestodes/src/PyRfK/web_static/',
                       static_url_path='/static')
-app.config['SQLALCHEMY_DATABASE_URI'] = "%s://%s:%s@%s/%s?charset=utf8" % (rfk.config.get('database', 'engine'),
-                                                              rfk.config.get('database', 'username'),
-                                                              rfk.config.get('database', 'password'),
-                                                              rfk.config.get('database', 'host'),
-                                                              rfk.config.get('database', 'database'))
+app.config['SQLALCHEMY_DATABASE_URI'] = "%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
+                                                              rfk.CONFIG.get('database', 'username'),
+                                                              rfk.CONFIG.get('database', 'password'),
+                                                              rfk.CONFIG.get('database', 'host'),
+                                                              rfk.CONFIG.get('database', 'database'))
 app.config['DEBUG'] = True
 app.secret_key = 'PENISPENISPENISPENISPENIS'
 
@@ -21,7 +21,7 @@ app.jinja_env.filters['bbcode'] = helper.bbcode
 app.jinja_env.filters['timedelta'] = helper.timedelta
 
 db = SQLAlchemy(app)
-db.Model = rfk.Base
+rfk.init_db(db.engine, db.Model.metadata)
 
 login_manager = LoginManager()
 login_manager.setup_app(app)
@@ -31,7 +31,7 @@ login_manager.login_message = u"Please log in to access this page."
 
 @login_manager.user_loader
 def load_user(userid):
-    return db.session.query(rfk.User).get(int(userid))
+    return db.session.query(User).get(int(userid))
 
 from . import user
 app.register_blueprint(user.user, url_prefix='/user')
@@ -46,7 +46,7 @@ app.register_blueprint(api, url_prefix='/api')
 
 @app.route('/')
 def index():
-    news = db.session.query(rfk.News).all()
+    news = db.session.query(News).all()
     #print app.template_folder
     return render_template('index.html', news=news)
 

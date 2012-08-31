@@ -1,14 +1,22 @@
 {% extends "base.html" %}
-{% block content %}<h1>Register</h1>
+{% block content %}
+<script src="/static/js/register.js">
+</script>
+
+<h1>Register</h1>
+
 <div class="panel">
 <form method="post">
 <table>
-<tr><td>Username</td><td><input name="username" /></td></tr>
-<tr><td>Password</td><td><input name="password" type="password" /></td></tr>
-<tr><td>retype</td><td><input name="password_confirmation" type="password" /></td></tr>
-<tr><td>Streampassword</td><td><input name="stream_password" type="password" /></td></tr>
-<tr><td>retype</td><td><input name="stream_password_confirmation" type="password" /></td></tr>
-<tr><td>&nbsp;</td><td><input type="submit"></td></tr>
+<tr><td>Username</td><td><input name="username" required autofocus onblur="check_username(this);"></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>Password</td><td><input name="password" type="password" required onblur="check_password(this);"></td></tr>
+<tr><td>retype</td><td><input name="password_confirmation" type="password" required></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>Streampassword</td><td><input name="stream_password" type="password" required></td></tr>
+<tr><td>retype</td><td><input name="stream_password_confirmation" type="password" required></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>&nbsp;</td><td><input type="submit" value="Register"></td></tr>
 </table>
 </form>
 </div>
