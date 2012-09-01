@@ -10,8 +10,9 @@ def gen_testdata():
     user = rfk.User('MrLoom', rfk.User.make_password('keks'), rfk.User.make_password('keks'))
     db.session.add(user)
     
-    key = rfk.ApiKey('Test', 'Test', rfk.User.get_user(db.session, username='MrLoom'))
+    key = rfk.ApiKey(rfk.User.get_user(db.session, username='MrLoom'), 'Test')
     key.gen_key(db.session)
+    db.session.add(key)
     
     db.session.commit()
     return key.key
