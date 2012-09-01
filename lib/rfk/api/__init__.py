@@ -40,7 +40,7 @@ def check_auth(f=None, required_permissions=None):
         return f(*args, **kwargs)
     return decorated_function
 
- 
+
 from .apitest import *
 #from .webapi import *
 from .icecast import *

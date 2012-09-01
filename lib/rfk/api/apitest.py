@@ -5,10 +5,14 @@ from flask import jsonify, request, g
 
 
 # DEBUG
-@api.route('/web/gen_key')
-def gen_key():
+@api.route('/web/gen_testdata')
+def gen_testdata():
+    user = rfk.User('MrLoom', rfk.User.make_password('keks'), rfk.User.make_password('keks'))
+    db.session.add(user)
+    
     key = rfk.ApiKey('Test', 'Test', rfk.User.get_user(db.session, username='MrLoom'))
     key.gen_key(db.session)
+    
     db.session.commit()
     return key.key
 # DEBUG
@@ -31,7 +35,7 @@ def dj():
     else:
         data = {'dj': None}
     return jsonify(wrapper(data))
-    
+
 @api.route('/web/current_dj')
 @check_auth()
 def current_dj():
@@ -43,7 +47,7 @@ def current_dj():
     return jsonify(wrapper(data))
 
 @api.route('/web/kick_dj')
-@check_auth(required_permissions=[rfk.ApiKey.FLAG_KICK])
+@check_auth(required_permissions=[rfk.ApiKey.FLAGS.KICK])
 def kick_dj():
     return "TODO"
-    
+

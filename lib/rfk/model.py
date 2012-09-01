@@ -195,7 +195,7 @@ class ApiKey(object):
             apikey = session.query(ApiKey).filter(ApiKey.key==key).one()
         except (exc.NoResultFound, exc.MultipleResultsFound):
             return False
-        if apikey.flag & ApiKey.FLAG_DISABLED['code']:
+        if apikey.flag & ApiKey.FLAG.DISABLED:
                 return False
         else:
                 return apikey
