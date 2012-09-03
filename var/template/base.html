@@ -12,6 +12,7 @@
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory: mathiasbynens.be/notes/touch-icons -->
         <link href='http://fonts.googleapis.com/css?family=Viga&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="/static/css/style.css">
+        <link rel="stylesheet" href="/static/css/jquery-ui-1.8.23.rfk.css">
         <script src="/static/js/vendor/modernizr-2.5.3.min.js">
         </script>
     </head>
@@ -30,23 +31,29 @@
         </div>
         <script src="/static/js/vendor/jquery-1.8.0.min.js">
         </script>
+        <script src="/static/js/vendor/jquery-ui-1.8.23.custom.min.js">
+        </script>
         <!-- scripts concatenated and minified via build script -->
         <script src="/static/js/plugins.js">
         </script>
         <script src="/static/js/main.js">
         </script>
-        <script type="text/javascript">
+        
+        
         {% with messages = get_flashed_messages() %}
         {% if messages %}
+        <script type="text/javascript">
+        $(function(){
           {% for message in messages %}
           $.pnotify({
               text: '{{ message }}'
           });
           {% endfor %}
+        });
+        </script>
         {% endif %}
         {% endwith %}
         
-        </script>
         <!-- end scripts -->
     </body>
 </html>

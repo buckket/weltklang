@@ -10,7 +10,7 @@
  * ==|== normalize ==========================================================
  */
 /* css for pines*/
-@import "/static/css/pines.css";
+/*@import "/static/css/pines.css";*/
 @import "/static/css/pnotify.default.css";
 
 /* =============================================================================
@@ -622,6 +622,20 @@ a:hover {
 #menu {
 	/*text-align: center;*/
 	background-color: #80c3a2;
+	margin-right: 165px;
+	height: 25px;
+}
+
+#menu_user {
+	background-color: #80c3a2;
+	float: right;
+	height: 25px;
+	width: 150px;
+	padding-left: 5px;
+}
+
+#login-form {
+	display: none;
 }
 
 #navlist {
@@ -652,12 +666,11 @@ a:hover {
 }
 
 #sidebar {
-	margin-top: 72px;
 	position: relative;
 	right: 0px;
 	float: right;
 	background-color: #80c3a2;
-	width: 145px;
+	width: 150px;
 }
 
 .panel {

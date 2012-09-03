@@ -1,6 +1,14 @@
 <header>
 	<span id="stationname">RFK</span>
 </header>
+<div id="menu_user">
+{% if current_user.name %}
+{{ current_user.name }}
+<a href="/logout"><span class="ui-icon ui-icon-arrowreturn-1-e" style="display:inline-block"></span></a>
+{% else %}
+<a id="login-link" onclick="login();">Login</a>
+{% endif %}
+</div>
 <div id="menu">
 	<ul id="navlist">
 		<li>
@@ -19,5 +27,56 @@
 			<a href="#">Help</a>
 		</li>
 	</ul>
-	{{ current_user.name }}
 </div>
+
+{% if not current_user.name %}
+<script type="text/javascript">
+function login() {
+    var notice = $.pnotify({
+        text: $('#login-form').html(),
+        icon: false,
+        width: 'auto',
+        hide: false,
+        sticker: false,
+        insert_brs: false,
+        history: false,
+        before_open: function(pnotify) {
+        	$('#login-link').hide();
+        },
+        before_close: function(pnotify) {
+        	$('#login-link').show();
+        }
+        });
+    
+    notice.find('form.pf-form').submit(function() {
+        var username = $(this).find('input[name=username]').val();
+        if (!username) {
+        alert('Please provide a username.');
+        return false;
+        }
+        notice.pnotify({
+        title: 'Welcome',
+        text: 'Successfully logged in as ' + username,
+        icon: true,
+        width: $.pnotify.defaults.width,
+        hide: true,
+        closer: true,
+        sticker: true,
+        type: 'success'
+        });
+        return false;
+        });
+    return false;
+}
+</script>
+<div id="login-form">
+<form method="post" action="/login">
+<table>
+<tr><td>Username</td><td><input type="text" name="username"></td></tr>
+<tr><td>Password</td><td><input type="password" name="password"></td></tr>
+<tr><td>Remember me</td><td><input type="checkbox" name="remember"></td></tr>
+</table>
+<input type="submit">
+</form>
+</div>
+{% endif %}

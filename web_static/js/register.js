@@ -3,9 +3,10 @@ function check_username(element) {
 	if (!regexp.test($(element).val())) {
 		element.setCustomValidity('Username contains invalid characters');
 		$.pnotify({
-	        text: 'Your username contains invalid chars<br> only [0-9a-z_-] allowed'
+	        text: 'Your username contains invalid chars<br> only [0-9a-z_-] allowed',
+        	type: 'error'
 	    });
-		return
+		return false
 	}
 	$.ajax({
 		  url: '/register/check',
@@ -16,10 +17,13 @@ function check_username(element) {
 			  if (data.username == 'taken') {
 				  element.setCustomValidity('Username already taken');
 				  $.pnotify({
-				        text: 'Your username is already taken :( '
+				        text: 'Your username is already taken :( ',
+			        	type: 'error'
 				    });
+				  return false
 			  } else {
 				  element.setCustomValidity('');
+				  return true
 			  }
 		  }
 		});
@@ -31,17 +35,21 @@ function check_password() {
 	if (pass.val().length < 3) {
 		pass[0].setCustomValidity('password too short')
 		$.pnotify({
-	        text: 'Your password is too short'
+	        text: 'Your password is too short',
+	        type: 'error'
 	    });
 	} else if (pass.val() != ret.val() && ret.val() != '') {
 		pass[0].setCustomValidity('passwords don\'t match')
 		ret[0].setCustomValidity('passwords don\'t match')
 		$.pnotify({
-	        text: 'Your password don\'t match'
+	        text: 'Your password don\'t match',
+	        type: 'error'
 	    });
+		return false
 	} else {
 		pass[0].setCustomValidity('')
 		ret[0].setCustomValidity('')
+		return true
 	}
 }
 
@@ -51,21 +59,30 @@ function check_stream_password() {
 	if (pass.val().length < 3) {
 		pass[0].setCustomValidity('password too short')
 		$.pnotify({
-	        text: 'Your password is too short'
+	        text: 'Your password is too short',
+	        type: 'error'
 	    });
 	} else if (pass.val() != ret.val() && ret.val() != '') {
 		pass[0].setCustomValidity('passwords don\'t match')
 		ret[0].setCustomValidity('passwords don\'t match')
 		$.pnotify({
-	        text: 'Your password don\'t match'
+	        text: 'Your password don\'t match',
+	        type: 'error'
 	    });
+		return false
 	} else {
 		pass[0].setCustomValidity('')
 		ret[0].setCustomValidity('')
+		return true
 	}
 }
 
 function submit_form(button) {
+	if (!(check_username($('#reg_username')[0]) ||
+		  check_password() ||
+		  check_stream_password())) {
+		return;
+	}
 	$(button).attr("disabled", true);
 	$(button).val("Please wait...")
 	$.ajax({
@@ -80,24 +97,28 @@ function submit_form(button) {
 				  if (data.username == 'taken') {
 					  $('#reg_username')[0].setCustomValidity('Username already taken');
 					  $.pnotify({
-					        text: 'Your username is already taken :( '
+					        text: 'Your username is already taken :( ',
+					        type: 'error'
 					  });
 				  } else if (data.username == 'invalid') {
 					  $('#reg_username')[0].setCustomValidity('Username contains invalid characters');
 						$.pnotify({
-					        text: 'Your username contains invalid chars<br> only [0-9a-z_-] allowed'
+					        text: 'Your username contains invalid chars<br> only [0-9a-z_-] allowed',
+					        type: 'error'
 					    });
 				  }
 				  if (data.password == 'invalid') {
 					  $('#reg_password')[0].setCustomValidity('password too short')
 						$.pnotify({
-					        text: 'Your password is too short'
+					        text: 'Your password is too short',
+					        type: 'error'
 					    });
 				  }
 				  if (data.stream_password == 'invalid') {
 					  $('#reg_stream_password')[0].setCustomValidity('password too short')
 						$.pnotify({
-					        text: 'Your password is too short'
+					        text: 'Your password is too short',
+					        type: 'error'
 					    });
 				  }
 			   $(button).removeAttr("disabled");
