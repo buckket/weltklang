@@ -53,7 +53,7 @@ def index():
         db.session.add(listener)
     elif action == 'listener_remove':
         client = request.form['client']
-        rfk.Listener.setDisconnected(db, relay, mount, client)
+        rfk.Listener.set_disconnected(db, relay, mount, client)
     elif action == 'mount_add':
         mount.add(db, relay)
     elif action == 'mount_remove':
@@ -67,5 +67,5 @@ def __init__(self):
     '''
     go ahead, nothing to see here
     '''
-        
-        
+    
+    

@@ -171,11 +171,12 @@ class Permission(object):
 
 class ApiKey(object):
     
-    FLAGS = SET(['UNKNOWN', 'DISABLED', 'VIEWIP', 'FASTQUERY', 'KICK', 'BAN', 'AUTH'])
+    FLAGS = SET(['DISABLED', 'FASTQUERY', 'KICK', 'BAN', 'AUTH'])
 
     def __init__(self, user, application):
         self.user = user
         self.application = application
+        self.access = datetime.datetime.now()
         
     def gen_key(self, session):
         c = 0
@@ -187,18 +188,20 @@ class ApiKey(object):
     
     @staticmethod
     def check_key(key, session):
-        '''
-        Checks an Apikey for exsistence
-        @todo: other stuff like ratelimiting
-        '''
         try:
             apikey = session.query(ApiKey).filter(ApiKey.key==key).one()
         except (exc.NoResultFound, exc.MultipleResultsFound):
             return False
-        if apikey.flag & ApiKey.FLAG_DISABLED['code']:
+        if apikey.flag & ApiKey.FLAGS.DISABLED:
+            return False
+        elif not apikey.flag & ApiKey.FLAGS.FASTQUERY:
+            if datetime.datetime.now() - apikey.access <= datetime.timedelta(seconds=1):
                 return False
-        else:
-                return apikey
+    
+        apikey.counter += 1
+        apikey.access = datetime.datetime.now()
+        session.commit()
+        return apikey
 
 class News(object):
     
