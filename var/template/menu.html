@@ -47,25 +47,6 @@ function login() {
         	$('#login-link').show();
         }
         });
-    
-    notice.find('form.pf-form').submit(function() {
-        var username = $(this).find('input[name=username]').val();
-        if (!username) {
-        alert('Please provide a username.');
-        return false;
-        }
-        notice.pnotify({
-        title: 'Welcome',
-        text: 'Successfully logged in as ' + username,
-        icon: true,
-        width: $.pnotify.defaults.width,
-        hide: true,
-        closer: true,
-        sticker: true,
-        type: 'success'
-        });
-        return false;
-        });
     return false;
 }
 </script>
@@ -74,9 +55,9 @@ function login() {
 <table>
 <tr><td>Username</td><td><input type="text" name="username"></td></tr>
 <tr><td>Password</td><td><input type="password" name="password"></td></tr>
-<tr><td>Remember me</td><td><input type="checkbox" name="remember"></td></tr>
+<tr><td><nobr>Remember me</nobr></td><td><input type="checkbox" name="remember"></td></tr>
 </table>
-<input type="submit">
+<input type="submit" value="Login">
 </form>
 </div>
 {% endif %}
