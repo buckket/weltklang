@@ -28,7 +28,7 @@ class SET(Set):
     def __iter__(self):
         return iter(self.dict)
     def __repr__(self):
-        return 'IndexOrderedSet({})'.format(self.dict.keys())
+        return 'SET({})'.format(self.dict.keys())
     def __getattr__(self, name):
         if name in self:
             return 1<<(self.index(name))
@@ -57,7 +57,7 @@ class ENUM(Set):
     def __iter__(self):
         return iter(self.dict)
     def __repr__(self):
-        return 'IndexOrderedSet({})'.format(self.dict.keys())
+        return 'ENUM({})'.format(self.dict.keys())
     def __getattr__(self, name):
         if name in self:
             return self.index(name)
