@@ -1,6 +1,10 @@
 import os
+import inspect
+from pprint import pprint
 import datetime
 import rfk
+
+
 
 if __name__ == '__main__':
     current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -21,19 +25,20 @@ if __name__ == '__main__':
         db.session.commit()
         
     def add_shows():
-        """
-        This shit is broken and I have no clue how to fix is
-        """
         shows = []
         
         show = rfk.Show('Testsendung #1', 'Testbeschreibung')
         show.end = None
-        show.user.append(rfk.User.get_user(db.session, 'MrLoom').get_id())
         shows.append(show)
         
         for show in shows:
-            db.session.add(show)
-            print "[shows] Added '%s' (%s) "
+            user = rfk.User.get_user(db.session, 'teddydestodes')
+            user.shows.append(show)
+            user = rfk.User.get_user(db.session, 'MrLoom')
+            user.shows.append(show)
+            print "[shows] Added '%s' (%s)" % (show.name, show.description)
+            
+        db.session.commit()
     
     def add_news():
         news = []
@@ -53,8 +58,8 @@ if __name__ == '__main__':
         print "[apikeys] Added key %s for user %s" % (key.key, key.user)
     
     
-    add_users()
+    #add_users()
     add_shows()
-    add_news()
-    add_apikey()
+    #add_news()
+    #add_apikey()
     

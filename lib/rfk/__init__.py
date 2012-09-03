@@ -192,7 +192,8 @@ def init_db(engine, metadata):
                 'user': relationship(User,
                                       backref='user_shows'),
                 'show': relationship(Show,
-                                      backref='user_shows'))
+                                      backref='user_shows')
+                                    })
 
     mapper(UserPermission, user_permissions, properties={
                 'user_id': user_permissions.c.user,
