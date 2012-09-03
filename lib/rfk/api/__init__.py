@@ -33,7 +33,7 @@ def check_auth(f=None, required_permissions=None):
             if required_permissions != None:
                 for required_permission in required_permissions:
                     if not apikey.flag & required_permission:
-                        return raise_error('%s (%i) required' % (required_permission, required_permission))
+                        return raise_error('Flag %s (%i) required' % (rfk.ApiKey.FLAGS.name(required_permission), required_permission))
         
         g.apikey = apikey
         
