@@ -1,4 +1,5 @@
 import os
+import datetime
 import rfk
 
 if __name__ == '__main__':
@@ -22,6 +23,7 @@ if __name__ == '__main__':
     news.append(rfk.News(rfk.User.get_user(db.session, 'MrLoom').get_id(), 'Hallo Welt', 'Hallo Loom'))
     news.append(rfk.News(rfk.User.get_user(db.session, 'teddydestodes').get_id(), 'Ich', 'ausversehen'))
     for newz in news:
+        newz.time = datetime.datetime.now()
         db.session.add(newz)
         print "[news] Added news from user %s" % newz.user
     db.session.commit()
