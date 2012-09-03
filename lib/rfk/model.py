@@ -7,6 +7,7 @@ import hashlib
 from passlib.hash import bcrypt
 import datetime
 import time
+import re
 from rfk import SET, ENUM
 from sqlalchemy.orm import exc
 from sqlalchemy import func, and_, or_, between
@@ -57,17 +58,16 @@ class User(object):
     
     def check_stream_password(self, password):
         return bcrypt.verify(password, self.streampassword)
-
-    def check_username(self, username):
-        if username.contains('|'):
-            return False
-        elif len(username) < 3:
+    
+    @staticmethod
+    def check_username(username):
+        if re.match('^[0-9a-zA-Z_-]{3,}$', username) == None:
             return False
         else:
             return True
     
     def get_stream_time(self, session):
-        time = session.query(User, func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin))))).join(user_shows).join(Show).filter(Show.end != None, User.user == self.user, Show.begin <= datetime.datetime.today()).group_by(User.user).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin)))).desc()).first()
+        time = session.query(User, func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin))))).join(UserShow).join(Show).filter(Show.end != None, User.user == self.user, Show.begin <= datetime.datetime.today()).group_by(User.user).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin)))).desc()).first()
         if time == None:
             return datetime.timedelta(0)
         else:
@@ -78,7 +78,7 @@ class User(object):
         self.status = User.STATUS_STREAMING
         
     def disconnect(self):
-        self.status = User.STATUS_NONE
+        self.status = User.STATUS.NONE
         
     @staticmethod        
     def make_password(password):
@@ -86,7 +86,7 @@ class User(object):
     
     @staticmethod
     def get_top_user_by_show(session):
-        return session.query(User, func.count()).join(user_shows).join(Show).group_by(User.user).order_by(func.count().desc())[:50]
+        return session.query(User, func.count()).join(UserShow).join(Show).group_by(User.user).order_by(func.count().desc())[:50]
     @staticmethod
     def get_top_user_by_show_length(session):
         return session.query(User, func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin))))).join(user_shows).join(Show).filter(Show.end != None).group_by(User.user).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin)))).desc())[:50]

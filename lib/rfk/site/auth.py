@@ -13,7 +13,7 @@ def check_credentials(username, password):
     """Verifies credentials for username and password.
     Returns None on success or a string describing the error on failure"""
     session = cherrypy.request.db
-    user = session.query(rfk.User).filter(rfk.User.name == username).filter(rfk.User.password == rfk.User.makePassword(password)).first()
+    user = session.query(rfk.User).filter(rfk.User.name == username).filter(rfk.User.password == rfk.User.make_password(password)).first()
     if user != None:
         return None
     else:

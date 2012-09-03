@@ -41,6 +41,8 @@ from . import admin
 app.register_blueprint(admin.admin, url_prefix='/admin')
 from . import listen
 app.register_blueprint(listen.listen, url_prefix='/listen')
+from . import register
+app.register_blueprint(register.register)
 from rfk.api import api
 app.register_blueprint(api, url_prefix='/api')
 
@@ -79,9 +81,7 @@ def logout():
     flash("Logged out.")
     return redirect(url_for("index"))
 
-@app.route('/register', methods=['POST','GET'])
-def register():
-    return render_template("register.html")
+
 
 def shutdown_server():
     func = request.environ.get('werkzeug.server.shutdown')

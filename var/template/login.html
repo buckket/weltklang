@@ -1,8 +1,13 @@
 {% extends "base.html" %}
 {% block content %}<h1>Login</h1>
+<div class="panel">
 <form method="post">
-<input name="username" />
-<input name="password" type="password" />
-<input type="submit">
+<Table>
+<tr><td>Username</td><td><input name="username" type="text"/></td></tr>
+<tr><td>Password</td><td><input name="password" type="password" /></td></tr>
+<tr><td>&nbsp;</td><td><input type="submit" value="Login"></td></tr>
+</Table>
 </form>
+
+</div>
 {% endblock %}

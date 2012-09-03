@@ -7,24 +7,24 @@ from flask import Blueprint, render_template
 import rfk
 from rfk.site import db
 from datetime import datetime
-
+from rfk.model import User, UserShow, Show
 user = Blueprint('user',__name__)
 
 @user.route('/', methods=['get'])
 def list():
-    users = db.session.query(rfk.User).all()
+    users = db.session.query(User).all()
     return render_template('user/list.html', users=users)
 
 @user.route('/<user>')
 def info(user):
-    user = db.session.query(rfk.User).filter(rfk.User.name == user).first()
+    user = db.session.query(User).filter(User.name == user).first()
     if user:
         
         out = {}
         out['username'] = user.name
-        out['info'] = {'totaltime': user.getStreamTime(db.session)}
-        ushows = db.session.query(rfk.Show).join(rfk.user_shows).join(rfk.User).filter(rfk.User.user==user.user, rfk.Show.begin > datetime.today()).order_by(rfk.Show.begin.asc())[:5]
-        lshows = db.session.query(rfk.Show).join(rfk.user_shows).join(rfk.User).filter(rfk.User.user==user.user, rfk.Show.end <= datetime.today()).order_by(rfk.Show.end.desc())[:5]
+        out['info'] = {'totaltime': user.get_stream_time(db.session)}
+        ushows = db.session.query(Show).join(UserShow).filter(UserShow.user==user, Show.begin > datetime.today()).order_by(Show.begin.asc())[:5]
+        lshows = db.session.query(Show).join(UserShow).filter(UserShow.user==user, Show.end <= datetime.today()).order_by(Show.end.desc())[:5]
         
         out['shows'] = {'upcomming': ushows,
                         'last': lshows
