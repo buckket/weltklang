@@ -32,8 +32,8 @@ def check_auth(f=None, required_permissions=None):
         else:
             if required_permissions != None:
                 for required_permission in required_permissions:
-                    if not apikey.flag & required_permission['code']:
-                        return raise_error('%s (%i) required' % (required_permission['name'], required_permission['code']))
+                    if not apikey.flag & required_permission:
+                        return raise_error('%s (%i) required' % (required_permission, required_permission))
         
         g.apikey = apikey
         
