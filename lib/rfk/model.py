@@ -24,6 +24,7 @@ class Anonymous(AnonymousUser):
 class User(object):
     STATUS = ENUM(['NONE','STREAMING'])
     
+    locale = 'de'
     def __init__(self, name, password, streampassword):
         self.name = name
         self.password = password
