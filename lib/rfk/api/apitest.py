@@ -6,20 +6,6 @@ from flask import jsonify, request, g
 import datetime
 from sqlalchemy import func, and_, or_, between
 
-# DEBUG
-@api.route('/web/gen_testdata')
-def gen_testdata():
-    user = rfk.User('MrLoom', rfk.User.make_password('keks'), rfk.User.make_password('keks'))
-    db.session.add(user)
-    
-    key = rfk.ApiKey(1, 'Test')
-    key.gen_key(db.session)
-    db.session.add(key)
-    
-    db.session.commit()
-    return key.key
-# DEBUG
-
 
 @api.route('/web/dj')
 @check_auth()
