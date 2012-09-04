@@ -11,6 +11,15 @@ import re
 from rfk import SET, ENUM
 from sqlalchemy.orm import exc
 from sqlalchemy import func, and_, or_, between
+from flask.ext.login import AnonymousUser
+
+
+class Anonymous(AnonymousUser):
+    
+    def __init__(self):
+        AnonymousUser.__init__(self)
+        self.locale = 'de'
+    
 
 class User(object):
     STATUS = ENUM(['NONE','STREAMING'])
@@ -20,7 +29,7 @@ class User(object):
         self.password = password
         self.streampassword = streampassword
         self.authenticated = False
-        
+        self.locale = 'de'
 
     def get_id(self):
         return unicode(self.user)

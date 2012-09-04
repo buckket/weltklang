@@ -44,6 +44,8 @@ def get_timezone():
 
 login_manager = LoginManager()
 login_manager.setup_app(app)
+
+login_manager.anonymous_user = rfk.model.Anonymous
 login_manager.login_view = "login"
 login_manager.login_message = u"Please log in to access this page."
 #login_manager.refresh_view = "reauth"
