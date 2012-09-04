@@ -108,8 +108,7 @@ class UserShow(object):
 
 class Show(object):
     
-    FLAGS = ENUM(['UNKNOWN',
-                  'DELETED',
+    FLAGS = SET([ 'DELETED',
                   'RECORD',
                   'PLANNED',
                   'UNPLANNED'])
