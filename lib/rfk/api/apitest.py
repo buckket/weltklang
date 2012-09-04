@@ -3,20 +3,9 @@ from rfk.site import db
 from rfk.api import api, check_auth, wrapper
 from flask import jsonify, request, g
 
+import datetime
+from sqlalchemy import func, and_, or_, between
 
-# DEBUG
-@api.route('/web/gen_testdata')
-def gen_testdata():
-    user = rfk.User('MrLoom', rfk.User.make_password('keks'), rfk.User.make_password('keks'))
-    db.session.add(user)
-    
-    key = rfk.ApiKey(1, 'Test')
-    key.gen_key(db.session)
-    db.session.add(key)
-    
-    db.session.commit()
-    return key.key
-# DEBUG
 
 @api.route('/web/dj')
 @check_auth()
@@ -37,6 +26,7 @@ def dj():
         data = {'dj': None}
     return jsonify(wrapper(data))
 
+
 @api.route('/web/current_dj')
 @check_auth()
 def current_dj():
@@ -47,8 +37,45 @@ def current_dj():
         data = {'current_dj': None}
     return jsonify(wrapper(data))
 
+
 @api.route('/web/kick_dj')
 @check_auth(required_permissions=[rfk.ApiKey.FLAGS.KICK])
 def kick_dj():
     return "TODO"
 
+
+@api.route('/web/current_show')
+@check_auth()
+def current_show():
+    clauses = []
+    clauses.append(and_(rfk.Show.begin <= datetime.datetime.now(), or_(rfk.Show.end >= datetime.datetime.now(), rfk.Show.end == None)))
+    result = db.session.query(rfk.Show).join(rfk.UserShow).join(rfk.User).filter(*clauses).order_by(rfk.Show.begin.desc(), rfk.Show.end.asc()).all()
+    
+    data = {'current_show': {'shows': {}}}
+    if result:
+        for show in result:
+            
+            show.begin = show.begin.isoformat()
+            if show.end:
+                show.end = show.end.isoformat()
+            
+            dj = []
+            for usershow in show.user_shows:
+                dj.append({'name': usershow.user.name, 'id': usershow.user.user, 'status': usershow.user.status})
+                
+            if (show.flags & rfk.Show.FLAGS.UNPLANNED and len(result) == 2) or len(result) == 1:
+                data['current_show']['show'] = show.show
+            if (show.flags & rfk.Show.FLAGS.PLANNED and len(result) == 2):
+                data['current_show']['planned'] = show.show
+                
+            data['current_show']['shows'][show.show] = {
+                'name': show.name,
+                'description': show.description,
+                'flags': show.flags,
+                'begin': show.begin,
+                'end': show.end,
+                'dj': dj
+            }
+    else:
+        data = {'current_show': None}
+    return jsonify(wrapper(data))

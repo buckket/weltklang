@@ -89,7 +89,7 @@ class User(object):
         return session.query(User, func.count()).join(UserShow).join(Show).group_by(User.user).order_by(func.count().desc())[:50]
     @staticmethod
     def get_top_user_by_show_length(session):
-        return session.query(User, func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin))))).join(user_shows).join(Show).filter(Show.end != None).group_by(User.user).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin)))).desc())[:50]
+        return session.query(User, func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin))))).join(UserShow).join(Show).filter(Show.end != None).group_by(User.user).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin)))).desc())[:50]
     
 
 class IrcUser(object):
@@ -98,22 +98,26 @@ class IrcUser(object):
         self.user = user
         self.hostmask = hostmask
 
+
 class UserShow(object):
     
     def __init__(self, user, show):
         self.user = user
         self.show = show
 
+
 class Show(object):
     
-    FLAGS = ENUM(['UNKNOWN',
-                  'DELETED',
+    FLAGS = SET([ 'DELETED',
                   'RECORD',
                   'PLANNED',
                   'UNPLANNED'])
+    
     def __init__(self, name, description):
         self.name = name
         self.description = description
+        self.begin = datetime.datetime.now()
+        self.updated = datetime.datetime.now()
         
     @staticmethod
     def get_current_shows(session, user=None):
@@ -121,7 +125,7 @@ class Show(object):
         clauses.append(and_(Show.begin <= datetime.datetime.today(), or_(Show.end >= datetime.datetime.today(), Show.end == None)))
         if user != None:
             clauses.append(User.user == user.user)
-        return session.query(Show).join(user_shows).join(User).filter(*clauses).order_by(Show.begin.desc(), Show.end.asc()).all()
+        return session.query(Show).join(UserShow).join(User).filter(*clauses).order_by(Show.begin.desc(), Show.end.asc()).all()
     
     def end_show(self, now=datetime.datetime.today()):
         if self.end == None:
@@ -131,7 +135,7 @@ class Show(object):
                 song.end = now
         
     def get_user_role(self, session, user):
-        return session.query(user_shows).filter_by(show=self.show, user=user.user).first()[2]
+        return session.query(UserShow).filter_by(show=self.show, user=user.user).first()[2]
     
     def get_listener(self, session):
         return session.query(Listener).filter(self.begin < Listener.disconnect, self.end > Listener.connect).all()
@@ -145,11 +149,13 @@ class Show(object):
             if tag not in newtags:
                 self.tags.remove(tag)
 
+
 class Setting(object):
     
     def __init__(self, code, name):
         self.code = code
         self.name = name
+
 
 class UserPermission(object):
     
@@ -158,7 +164,8 @@ class UserPermission(object):
         
     def has_permission(self, permission):
         print self.permission
-        
+
+
 class Permission(object):
     
     def __init__(self, code, name):
@@ -168,6 +175,7 @@ class Permission(object):
     @staticmethod
     def get_permission(session, code):
         return session.query(Permission).filter(Permission.code == code).one()
+
 
 class ApiKey(object):
     
@@ -202,6 +210,7 @@ class ApiKey(object):
         apikey.access = datetime.datetime.now()
         session.commit()
         return apikey
+    
 
 class News(object):
     
@@ -209,6 +218,7 @@ class News(object):
         self.user = user
         self.title = title
         self.content = content
+        self.time = datetime.datetime.now()
         
         
 class Song(object):
@@ -235,7 +245,8 @@ class Song(object):
     @staticmethod
     def get_current_song(session):
         return session.query(Song).filter(Song.end == None).order_by(Song.song.desc()).first()
-    
+
+   
 class Title(object):
     @staticmethod
     def get_top_titles(session):
@@ -255,6 +266,7 @@ class Title(object):
             metaTitle.addDuration(begin, end)
         return metaTitle.title
 
+
 class MetaTitle(object):
     def add_duration(self, begin, end):
         '''adds a new duration to this metaTitle'''
@@ -266,6 +278,7 @@ class MetaTitle(object):
         else :
             self.duration = duration
             self.duration_weight = 1
+
 
 class Artist(object):
     @staticmethod
@@ -283,14 +296,17 @@ class Artist(object):
             metaArtist.artist = art
         return metaArtist.artist
 
+
 class MetaArtist(object):
     pass
+
 
 class ShowTag(object):
     
     def __init__ (self, show, tag):
         self.show = show
         self.tag = tag
+
 
 class Tag(object):
     
@@ -308,8 +324,10 @@ class Tag(object):
             r.append(t)
         return r
 
+
 class Series(object):
     pass
+
 
 class Listener(object):
     
@@ -338,6 +356,7 @@ class Stream(object):
     def remove(self, session, relay):
         session.query(Listener).filter(and_(Listener.relay == relay, Listener.stream == self, Listener.disconnect == None)).update({Listener.disconnect: datetime.datetime.today()})
 
+
 class Relay(object):
     
     STATUS = ENUM(['UNKNOWN', 'DISABLED', 'OFFLINE', 'ONLINE'])
@@ -354,11 +373,13 @@ class Relay(object):
                 minLoad = relay.getLoad()
                 bestRelay = relay
         return bestRelay
-    
+
+   
 class StreamRelay(object):
     
     def __init__(self, blah):
         pass
+
     
 class Playlist(object):
     
@@ -366,3 +387,4 @@ class Playlist(object):
     def get_current_item(session):
         all = session.query(Playlist).filter(between(datetime.datetime.today().time(), Playlist.begin, Playlist.end)).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Playlist.end, Playlist.begin)))).asc()).first()
         return all
+
