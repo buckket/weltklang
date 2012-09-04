@@ -15,7 +15,7 @@ admin = Blueprint('admin',__name__)
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if current_user.is_admin(db.session) == False:
+        if not current_user.is_admin(db.session):
             return 'you need to be an admin'
         return f(*args, **kwargs)
     return decorated_function
