@@ -1,10 +1,12 @@
 from flask import Flask, session, g, render_template, flash, redirect, url_for, request
 from flask_sqlalchemy import SQLAlchemy
-from flask.ext.login import LoginManager, UserMixin, login_user, login_required, logout_user
+from flask.ext.login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flaskext.babel import Babel
 
 import rfk
 from . import helper
 from rfk.model import User, News
+
 app = Flask(__name__, template_folder='/home/teddydestodes/src/PyRfK/var/template/',
                       static_folder='/home/teddydestodes/src/PyRfK/web_static/',
                       static_url_path='/static')
@@ -14,6 +16,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "%s://%s:%s@%s/%s?charset=utf8" % (rfk.C
                                                               rfk.CONFIG.get('database', 'host'),
                                                               rfk.CONFIG.get('database', 'database'))
 app.config['DEBUG'] = True
+app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europe/Berlin'
+app.config['BABEL_DEFAULT_LOCALE'] = 'de'
+#app.config['BABEL_LOCALE_PATH'] = 'de'
 app.secret_key = 'PENISPENISPENISPENISPENIS'
 
 app.jinja_env.globals['nowPlaying'] = helper.nowPlaying
@@ -22,6 +27,20 @@ app.jinja_env.filters['timedelta'] = helper.timedelta
 
 db = SQLAlchemy(app)
 rfk.init_db(db.engine, db.Model.metadata)
+
+babel = Babel(app)
+
+@babel.localeselector
+def get_locale():
+    if current_user is not None:
+        return current_user.locale
+    return request.accept_languages.best_match(['de', 'en'])
+
+@babel.timezoneselector
+def get_timezone():
+    user = getattr(g, 'user', None)
+    if user is not None:
+        return user.timezone
 
 login_manager = LoginManager()
 login_manager.setup_app(app)
@@ -45,6 +64,14 @@ from . import register
 app.register_blueprint(register.register)
 from rfk.api import api
 app.register_blueprint(api, url_prefix='/api')
+
+     
+
+@app.before_request
+def lang():
+    if request.method == 'GET': 
+        if request.args.get('lang') is not None and request.args.get('lang') != '':
+            current_user.locale = request.args.get('lang') 
 
 @app.route('/')
 def index():

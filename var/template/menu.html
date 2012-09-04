@@ -6,25 +6,25 @@
 {{ current_user.name }}
 <a href="/logout"><span class="ui-icon ui-icon-arrowreturn-1-e" style="display:inline-block"></span></a>
 {% else %}
-<a id="login-link" onclick="login();">Login</a>
+<a id="login-link" onclick="login();">{% trans %}Login{% endtrans %}</a>
 {% endif %}
 </div>
 <div id="menu">
 	<ul id="navlist">
 		<li>
-			<a href="#">News</a>
+			<a href="#">{% trans %}News{% endtrans %}</a>
 		</li>
 		<li>
-			<a href="#">Shows</a>
+			<a href="#">{% trans %}Shows{% endtrans %}</a>
 		</li>
 		<li>
-			<a href="#">Listen</a>
+			<a href="#">{% trans %}Listen{% endtrans %}</a>
 		</li>
 		<li>
-			<a href="#">Donations</a>
+			<a href="#">{% trans %}Donations{% endtrans %}</a>
 		</li>
 		<li>
-			<a href="#">Help</a>
+			<a href="#">{% trans %}Help{% endtrans %}</a>
 		</li>
 	</ul>
 </div>
@@ -53,9 +53,9 @@ function login() {
 <div id="login-form">
 <form method="post" action="/login">
 <table>
-<tr><td>Username</td><td><input type="text" name="username"></td></tr>
-<tr><td>Password</td><td><input type="password" name="password"></td></tr>
-<tr><td><nobr>Remember me</nobr></td><td><input type="checkbox" name="remember"></td></tr>
+<tr><td>{% trans %}Username{% endtrans %}</td><td><input type="text" name="username"></td></tr>
+<tr><td>{% trans %}Password{% endtrans %}</td><td><input type="password" name="password"></td></tr>
+<tr><td><nobr>{% trans %}Remember me{% endtrans %}</nobr></td><td><input type="checkbox" name="remember"></td></tr>
 </table>
 <input type="submit" value="Login">
 </form>

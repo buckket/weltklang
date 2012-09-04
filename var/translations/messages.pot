@@ -1,0 +1,89 @@
+# Translations template for PROJECT.
+# Copyright (C) 2012 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2012.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2012-09-04 18:45+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 0.9.6\n"
+
+#: var/template/index.html:2 var/template/menu.html:15
+msgid "News"
+msgstr ""
+
+#: var/template/login.html:2 var/template/login.html:8 var/template/menu.html:9
+msgid "Login"
+msgstr ""
+
+#: var/template/login.html:6 var/template/menu.html:56
+#: var/template/register.html:12
+msgid "Username"
+msgstr ""
+
+#: var/template/login.html:7 var/template/menu.html:57
+#: var/template/register.html:19
+msgid "Password"
+msgstr ""
+
+#: var/template/menu.html:18
+msgid "Shows"
+msgstr ""
+
+#: var/template/menu.html:21
+msgid "Listen"
+msgstr ""
+
+#: var/template/menu.html:24
+msgid "Donations"
+msgstr ""
+
+#: var/template/menu.html:27
+msgid "Help"
+msgstr ""
+
+#: var/template/menu.html:58
+msgid "Remember me"
+msgstr ""
+
+#: var/template/nowplaying.html:2
+msgid "On Air"
+msgstr ""
+
+#: var/template/nowplaying.html:27
+msgid "... and there were silence ..."
+msgstr ""
+
+#: var/template/register.html:6 var/template/register.html:43
+msgid "Register"
+msgstr ""
+
+#: var/template/register.html:25 var/template/register.html:37
+msgid "retype"
+msgstr ""
+
+#: var/template/register.html:31
+msgid "Streampassword"
+msgstr ""
+
+#: var/template/register_success.html:6
+msgid "Registration was successful"
+msgstr ""
+
+#: var/template/register_success.html:9
+msgid "Your registration was successful"
+msgstr ""
+
+#: var/template/register_success.html:11
+msgid "You can now login if you follow <a href=\"/login\">this link</a>"
+msgstr ""
+

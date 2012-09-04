@@ -13,6 +13,7 @@
         <link href='http://fonts.googleapis.com/css?family=Viga&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="/static/css/style.css">
         <link rel="stylesheet" href="/static/css/jquery-ui-1.8.23.rfk.css">
+        <link rel="stylesheet" href="/static/css/polyglot-language-switcher.css">
         <script src="/static/js/vendor/modernizr-2.5.3.min.js">
         </script>
     </head>
@@ -29,9 +30,20 @@
                 {% endblock %}
             </div>
         </div>
+        <div id="polyglotLanguageSwitcher">
+        <form action="#">
+            <select id="polyglot-language-options">
+                <option id="de" value="de" {% if current_user.locale == 'de' %}selected{% endif %}>Bernd</option>
+                <option id="en" value="en" {% if current_user.locale == 'en' %}selected{% endif %}>English</option>
+            </select>
+        </form>
+    </div>   
+        
         <script src="/static/js/vendor/jquery-1.8.0.min.js">
         </script>
         <script src="/static/js/vendor/jquery-ui-1.8.23.custom.min.js">
+        </script>
+        <script src="/static/js/vendor/jquery.polyglot.language.switcher.js">
         </script>
         <!-- scripts concatenated and minified via build script -->
         <script src="/static/js/plugins.js">

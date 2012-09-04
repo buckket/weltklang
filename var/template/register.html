@@ -3,44 +3,44 @@
 <script src="/static/js/register.js">
 </script>
 
-<h1>Register</h1>
+<h1>{% trans %}Register{% endtrans %}</h1>
 
 <div class="panel">
 <form method="post">
 <table>
     <tr>
-        <td>Username</td>
+        <td>{% trans %}Username{% endtrans %}</td>
         <td>
             <input type="text" id="reg_username" name="username" required autofocus onblur="check_username(this);">
         </td>
     </tr>
     <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
     <tr>
-        <td>Password</td>
+        <td>{% trans %}Password{% endtrans %}</td>
         <td>
             <input id="reg_password" name="password" type="password" required onblur="check_password();">
         </td>
     </tr>
     <tr>
-        <td>retype</td>
+        <td>{% trans %}retype{% endtrans %}</td>
         <td>
             <input id="reg_password_conf" type="password" required onblur="check_password();">
         </td>
     </tr>
 	<tr>
-	   <td>Streampassword</td>
+	   <td>{% trans %}Streampassword{% endtrans %}</td>
 	   <td>
 	       <input id="reg_stream_password" name="stream_password" type="password" required onblur="check_stream_password();">
 	   </td>
 	</tr>
 	<tr>
-	   <td>retype</td>
+	   <td>{% trans %}retype{% endtrans %}</td>
 	   <td>
 	       <input id="reg_stream_password_conf" type="password" required onblur="check_stream_password();">
 	   </td>
     </tr>
 	<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-    <tr><td>&nbsp;</td><td><input type="button" onclick="submit_form();" value="Register"></td></tr>
+    <tr><td>&nbsp;</td><td><input type="button" onclick="submit_form();" value="{% trans %}Register{% endtrans %}"></td></tr>
 </table>
 </form>
 </div>
