@@ -31,11 +31,11 @@ class SET(Set):
         return 'SET({})'.format(self.dict.keys())
     def __getattr__(self, name):
         if name in self:
-            return 1<<(self.index(name))
+            return 1 << (self.index(name))
         raise AttributeError
     def name(self,mask):
         for elem in self:
-            if mask & 1<<self.index(elem):
+            if mask & 1 << self.index(elem):
                 return elem
 
 class ENUM(Set):
@@ -131,7 +131,7 @@ def init_db(engine, metadata):
                         'relay_id': stream_relays.c.relay,
                         'stream': relationship(Stream),
                         'relay': relationship(Relay)})
-    mapper(Listener,listeners, properties={
+    mapper(Listener, listeners, properties={
                 'relay_id': listeners.c.relay,
                 'stream_id': listeners.c.stream,
                 'relay': relationship(Relay, backref='listeners.listener'),
@@ -140,7 +140,7 @@ def init_db(engine, metadata):
                                       secondary=show_listener,
                                       backref='listeners.listener')
                                     })
-    mapper(ShowListener,show_listener, properties={
+    mapper(ShowListener, show_listener, properties={
                         'listener_id': show_listener.c.listener,
                         'show_id': show_listener.c.show,
                         'listener': relationship(Listener),
