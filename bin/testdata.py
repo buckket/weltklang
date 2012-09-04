@@ -29,6 +29,12 @@ if __name__ == '__main__':
         
         show = rfk.Show('Testsendung #1', 'Testbeschreibung')
         show.end = None
+        show.flags = rfk.Show.FLAGS.UNPLANNED
+        shows.append(show)
+        
+        show = rfk.Show('Testsendung #2', 'Hurf Durf')
+        show.end = datetime.datetime.now() + datetime.timedelta(hours=1)
+        show.flags = rfk.Show.FLAGS.PLANNED
         shows.append(show)
         
         for show in shows:

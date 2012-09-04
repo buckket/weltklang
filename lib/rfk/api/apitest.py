@@ -59,7 +59,7 @@ def kick_dj():
 
 
 @api.route('/web/current_show')
-#@check_auth()
+@check_auth()
 def current_show():
     clauses = []
     clauses.append(and_(rfk.Show.begin <= datetime.datetime.now(), or_(rfk.Show.end >= datetime.datetime.now(), rfk.Show.end == None)))
@@ -77,10 +77,10 @@ def current_show():
             for usershow in show.user_shows:
                 dj.append({'name': usershow.user.name, 'id': usershow.user.user, 'status': usershow.user.status})
                 
-            if show.flags & rfk.Show.FLAGS.PLANNED:
+            if (show.flags & rfk.Show.FLAGS.UNPLANNED and len(result) == 2) or len(result) == 1:
+                data['current_show']['show'] = show.show
+            if (show.flags & rfk.Show.FLAGS.PLANNED and len(result) == 2):
                 data['current_show']['planned'] = show.show
-            elif show.flags & rfk.Show.FLAGS.UNPLANNED:
-                data['current_show']['unplanned'] = show.show
                 
             data['current_show']['shows'][show.show] = {
                 'name': show.name,
