@@ -23,8 +23,8 @@ def info(user):
         out = {}
         out['username'] = user.name
         out['info'] = {'totaltime': user.get_stream_time(db.session)}
-        ushows = db.session.query(Show).join(UserShow).filter(UserShow.user==user, Show.begin > datetime.today()).order_by(Show.begin.asc())[:5]
-        lshows = db.session.query(Show).join(UserShow).filter(UserShow.user==user, Show.end <= datetime.today()).order_by(Show.end.desc())[:5]
+        ushows = db.session.query(Show).join(UserShow).filter(UserShow.user==user, Show.begin > datetime.utcnow()).order_by(Show.begin.asc())[:5]
+        lshows = db.session.query(Show).join(UserShow).filter(UserShow.user==user, Show.end <= datetime.utcnow()).order_by(Show.end.desc())[:5]
         
         out['shows'] = {'upcomming': ushows,
                         'last': lshows

@@ -77,7 +77,7 @@ class User(object):
             return True
     
     def get_stream_time(self, session):
-        time = session.query(User, func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin))))).join(UserShow).join(Show).filter(Show.end != None, User.user == self.user, Show.begin <= datetime.datetime.today()).group_by(User.user).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin)))).desc()).first()
+        time = session.query(User, func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin))))).join(UserShow).join(Show).filter(Show.end != None, User.user == self.user, Show.begin <= datetime.datetime.utcnow()).group_by(User.user).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Show.end, Show.begin)))).desc()).first()
         if time == None:
             return datetime.timedelta(0)
         else:
@@ -126,18 +126,18 @@ class Show(object):
     def __init__(self, name, description):
         self.name = name
         self.description = description
-        self.begin = datetime.datetime.now()
-        self.updated = datetime.datetime.now()
+        self.begin = datetime.datetime.utcnow()
+        self.updated = datetime.datetime.utcnow()
         
     @staticmethod
     def get_current_shows(session, user=None):
         clauses = []
-        clauses.append(and_(Show.begin <= datetime.datetime.today(), or_(Show.end >= datetime.datetime.today(), Show.end == None)))
+        clauses.append(and_(Show.begin <= datetime.datetime.utcnow(), or_(Show.end >= datetime.datetime.utcnow(), Show.end == None)))
         if user != None:
             clauses.append(User.user == user.user)
         return session.query(Show).join(UserShow).join(User).filter(*clauses).order_by(Show.begin.desc(), Show.end.asc()).all()
     
-    def end_show(self, now=datetime.datetime.today()):
+    def end_show(self, now=datetime.datetime.utcnow()):
         if self.end == None:
             self.end = now
         for song in self.songs:
@@ -194,7 +194,7 @@ class ApiKey(object):
     def __init__(self, user, application):
         self.user = user
         self.application = application
-        self.access = datetime.datetime.now()
+        self.access = datetime.datetime.utcnow()
         
     def gen_key(self, session):
         c = 0
@@ -213,11 +213,11 @@ class ApiKey(object):
         if apikey.flag & ApiKey.FLAGS.DISABLED:
             return False
         elif not apikey.flag & ApiKey.FLAGS.FASTQUERY:
-            if datetime.datetime.now() - apikey.access <= datetime.timedelta(seconds=1):
+            if datetime.datetime.utcnow() - apikey.access <= datetime.timedelta(seconds=1):
                 return False
     
         apikey.counter += 1
-        apikey.access = datetime.datetime.now()
+        apikey.access = datetime.datetime.utcnow()
         session.commit()
         return apikey
     
@@ -228,7 +228,7 @@ class News(object):
         self.user = user
         self.title = title
         self.content = content
-        self.time = datetime.datetime.now()
+        self.time = datetime.datetime.utcnow()
         
         
 class Song(object):
@@ -248,7 +248,7 @@ class Song(object):
         return song
 
     def end_song(self, session):
-        self.end = datetime.datetime.today()
+        self.end = datetime.datetime.utcnow()
         #ohh gawd, i failed at desining the database
         #Title.checkTitle(session, self.title., title, self.end,self.end)
     
@@ -344,7 +344,7 @@ class Listener(object):
     @staticmethod
     def set_disconnected(session, relay, stream, client):
         listener = session.query(Listener).filter(and_(Listener.relay == relay, Listener.stream == stream, Listener.client == client, Listener.disconnect == None)).first()
-        listener.disconnect = datetime.datetime.today()
+        listener.disconnect = datetime.datetime.utcnow()
 
 
 class ShowListener(object):
@@ -361,10 +361,10 @@ class Stream(object):
         return "http://%s:%d%s" % (relay.hostname, relay.port, self.mountpoint)
     
     def add(self, session, relay):
-        session.query(Listener).filter(and_(Listener.relay == relay, Listener.stream == self, Listener.disconnect == None)).update({Listener.disconnect: datetime.datetime.today()})
+        session.query(Listener).filter(and_(Listener.relay == relay, Listener.stream == self, Listener.disconnect == None)).update({Listener.disconnect: datetime.datetime.utcnow()})
         
     def remove(self, session, relay):
-        session.query(Listener).filter(and_(Listener.relay == relay, Listener.stream == self, Listener.disconnect == None)).update({Listener.disconnect: datetime.datetime.today()})
+        session.query(Listener).filter(and_(Listener.relay == relay, Listener.stream == self, Listener.disconnect == None)).update({Listener.disconnect: datetime.datetime.utcnow()})
 
 
 class Relay(object):
@@ -395,6 +395,6 @@ class Playlist(object):
     
     @staticmethod
     def get_current_item(session):
-        all = session.query(Playlist).filter(between(datetime.datetime.today().time(), Playlist.begin, Playlist.end)).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Playlist.end, Playlist.begin)))).asc()).first()
+        all = session.query(Playlist).filter(between(datetime.datetime.utcnow().time(), Playlist.begin, Playlist.end)).order_by(func.sec_to_time(func.sum(func.time_to_sec(func.timediff(Playlist.end, Playlist.begin)))).asc()).first()
         return all
 

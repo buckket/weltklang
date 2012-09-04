@@ -14,6 +14,7 @@ Requirements:
 * passlib
 * py-bcrypt
 * babel
+* pytz
 
 * Some kind of database (tested with MySQL)
 * liquidsoap

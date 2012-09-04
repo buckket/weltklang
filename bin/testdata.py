@@ -33,7 +33,7 @@ if __name__ == '__main__':
         shows.append(show)
         
         show = rfk.Show('Testsendung #2', 'Hurf Durf')
-        show.end = datetime.datetime.now() + datetime.timedelta(hours=1)
+        show.end = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
         show.flags = rfk.Show.FLAGS.PLANNED
         shows.append(show)
         
@@ -51,7 +51,7 @@ if __name__ == '__main__':
         news.append(rfk.News(rfk.User.get_user(db.session, 'MrLoom').get_id(), 'Hallo Welt', 'Hallo Loom'))
         news.append(rfk.News(rfk.User.get_user(db.session, 'teddydestodes').get_id(), 'Ich', 'ausversehen'))
         for newz in news:
-            newz.time = datetime.datetime.now()
+            newz.time = datetime.datetime.utcnow()
             db.session.add(newz)
             print "[news] Added news from user %s" % newz.user
         db.session.commit()

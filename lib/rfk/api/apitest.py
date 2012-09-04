@@ -48,7 +48,7 @@ def kick_dj():
 @check_auth()
 def current_show():
     clauses = []
-    clauses.append(and_(rfk.Show.begin <= datetime.datetime.now(), or_(rfk.Show.end >= datetime.datetime.now(), rfk.Show.end == None)))
+    clauses.append(and_(rfk.Show.begin <= datetime.datetime.utcnow(), or_(rfk.Show.end >= datetime.datetime.utcnow(), rfk.Show.end == None)))
     result = db.session.query(rfk.Show).join(rfk.UserShow).join(rfk.User).filter(*clauses).order_by(rfk.Show.begin.desc(), rfk.Show.end.asc()).all()
     
     data = {'current_show': {'shows': {}}}
