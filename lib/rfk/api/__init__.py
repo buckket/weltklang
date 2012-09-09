@@ -8,7 +8,7 @@ api = Blueprint('api', __name__)
 
 
 def wrapper(data, ecode=0, emessage=None):
-    return {'pyrfk':{'version':'0.1','codename':'Affenkot'},'status':{'code':ecode,'message':emessage},'data':data}
+    return {'pyrfk': {'version': '0.1', 'codename': 'Weltklang'}, 'status': {'code': ecode, 'message': emessage}, 'data': data}
 
 def check_auth(f=None, required_permissions=None):
     if f is None:
@@ -48,6 +48,6 @@ from .icecast import *
 
 @api.route('/<path:path>')
 def page_not_found(path):
-    response = jsonify(wrapper(None, 404, "'%s' not found" % (path,)))
+    response = jsonify(wrapper(None, 404, "'%s' not found" % (path)))
     response.status_code = 404
     return response

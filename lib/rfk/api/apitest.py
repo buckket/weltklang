@@ -51,8 +51,14 @@ def current_show():
     clauses.append(and_(rfk.Show.begin <= datetime.datetime.utcnow(), or_(rfk.Show.end >= datetime.datetime.utcnow(), rfk.Show.end == None)))
     result = db.session.query(rfk.Show).join(rfk.UserShow).join(rfk.User).filter(*clauses).order_by(rfk.Show.begin.desc(), rfk.Show.end.asc()).all()
     
-    data = {'current_show': {'shows': {}}}
+    data = {'current_show': {}}
     if result:
+        
+        if len(result) >= 2:
+            data['current_show']['overlap'] = True
+        else:
+            data['current_show']['overlap'] = False
+            
         for show in result:
             
             show.begin = show.begin.isoformat()
@@ -62,20 +68,27 @@ def current_show():
             dj = []
             for usershow in show.user_shows:
                 dj.append({'name': usershow.user.name, 'id': usershow.user.user, 'status': usershow.user.status})
-                
+                                
             if (show.flags & rfk.Show.FLAGS.UNPLANNED and len(result) == 2) or len(result) == 1:
-                data['current_show']['show'] = show.show
+                data['current_show']['show'] = {
+                    'id': show.show,
+                    'name': show.name,
+                    'description': show.description,
+                    'flags': show.flags,
+                    'begin': show.begin,
+                    'end': show.end,
+                    'dj': dj
+                }
             if (show.flags & rfk.Show.FLAGS.PLANNED and len(result) == 2):
-                data['current_show']['planned'] = show.show
-                
-            data['current_show']['shows'][show.show] = {
-                'name': show.name,
-                'description': show.description,
-                'flags': show.flags,
-                'begin': show.begin,
-                'end': show.end,
-                'dj': dj
-            }
+                data['current_show']['planned_show'] = {
+                    'id': show.show,
+                    'name': show.name,
+                    'description': show.description,
+                    'flags': show.flags,
+                    'begin': show.begin,
+                    'end': show.end,
+                    'dj': dj
+                }
     else:
         data = {'current_show': None}
     return jsonify(wrapper(data))
