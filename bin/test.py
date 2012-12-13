@@ -4,56 +4,22 @@ Created on 04.05.2012
 @author: teddydestodes
 '''
 import rfk
+import rfk.database
+from rfk.database.base import User, Permission, UserPermission
 import os
-from sqlalchemy import *
-from sqlalchemy.orm import sessionmaker
-import postmarkup
 
 if __name__ == '__main__':
     current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    rfk.config.read(os.path.join(current_dir, 'etc', 'config.cfg'))
-
-    engine = create_engine("%s://%s:%s@%s/%s?charset=utf8" % (rfk.config.get('database', 'engine'),
-                                                              rfk.config.get('database', 'username'),
-                                                              rfk.config.get('database', 'password'),
-                                                              rfk.config.get('database', 'host'),
-                                                              #'192.168.2.101',
-                                                              rfk.config.get('database', 'database')), echo=True)
+    rfk.init(current_dir)
+    rfk.database.init_db("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
+                                                              rfk.CONFIG.get('database', 'username'),
+                                                              rfk.CONFIG.get('database', 'password'),
+                                                              rfk.CONFIG.get('database', 'host'),
+                                                              rfk.CONFIG.get('database', 'database')))
     
-    
-    rfk.Base.metadata.create_all(engine)
-    
-    markup = postmarkup.PostMarkup()
-    markup.default_tags()
-    print markup.render_to_html('[b]sldfklsdnf[/b]')
-    
-    """
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    
-    user = session.query(rfk.User).get(124)
-    shows = rfk.Show.getCurrentShows(session, user)
-    
-    currshow = None
-    print shows
-    for show in shows:
-        if currshow and show.end is None:
-            print show.show
-            show.end = datetime.today()
-            break
-        currshow = show
-    print currshow.show
-    """
-    
-    """show = session.query(rfk.Show).get(180)
-    
-    tags = 'penisrock pop post.rock schwarzmetall black.metal'
-    
-    
-    show.updateTags(session,tags)
-    """
-    """
-    user = session.query(rfk.User).filter(rfk.User.name == 'teddydestodes').first()
-    print rfk.Show.getCurrentShows(session, user)
-    session.commit()
-    """
+    rfk.database.session.add(User.add_user('teddydestodes', 'testo'))
+    rfk.database.session.commit()
+    user = User.query.first()
+    permission = Permission.add_permission('admin', 'Admin')
+    user.add_permission(permission=permission)
+    rfk.database.session.commit()

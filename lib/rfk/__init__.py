@@ -10,9 +10,6 @@ CONFIG = SafeConfigParser()
 
 
 class SET(Set):
-    """An OrderedFrozenSet-like object
-       Allows constant time 'index'ing
-       But doesn't allow you to remove elements"""
     def __init__(self, iterable = ()):
         self.num = count()
         self.dict = OrderedDict(izip(iterable, self.num))
@@ -39,9 +36,6 @@ class SET(Set):
                 return elem
 
 class ENUM(Set):
-    """An OrderedFrozenSet-like object
-       Allows constant time 'index'ing
-       But doesn't allow you to remove elements"""
     def __init__(self, iterable = ()):
         self.num = count()
         self.dict = OrderedDict(izip(iterable, self.num))
@@ -183,7 +177,8 @@ def init_db(engine, metadata):
                 'permissions': relationship(Permission,
                                      secondary=user_permissions),
                 'shows': relationship(Show,
-                                     secondary=user_shows)
+                                      secondary=user_shows,
+                                      backref='users.user')
                                     })
 
     mapper(UserShow, user_shows, properties={
