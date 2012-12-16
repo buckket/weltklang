@@ -1,9 +1,14 @@
 from sqlalchemy import *
 from sqlalchemy.orm import relationship, backref, exc
+from sqlalchemy.dialects.mysql import INTEGER as Integer 
+
+from datetime import datetime
 
 from rfk.database import Base
 from rfk import ENUM, SET
 import rfk.icecast
+import netaddr
+
 
 class Listener(Base):
     __tablename__ = 'listeners'
@@ -11,13 +16,41 @@ class Listener(Base):
     connect = Column(DateTime)
     disconnect = Column(DateTime)
     location = Column(String(10))
+    address = Column(Integer(unsigned=True))
+    client = Column(Integer(unsigned=True))
+    useragent = Column(String(255))
     stream_relay_id = Column("stream_relay",
                              Integer,
                              ForeignKey('stream_relays.stream_relay',
-                                                        onupdate="CASCADE",
-                                                        ondelete="RESTRICT"))
+                                        onupdate="CASCADE",
+                                        ondelete="RESTRICT"))
     stream_relay = relationship("StreamRelay")
-
+    show_id = Column("show",Integer,
+                             ForeignKey('shows.show',
+                                        onupdate="CASCADE",
+                                        ondelete="RESTRICT"))
+    show = relationship("Show")
+    @staticmethod
+    def get_listener(stream_relay, client, disconnect=None):
+        print stream_relay, client
+        listener = Listener.query.filter(Listener.disconnect == disconnect,
+                                         Listener.stream_relay == stream_relay,
+                                         Listener.client == client).one()
+        return listener
+        
+    @staticmethod
+    def create(address, client, useragent, stream_relay):
+        listener = Listener()
+        listener.address = int(netaddr.IPAddress(address))
+        listener.client = client
+        listener.useragent = useragent
+        listener.connect = datetime.utcnow()
+        listener.stream_relay = stream_relay
+        return listener
+        
+    def set_disconnected(self):
+        self.disconnect = datetime.utcnow()
+        
 class Stream(Base):
     __tablename__ = 'streams'
     stream = Column(Integer, primary_key=True, autoincrement=True)
@@ -136,3 +169,10 @@ class StreamRelay(Base):
         assert relay or stream
         self.relay = relay
         self.stream = stream
+        
+    def set_offline(self):
+        self.status = StreamRelay.STATUS.OFFLINE
+        connected_listeners = Listener.query.filter(Listener.stream_relay == self,
+                                                    Listener.disconnect == None).all()
+        for listener in connected_listeners:
+            listener.disconnect = datetime.utcnow()
