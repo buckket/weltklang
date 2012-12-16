@@ -1,5 +1,4 @@
 import rfk
-from rfk.site import db
 from functools import wraps, partial
 from flask import Blueprint, g, request, jsonify
 

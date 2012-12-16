@@ -33,9 +33,18 @@ class IcecastConfig(object):
         self.logarchive = False
         self.logsize = 10000
         
-        self.basedir = '/usr/local/share/icecast2'
-        self.webroot = '/usr/local/share/icecast2/web'
-        self.adminroot = '/usr/local/share/icecast2/admin'
+        self.basedir = '/usr/local/share/icecast'
+        self.webroot = '/usr/local/share/icecast/web'
+        self.adminroot = '/usr/local/share/icecast/admin'
+        
+        self.master = None
+        self.master_port = 8000
+        self.update_interval = 120
+        self.master_password = 'hackme'
+        self.master_user = 'hackme'
+        
+        self.relay_user = None
+        self.relay_password = 'hackme'
         
     def get_xml(self):
         doc = Document()
@@ -50,6 +59,10 @@ class IcecastConfig(object):
         conf.appendChild(self._put_security(doc))
         conf.appendChild(self._put_paths(doc))
         conf.appendChild(self._put_logging(doc))
+        if self.master:
+            conf.appendChild(self._put_master(doc))
+        for mount in self.mounts:
+            conf.appendChild(self._put_mount(doc, mount))
         return doc.toprettyxml('    ')
     
     def _put_limits(self, doc):
@@ -83,6 +96,13 @@ class IcecastConfig(object):
         admin_user.appendChild(doc.createTextNode(self.admin))
         admin_pass = doc.createElement('admin-password')
         admin_pass.appendChild(doc.createTextNode(self.password))
+        if self.relay_user:
+            relay_user = doc.createElement('relay-user')
+            relay_user.appendChild(doc.createTextNode(self.relay_user))
+            relay_password = doc.createElement('relay-password')
+            relay_password.appendChild(doc.createTextNode(self.relay_password))
+            auth.appendChild(relay_user)
+            auth.appendChild(relay_password)
         auth.appendChild(admin_user)
         auth.appendChild(admin_pass)
         return auth
@@ -127,6 +147,7 @@ class IcecastConfig(object):
         alias.setAttribute('source', '/')
         alias.setAttribute('dest', '/status.xsl')
         paths.appendChild(basedir)
+        paths.appendChild(logdir)
         paths.appendChild(webroot)
         paths.appendChild(adminroot)
         paths.appendChild(alias)
@@ -150,3 +171,66 @@ class IcecastConfig(object):
         logging.appendChild(logsize)
         logging.appendChild(logarchive)
         return logging
+    
+    def _put_mount(self, doc, mount):
+        mnt = doc.createElement('mount')
+        mount_name = doc.createElement('mount-name')
+        mount_name.appendChild(doc.createTextNode(mount.mount))
+        username = doc.createElement('username')
+        username.appendChild(doc.createTextNode(mount.username))
+        password = doc.createElement('password')
+        password.appendChild(doc.createTextNode(mount.password))
+        mnt.appendChild(mount_name)
+        #mnt.appendChild(username)
+        #mnt.appendChild(password)
+        auth = doc.createElement('authentication')
+        auth.setAttribute('type','url')
+        auth.appendChild(self._gen_auth_option(doc, 'stream_auth', mount.api_url+'auth'))
+        auth.appendChild(self._gen_auth_option(doc, 'mount_add', mount.api_url+'add'))
+        auth.appendChild(self._gen_auth_option(doc, 'mount_remove', mount.api_url+'remove'))
+        auth.appendChild(self._gen_auth_option(doc, 'listener_add', mount.api_url+'listeneradd'))
+        auth.appendChild(self._gen_auth_option(doc, 'listener_remove', mount.api_url+'listenerremove'))
+        auth.appendChild(self._gen_auth_option(doc, 'username', mount.username))
+        auth.appendChild(self._gen_auth_option(doc, 'password', mount.password))
+        auth.appendChild(self._gen_auth_option(doc, 'auth_header', 'icecast-auth-user: 1'))
+        mnt.appendChild(auth)
+        return mnt
+    
+    def _gen_auth_option(self, doc, name, value):
+        option = doc.createElement('option')
+        option.setAttribute('name', name)
+        option.setAttribute('value', value)
+        return option
+    
+    def _put_master(self,doc):
+        master = doc.createElement('master')
+        server = doc.createElement('server')
+        server.appendChild(doc.createTextNode(self.master))
+        port = doc.createElement('port')
+        port.appendChild(doc.createTextNode(str(self.master_port)))
+        username = doc.createElement('username')
+        username.appendChild(doc.createTextNode(self.master_user))
+        password = doc.createElement('password')
+        password.appendChild(doc.createTextNode(self.master_password))
+        interval = doc.createElement('interval')
+        interval.appendChild(doc.createTextNode(str(self.update_interval)))
+        master.appendChild(server)
+        master.appendChild(port)
+        master.appendChild(username)
+        master.appendChild(password)
+        master.appendChild(interval)
+        return master
+    
+    
+class Mount(object):
+    
+    def __init__(self):
+        self.mount = ''
+        
+        self.hidden = False
+        
+        self.username = 'hackme'
+        self.password = 'hackme'
+        
+        self.api_url = 'http://localhost:8000/backend/icecast/'
+        

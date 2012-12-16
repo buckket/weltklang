@@ -4,7 +4,6 @@ Created on 09.05.2012
 @author: teddydestodes
 '''
 import rfk
-from rfk.site import db
 from rfk.api import api
 from flask import request, make_response
 from datetime import datetime

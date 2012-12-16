@@ -19,18 +19,21 @@ class Anonymous(AnonymousUser):
     def __init__(self):
         AnonymousUser.__init__(self)
         self.locale = 'de'
+        self.timezone = 'Europe/Berlin'
     
 
 class User(object):
     STATUS = ENUM(['NONE','STREAMING'])
     
     locale = 'de'
+    timezone = 'Europe/Berlin'
     def __init__(self, name, password, streampassword):
         self.name = name
         self.password = password
         self.streampassword = streampassword
         self.authenticated = False
         self.locale = 'de'
+        self.timezone = 'Europe/Berlin'
 
     def get_id(self):
         return unicode(self.user)

@@ -18,15 +18,11 @@ import json
 import os
 import sys
 import base64
-from sqlalchemy import *
-from sqlalchemy.orm import sessionmaker
 from datetime import datetime
+from rfk.database import init_db, session
 
 
 username_delimiter = '|'
-
-current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-rfk.config.read(os.path.join(current_dir, 'etc', 'config.cfg'))
 
 def doAuth(username, password, session):
     if username == 'source':
@@ -107,9 +103,9 @@ def doDisconnect(userid, session):
     else:
         print "no user found"
 
-def doPlaylist(session):
-    item = rfk.Playlist.getCurrentItem(session)
-    print os.path.join(current_dir, 'var', 'music', item.file)
+def doPlaylist():
+    #item = rfk.Playlist.getCurrentItem(session)
+    print os.path.join(current_dir, 'var', 'music', 'loop.mp3')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyRfK Interface for liquidsoap',
@@ -130,24 +126,25 @@ if __name__ == '__main__':
     playlistparser = subparsers.add_parser('playlist', help='a help')
     
     args = parser.parse_args()
-    engine = create_engine("%s://%s:%s@%s/%s?charset=utf8" % (rfk.config.get('database', 'engine'),
-                                                              rfk.config.get('database', 'username'),
-                                                              rfk.config.get('database', 'password'),
-                                                              rfk.config.get('database', 'host'),
-                                                              rfk.config.get('database', 'database')), echo=False)
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    
+    current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    rfk.init(current_dir)
+    init_db("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
+                                                              rfk.CONFIG.get('database', 'username'),
+                                                              rfk.CONFIG.get('database', 'password'),
+                                                              rfk.CONFIG.get('database', 'host'),
+                                                              rfk.CONFIG.get('database', 'database')))
     if args.command == 'auth':
-        doAuth(args.username, args.password, session)
+        doAuth(args.username, args.password)
     elif args.command == 'metadata':
         data = json.loads(args.data);
-        doMetaData(data, session)
+        doMetaData(data)
     elif args.command == 'connect':
         data = json.loads(args.data);
-        doConnect(data, session)
+        doConnect(data)
     elif args.command == 'disconnect':
         data = json.loads(args.data);
-        doDisconnect(data, session)
+        doDisconnect(data)
     elif args.command == 'playlist':
-        doPlaylist(session)
-    session.close()
+        doPlaylist()
+    #session.remove()

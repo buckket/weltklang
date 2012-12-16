@@ -1,63 +1,55 @@
-<header>
-	<span id="stationname">RFK</span>
-</header>
-<div id="menu_user">
-{% if current_user.name %}
-{{ current_user.name }}
-<a href="/logout"><span class="ui-icon ui-icon-arrowreturn-1-e" style="display:inline-block"></span></a>
-{% else %}
-<a id="login-link" onclick="login();">{% trans %}Login{% endtrans %}</a>
-{% endif %}
-</div>
-<div id="menu">
-	<ul id="navlist">
-		<li>
-			<a href="#">{% trans %}News{% endtrans %}</a>
-		</li>
-		<li>
-			<a href="#">{% trans %}Shows{% endtrans %}</a>
-		</li>
-		<li>
-			<a href="#">{% trans %}Listen{% endtrans %}</a>
-		</li>
-		<li>
-			<a href="#">{% trans %}Donations{% endtrans %}</a>
-		</li>
-		<li>
-			<a href="#">{% trans %}Help{% endtrans %}</a>
-		</li>
-	</ul>
-</div>
-
-{% if not current_user.name %}
-<script type="text/javascript">
-function login() {
-    var notice = $.pnotify({
-        text: $('#login-form').html(),
-        icon: false,
-        width: 'auto',
-        hide: false,
-        sticker: false,
-        insert_brs: false,
-        history: false,
-        before_open: function(pnotify) {
-        	$('#login-link').hide();
-        },
-        before_close: function(pnotify) {
-        	$('#login-link').show();
-        }
-        });
-    return false;
-}
-</script>
-<div id="login-form">
-<form method="post" action="/login">
-<table>
-<tr><td>{% trans %}Username{% endtrans %}</td><td><input type="text" name="username"></td></tr>
-<tr><td>{% trans %}Password{% endtrans %}</td><td><input type="password" name="password"></td></tr>
-<tr><td><nobr>{% trans %}Remember me{% endtrans %}</nobr></td><td><input type="checkbox" name="remember"></td></tr>
-</table>
-<input type="submit" value="Login">
-</form>
-</div>
-{% endif %}
+<div class="navbar navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="#">RfK</a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav">
+                            {% for name, item in request.menu.items() %}
+                                {% if item.submenu %}
+                                <li class="dropdown">
+	                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ item.name }} <b class="caret"></b></a>
+	                                <ul class="dropdown-menu">
+	                                {% for sitem in item.submenu %}
+	                                    <li><a href="{{sitem.url}}">{{ sitem.name }}</a></li>
+	                                {% endfor %}
+	                                </ul>
+                                </li>
+                                {% else %}
+                                    <li><a href="{{ item.url }}">{{ item.name }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                            <li class="active"><a href="#">Home</a></li>
+                            <li><a href="#about">About</a></li>
+                            <li><a href="#contact">Contact</a></li>
+                            
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="#">Action</a></li>
+                                    <li><a href="#">Another action</a></li>
+                                    <li><a href="#">Something else here</a></li>
+                                    <li class="divider"></li>
+                                    <li class="nav-header">Nav header</li>
+                                    <li><a href="#">Separated link</a></li>
+                                    <li><a href="#">One more separated link</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                        {% if current_user.name %}
+                        <span class="pull-right">{{ current_user }}</span>
+                        {% else %}
+                        <form class="navbar-form pull-right" method="post" action="/login">
+                            <input class="span2" name="username" type="text" placeholder="Username">
+                            <input class="span2" name="password" type="password" placeholder="Password">
+                            <button type="submit" class="btn">Sign in</button>
+                        </form>
+                        {% endif %}
+                    </div><!--/.nav-collapse -->
+                </div>
+            </div>
+        </div>

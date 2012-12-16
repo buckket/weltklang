@@ -2,13 +2,15 @@ from sqlalchemy import *
 from sqlalchemy.orm import relationship, backref, exc
 
 from rfk.database import Base
+from rfk import ENUM, SET
+import rfk.icecast
 
 class Listener(Base):
     __tablename__ = 'listeners'
     listener = Column(Integer, primary_key=True, autoincrement=True)
     connect = Column(DateTime)
     disconnect = Column(DateTime)
-    location = Column(String)
+    location = Column(String(10))
     stream_relay_id = Column("stream_relay",
                              Integer,
                              ForeignKey('stream_relays.stream_relay',
@@ -19,15 +21,118 @@ class Listener(Base):
 class Stream(Base):
     __tablename__ = 'streams'
     stream = Column(Integer, primary_key=True, autoincrement=True)
+    mount = Column(String(25))
+    code = Column(String(25))
+    name = Column(String(25))
+    type = Column(Integer)
+    quality = Column(Integer)
+    TYPES = ENUM(['UNKNOWN', 'MP3', 'AACP', 'OGG', 'OPUS'])
     
+    @staticmethod
+    def get_stream(id=None, mount=None):
+        assert id or mount
+        if id:
+            return Stream.query.get(id)
+        else:
+            return Stream.query.filter(Stream.mount == mount).one()
+        
+    def add_relay(self, relay):
+        try:
+            StreamRelay.query.filter(StreamRelay.stream == self,
+                                     StreamRelay.relay == relay).one()
+            return False
+        except exc.NoResultFound:
+            self.relays.append(StreamRelay(relay=relay))
+            return True
     
 class Relay(Base):
     __tablename__ = 'relays'
     relay = Column(Integer, primary_key=True, autoincrement=True)
-    address = Column(String)
+    address = Column(String(15))
     port = Column(Integer)
     flag = Column(Integer)
+    bandwith = Column(Integer)
+    usage = Column(Integer)
+    admin_username = Column(String(50))
+    admin_password = Column(String(50))
+    auth_username = Column(String(50))
+    auth_password = Column(String(50))
+    relay_username = Column(String(50))
+    relay_password = Column(String(50)) 
+    type = Column(Integer)
+    status = Column(Integer)
+    
+    STATUS = ENUM(['UNKNOWN', 'DISABLED', 'OFFLINE', 'ONLINE'])
+    TYPE = ENUM(['MASTER', 'RELAY'])
+    
+    @staticmethod
+    def get_master():
+        return Relay.query.filter(Relay.type == Relay.TYPE.MASTER).one()
+    
+    @staticmethod
+    def get_relay(id=None, address=None, port=None):
+        assert id or (address and port)
+        if id:
+            return Relay.query.get(id)
+        else:
+            return Relay.query.filter(Relay.address == address,
+                                      Relay.port == port).one()
+        
+    def get_icecast_config(self):
+        conf = rfk.icecast.IcecastConfig()
+        conf.address = self.address
+        conf.port = self.port
+        conf.admin = self.admin_username
+        conf.password = self.admin_password
+        conf.hostname = self.address
+        for stream in self.streams:
+            mount = rfk.icecast.Mount()
+            mount.api_url = 'http://192.168.122.1:5000/backend/icecast/'
+            mount.mount = stream.stream.mount
+            mount.username = self.auth_username
+            mount.password = self.auth_password
+            conf.mounts.append(mount)
+        if self.type == Relay.TYPE.RELAY:
+            master = Relay.get_master()
+            conf.master = master.address
+            conf.master_user = master.relay_username
+            conf.master_password = master.relay_password
+            conf.master_port = master.port
+        elif self.type == Relay.TYPE.MASTER:
+            conf.relay_user = self.relay_username
+            conf.relay_password = self.relay_password
+        return conf.get_xml()
+        
+    def add_stream(self, stream):
+        try:
+            StreamRelay.query.filter(StreamRelay.relay == self,
+                                     StreamRelay.stream == stream).one()
+            return False
+        except exc.NoResultFound:
+            self.streams.append(StreamRelay(stream=stream))
+            return True
+    
+    def get_stream_relay(self, stream):
+        return StreamRelay.query.filter(StreamRelay.relay == self,
+                                        StreamRelay.stream == stream).one()
     
 class StreamRelay(Base):
     __tablename__ = 'stream_relays'
     stream_relay = Column(Integer, primary_key=True, autoincrement=True)
+    stream_id = Column("stream", Integer, ForeignKey('streams.stream',
+                                                 onupdate="CASCADE",
+                                                 ondelete="RESTRICT"))
+    stream = relationship("Stream", backref=backref('relays'))
+    relay_id = Column("relay", Integer,
+                           ForeignKey('relays.relay',
+                                      onupdate="CASCADE",
+                                      ondelete="RESTRICT"))
+    relay = relationship("Relay", backref=backref('streams'))
+    status = Column(Integer)
+    
+    STATUS = ENUM(['UNKNOWN', 'DISABLED', 'OFFLINE', 'ONLINE'])
+    
+    def __init__(self, relay=None, stream=None):
+        assert relay or stream
+        self.relay = relay
+        self.stream = stream

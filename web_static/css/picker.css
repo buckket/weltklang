@@ -1,0 +1,50 @@
+#ltz-picker, #ltz-picker * {
+    margin: 0;
+    padding: 0; 
+    outline: none;
+}
+
+#ltz-picker {
+    color: #444;
+    line-height: normal;
+    position: fixed;
+    bottom: 0px;
+    right: 0px; 
+    z-index: 100;
+    border-left: 1px solid #444;
+    border-top: 1px solid #444;
+}
+
+#ltz-picker ul {
+    list-style: none;
+}
+#ltz-picker>ul>li {
+    display: inline;
+    
+    margin-right: 2px;
+    margin-left: 3px;
+}
+#ltz-picker>ul>li a {
+	cursor: pointer;
+}
+
+#ltz-picker>ul>li>ul>li>ul {
+    position:absolute;
+}
+
+#ltz-picker .ltz-flag {
+	margin-right:2px;
+}
+
+#ltz-tzpicker {
+	position:fixed;
+}
+#ltz-tzpicker li{
+    background-color: #fefefe;
+    border: 1px solid #ddd;
+}
+
+.ltz-scroll-up {
+	position: relative;
+	top:0px;
+}

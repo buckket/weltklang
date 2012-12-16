@@ -1,8 +1,11 @@
 {% extends "base.html" %}
+
 {% block content %}<h1>{% trans %}Login{% endtrans %}</h1>
 <div class="panel">
 <form method="post">
+
 <Table>
+
 <tr><td>{% trans %}Username{% endtrans %}</td><td><input name="username" type="text"/></td></tr>
 <tr><td>{% trans %}Password{% endtrans %}</td><td><input name="password" type="password" /></td></tr>
 <tr><td>&nbsp;</td><td><input type="submit" value="{% trans %}Login{% endtrans %}"></td></tr>

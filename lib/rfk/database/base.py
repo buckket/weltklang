@@ -1,10 +1,18 @@
 from sqlalchemy import *
 from sqlalchemy.orm import relationship, backref, sessionmaker, scoped_session, exc
 from passlib.hash import bcrypt
+from flask.ext.login import AnonymousUser
 import hashlib
 import re
 
 from rfk.database import Base, session
+
+class Anonymous(AnonymousUser):
+    
+    def __init__(self):
+        AnonymousUser.__init__(self)
+        self.locale = 'de'
+        self.timezone = 'Europe/Berlin'
 
 class User(Base):
     __tablename__ = 'users'
@@ -25,6 +33,17 @@ class User(Base):
     def is_authenticated(self):
         return True
     
+    @staticmethod
+    def get_user(id=None, username=None):
+        assert id or username
+        try:
+            if username is None:
+                return User.query.filter(User.user == id).one()
+            else:
+                return User.query.filter(User.username == username).one()
+        except exc.NoResultFound:
+            return None
+                
     @staticmethod
     def check_username(username):
         if re.match('^[0-9a-zA-Z_-]{3,}$', username) == None:
@@ -77,6 +96,7 @@ class User(Base):
             return True
         except exc.NoResultFound:
             return False
+
 
 class Permission(Base):
     __tablename__ = 'permissions'

@@ -1,5 +1,4 @@
 import rfk
-from rfk.site import db
 from rfk.api import api, check_auth, wrapper
 from flask import jsonify, request, g
 

@@ -3,7 +3,8 @@ import telnetlib
 import rfk
 import os
 from string import Template
-from sqlalchemy import *
+from rfk.database.streaming import Relay, Stream
+
 
 
 class LiquidInterface:
@@ -40,14 +41,14 @@ class LiquidInterface:
         ret = self.conn.read_until('END', self.timeout)
         return ret
 
-def gen_script(session, dir):
+def gen_script(dir):
     """generates liquidsoap script from templates
     """
     bin = os.path.join(dir,'bin')
     interface = os.path.join(bin, 'liquidsoap-handler.py')
     logfile = os.path.join(dir, 'var', 'log', 'liquidsoap.log')
-    address = rfk.config.get('liquidsoap', 'address')
-    port = rfk.config.get('liquidsoap', 'port')
+    address = rfk.CONFIG.get('liquidsoap', 'address')
+    port = rfk.CONFIG.get('liquidsoap', 'port')
     
     
     template_string = open(os.path.join(dir, 'var', 'liquidsoap', 'main.liq'),
@@ -59,7 +60,11 @@ def gen_script(session, dir):
                         logfile=logfile,
                         lastFM='',
                         script=interface)
-    config += make_output(session, dir)
+    if isinstance(config, str):
+        config = config.decode('utf-8')
+    if not isinstance(config, unicode):
+        config = unicode(config)
+    config += make_output(dir)
     return config
 
 
@@ -67,32 +72,35 @@ def make_lastfm():
     script = ''
     return script
 
-def make_output(session, dir):
+def make_output(dir):
     script = u''
-    streams = session.query(rfk.Stream).all()
+    streams = Stream.query.all()
     for stream in streams:
-        if stream.type == rfk.Stream.TYPE_OGG:
+        if stream.type == Stream.TYPES.OGG:
             file = 'output_vorbis.liq'
-        elif stream.type == rfk.Stream.TYPE_AACP:
+        elif stream.type == Stream.TYPES.AACP:
             file = 'output_aacp.liq'
-        elif stream.type == rfk.Stream.TYPE_MP3:
+        elif stream.type == Stream.TYPES.MP3:
             file = 'output_mp3.liq'
-        elif stream.type == rfk.Stream.TYPE_OPUS:
+        elif stream.type == Stream.TYPES.OPUS:
             file = 'output_opus.liq'
         else:
             continue
         template_string = open(os.path.join(dir, 'var', 'liquidsoap', file),
                            'r').read()
         template = Template(template_string)
-        script += template.substitute(name=stream.name,
-                                      description=stream.description,
+        master = Relay.get_master()
+        script += template.substitute(name=stream.code,
+                                      description=stream.name,
                                       quality=stream.quality,
-                                      host=rfk.config.get('icecast',
-                                                          'internal-address'),
-                                      port=rfk.config.get('icecast',
-                                                          'port'),
-                                      username=stream.username,
-                                      password=stream.password,
-                                      mount=stream.mountpoint,
-                                      url=rfk.config.get('site', 'url'))
+                                      host=master.address,
+                                      port=master.port,
+                                      username=master.auth_username,
+                                      password=master.auth_password,
+                                      mount=stream.mount,
+                                      url=rfk.CONFIG.get('site', 'url'))
+    if isinstance(streams, str):
+        streams = streams.decode('utf-8')
+    if not isinstance(streams, unicode):
+        streams = unicode(streams)
     return script
