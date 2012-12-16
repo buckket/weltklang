@@ -6,7 +6,8 @@ Created on 04.05.2012
 import rfk
 import rfk.database
 from rfk.database.base import User, Permission, UserPermission
-from rfk.database.streaming import Stream, Relay, StreamRelay
+from rfk.database.streaming import Stream, Relay, StreamRelay, Listener
+from rfk.database.show import Show, Tag
 import os
 
 if __name__ == '__main__':
@@ -17,12 +18,23 @@ if __name__ == '__main__':
                                                               rfk.CONFIG.get('database', 'password'),
                                                               rfk.CONFIG.get('database', 'host'),
                                                               rfk.CONFIG.get('database', 'database')))
-    
+    user = User.add_user('teddydestodes', 'lolololo')
+    rfk.database.session.add(user)
+    permission = Permission.add_permission('admin', 'ADMIN')
+    rfk.database.session.add(permission)
+    user.add_permission(permission=permission)
+    show = Show()
+    show.name = 'testo'
+    show.description = 'testo'
+    rfk.database.session.add(show)
+    rfk.database.session.commit()
+    show.add_tags(Tag.parse_tags('lol homo'))
     stream = Stream()
     stream.mount = '/radio.ogg'
     stream.code = 'ogg'
     stream.type = Stream.TYPES.OGG
     stream.quality = 3
+    
     #rfk.database.session.add(stream)
     #rfk.database.session.commit()
     relay = Relay()
@@ -38,7 +50,9 @@ if __name__ == '__main__':
     #relay.relay_username = 'relay'
     #rfk.database.session.add(relay)
     #rfk.database.session.commit()
+    import netaddr
+    
     relay = Relay.get_relay(address=relay.address, port=relay.port)
     relay.add_stream(Stream.query.first())
-    print relay.get_icecast_config()
+    #print relay.get_icecast_config()
     rfk.database.session.commit()
