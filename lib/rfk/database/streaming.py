@@ -1,6 +1,6 @@
 from sqlalchemy import *
 from sqlalchemy.orm import relationship, backref, exc
-from sqlalchemy.dialects.mysql import INTEGER as Integer 
+from sqlalchemy.dialects.mysql import INTEGER as Integer
 
 from datetime import datetime
 
@@ -12,7 +12,7 @@ import netaddr
 
 class Listener(Base):
     __tablename__ = 'listeners'
-    listener = Column(Integer, primary_key=True, autoincrement=True)
+    listener = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     connect = Column(DateTime)
     disconnect = Column(DateTime)
     location = Column(String(10))
@@ -53,7 +53,7 @@ class Listener(Base):
         
 class Stream(Base):
     __tablename__ = 'streams'
-    stream = Column(Integer, primary_key=True, autoincrement=True)
+    stream = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     mount = Column(String(25))
     code = Column(String(25))
     name = Column(String(25))
@@ -80,7 +80,7 @@ class Stream(Base):
     
 class Relay(Base):
     __tablename__ = 'relays'
-    relay = Column(Integer, primary_key=True, autoincrement=True)
+    relay = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     address = Column(String(15))
     port = Column(Integer)
     flag = Column(Integer)
@@ -151,7 +151,7 @@ class Relay(Base):
     
 class StreamRelay(Base):
     __tablename__ = 'stream_relays'
-    stream_relay = Column(Integer, primary_key=True, autoincrement=True)
+    stream_relay = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     stream_id = Column("stream", Integer, ForeignKey('streams.stream',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))

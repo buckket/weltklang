@@ -1,13 +1,15 @@
 from sqlalchemy import *
 from sqlalchemy.orm import relationship, backref, exc
 from sqlalchemy.sql.expression import between
+from sqlalchemy.dialects.mysql import INTEGER as Integer 
+
 from datetime import datetime
 from rfk.database import Base
 from rfk import ENUM, SET
 
 class Show(Base):
     __tablename__ = 'shows'
-    show = Column(Integer, primary_key=True, autoincrement=True)
+    show = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     series_id = Column("series", Integer, ForeignKey('series.series',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))
@@ -46,7 +48,7 @@ class Show(Base):
 
 class UserShow(Base):
     __tablename__ = 'user_shows'
-    userShow = Column(Integer, primary_key=True, autoincrement=True)
+    userShow = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     user_id = Column("user", Integer, ForeignKey('users.user',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))
@@ -67,7 +69,7 @@ class UserShow(Base):
     
 class Tag(Base):
     __tablename__ = 'tags'
-    tag = Column(Integer, primary_key=True, autoincrement=True)
+    tag = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     name = Column(String(25))
     description = Column(Text)
     
@@ -87,7 +89,7 @@ class Tag(Base):
 
 class ShowTag(Base):
     __tablename__ = 'show_tags'
-    show_tag = Column(Integer, primary_key=True, autoincrement=True)
+    show_tag = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     show_id = Column("show", Integer,
                            ForeignKey('shows.show',
                                       onupdate="CASCADE",
@@ -104,14 +106,14 @@ class ShowTag(Base):
     
 class Role(Base):
     __tablename__ = 'roles'
-    role = Column(Integer, primary_key=True, autoincrement=True)
+    role = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     name = Column(String(50))
     
     
 class Series(Base):
     __tablename__ = 'series'
     
-    series = Column(Integer, primary_key=True, autoincrement=True)
+    series = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     user_id = Column("user", Integer, ForeignKey('users.user',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))

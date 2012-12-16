@@ -1,5 +1,7 @@
 from sqlalchemy import *
 from sqlalchemy.orm import relationship, backref, sessionmaker, scoped_session, exc
+from sqlalchemy.dialects.mysql import INTEGER as Integer 
+
 from passlib.hash import bcrypt
 from flask.ext.login import AnonymousUser
 import hashlib
@@ -16,7 +18,7 @@ class Anonymous(AnonymousUser):
 
 class User(Base):
     __tablename__ = 'users'
-    user = Column(Integer, primary_key=True, autoincrement=True)
+    user = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     username = Column(String(50), unique=True)
     password = Column(String(64))
     mail = Column(String(255))
@@ -100,7 +102,7 @@ class User(Base):
 
 class Permission(Base):
     __tablename__ = 'permissions'
-    permission = Column(Integer, primary_key=True, autoincrement=True)
+    permission = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     code = Column(String(25), unique=True)
     name = Column(String(50))
 
@@ -117,7 +119,7 @@ class Permission(Base):
 
 class UserPermission(Base):
     __tablename__ = 'user_permissions'
-    userPermission = Column(Integer, primary_key=True, autoincrement=True)
+    userPermission = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     user_id = Column("user", Integer, ForeignKey('users.user',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))
@@ -134,7 +136,7 @@ class UserPermission(Base):
     
 class Ban(Base):
     __tablename__ = 'bans'
-    ban = Column(Integer, primary_key=True, autoincrement=True)
+    ban = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     user_id = Column("user", Integer, ForeignKey('users.user',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))
@@ -144,7 +146,7 @@ class Ban(Base):
     
 class News(Base):
     __tablename__ = 'news'
-    news = Column(Integer, primary_key=True, autoincrement=True)
+    news = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     user_id = Column("user", Integer, ForeignKey('users.user',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))
