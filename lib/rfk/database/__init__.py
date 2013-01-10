@@ -17,6 +17,7 @@ def init_db(db_uri):
     import base
     import show
     import streaming
+    import track
     Base.metadata.create_all(bind=engine)
     Base.query = session.query_property()
     

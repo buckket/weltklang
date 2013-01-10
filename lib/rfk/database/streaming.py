@@ -11,6 +11,7 @@ import netaddr
 
 
 class Listener(Base):
+    """database representation of a Listener"""
     __tablename__ = 'listeners'
     listener = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     connect = Column(DateTime)
@@ -20,18 +21,19 @@ class Listener(Base):
     client = Column(Integer(unsigned=True))
     useragent = Column(String(255))
     stream_relay_id = Column("stream_relay",
-                             Integer,
+                             Integer(unsigned=True),
                              ForeignKey('stream_relays.stream_relay',
                                         onupdate="CASCADE",
                                         ondelete="RESTRICT"))
     stream_relay = relationship("StreamRelay")
-    show_id = Column("show",Integer,
+    show_id = Column("show",Integer(unsigned=True),
                              ForeignKey('shows.show',
                                         onupdate="CASCADE",
                                         ondelete="RESTRICT"))
     show = relationship("Show")
     @staticmethod
     def get_listener(stream_relay, client, disconnect=None):
+        """returns a listener"""
         print stream_relay, client
         listener = Listener.query.filter(Listener.disconnect == disconnect,
                                          Listener.stream_relay == stream_relay,
@@ -40,6 +42,7 @@ class Listener(Base):
         
     @staticmethod
     def create(address, client, useragent, stream_relay):
+        """adds a new listener to the database"""
         listener = Listener()
         listener.address = int(netaddr.IPAddress(address))
         listener.client = client
@@ -49,20 +52,23 @@ class Listener(Base):
         return listener
         
     def set_disconnected(self):
+        """updates the listener to disconnected state"""
         self.disconnect = datetime.utcnow()
         
 class Stream(Base):
+    """database representation of an outputStream"""
     __tablename__ = 'streams'
     stream = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     mount = Column(String(25))
     code = Column(String(25))
     name = Column(String(25))
-    type = Column(Integer)
+    type = Column(Integer(unsigned=True))
     quality = Column(Integer)
     TYPES = ENUM(['UNKNOWN', 'MP3', 'AACP', 'OGG', 'OPUS'])
     
     @staticmethod
     def get_stream(id=None, mount=None):
+        """returns a Stream by id or mountpoint"""
         assert id or mount
         if id:
             return Stream.query.get(id)
@@ -70,6 +76,7 @@ class Stream(Base):
             return Stream.query.filter(Stream.mount == mount).one()
         
     def add_relay(self, relay):
+        """adds a Relay to this Stream"""
         try:
             StreamRelay.query.filter(StreamRelay.stream == self,
                                      StreamRelay.relay == relay).one()
@@ -79,31 +86,34 @@ class Stream(Base):
             return True
     
 class Relay(Base):
+    """database representation of a RelayServer"""
     __tablename__ = 'relays'
     relay = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     address = Column(String(15))
-    port = Column(Integer)
-    flag = Column(Integer)
-    bandwith = Column(Integer)
-    usage = Column(Integer)
+    port = Column(Integer(unsigned=True))
+    flag = Column(Integer(unsigned=True))
+    bandwith = Column(Integer(unsigned=True))
+    usage = Column(Integer(unsigned=True))
     admin_username = Column(String(50))
     admin_password = Column(String(50))
     auth_username = Column(String(50))
     auth_password = Column(String(50))
     relay_username = Column(String(50))
     relay_password = Column(String(50)) 
-    type = Column(Integer)
-    status = Column(Integer)
+    type = Column(Integer(unsigned=True))
+    status = Column(Integer(unsigned=True))
     
     STATUS = ENUM(['UNKNOWN', 'DISABLED', 'OFFLINE', 'ONLINE'])
     TYPE = ENUM(['MASTER', 'RELAY'])
     
     @staticmethod
     def get_master():
+        """returns the master server"""
         return Relay.query.filter(Relay.type == Relay.TYPE.MASTER).one()
     
     @staticmethod
     def get_relay(id=None, address=None, port=None):
+        """returns a Relay either by id or by address and port"""
         assert id or (address and port)
         if id:
             return Relay.query.get(id)
@@ -112,6 +122,7 @@ class Relay(Base):
                                       Relay.port == port).one()
         
     def get_icecast_config(self):
+        """returns the configuration XML for this Relay"""
         conf = rfk.icecast.IcecastConfig()
         conf.address = self.address
         conf.port = self.port
@@ -137,6 +148,7 @@ class Relay(Base):
         return conf.get_xml()
         
     def add_stream(self, stream):
+        """adds a Stream to this Relay"""
         try:
             StreamRelay.query.filter(StreamRelay.relay == self,
                                      StreamRelay.stream == stream).one()
@@ -146,22 +158,23 @@ class Relay(Base):
             return True
     
     def get_stream_relay(self, stream):
+        """returns the StreamRelay combination for the given Stream and this Relay"""
         return StreamRelay.query.filter(StreamRelay.relay == self,
                                         StreamRelay.stream == stream).one()
     
 class StreamRelay(Base):
     __tablename__ = 'stream_relays'
     stream_relay = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    stream_id = Column("stream", Integer, ForeignKey('streams.stream',
+    stream_id = Column("stream", Integer(unsigned=True), ForeignKey('streams.stream',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))
     stream = relationship("Stream", backref=backref('relays'))
-    relay_id = Column("relay", Integer,
+    relay_id = Column("relay", Integer(unsigned=True),
                            ForeignKey('relays.relay',
                                       onupdate="CASCADE",
                                       ondelete="RESTRICT"))
     relay = relationship("Relay", backref=backref('streams'))
-    status = Column(Integer)
+    status = Column(Integer(unsigned=True))
     
     STATUS = ENUM(['UNKNOWN', 'DISABLED', 'OFFLINE', 'ONLINE'])
     
@@ -171,6 +184,7 @@ class StreamRelay(Base):
         self.stream = stream
         
     def set_offline(self):
+        """sets this combination of stream and relay to offline"""
         self.status = StreamRelay.STATUS.OFFLINE
         connected_listeners = Listener.query.filter(Listener.stream_relay == self,
                                                     Listener.disconnect == None).all()

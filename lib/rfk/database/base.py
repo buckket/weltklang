@@ -120,11 +120,11 @@ class Permission(Base):
 class UserPermission(Base):
     __tablename__ = 'user_permissions'
     userPermission = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    user_id = Column("user", Integer, ForeignKey('users.user',
+    user_id = Column("user", Integer(unsigned=True), ForeignKey('users.user',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))
     user = relationship("User", backref=backref('permissions'))
-    permission_id = Column("permission", Integer,
+    permission_id = Column("permission", Integer(unsigned=True),
                            ForeignKey('permissions.permission',
                                       onupdate="CASCADE",
                                       ondelete="RESTRICT"))
@@ -137,7 +137,7 @@ class UserPermission(Base):
 class Ban(Base):
     __tablename__ = 'bans'
     ban = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    user_id = Column("user", Integer, ForeignKey('users.user',
+    user_id = Column("user", Integer(unsigned=True), ForeignKey('users.user',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))
     user = relationship("User", backref=backref('bans'))
@@ -147,7 +147,7 @@ class Ban(Base):
 class News(Base):
     __tablename__ = 'news'
     news = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    user_id = Column("user", Integer, ForeignKey('users.user',
+    user_id = Column("user", Integer(unsigned=True), ForeignKey('users.user',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))
     user = relationship("User")

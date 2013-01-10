@@ -8,7 +8,9 @@ import rfk.database
 from rfk.database.base import User, Permission, UserPermission
 from rfk.database.streaming import Stream, Relay, StreamRelay, Listener
 from rfk.database.show import Show, Tag
+from rfk.database.track import Track
 import os
+import time
 
 if __name__ == '__main__':
     current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,8 +28,8 @@ if __name__ == '__main__':
     show = Show()
     show.name = 'testo'
     show.description = 'testo'
-    rfk.database.session.add(show)
-    rfk.database.session.commit()
+    #rfk.database.session.add(show)
+    #rfk.database.session.commit()
     show.add_tags(Tag.parse_tags('lol homo'))
     stream = Stream()
     stream.mount = '/radio.ogg'
@@ -52,7 +54,18 @@ if __name__ == '__main__':
     #rfk.database.session.commit()
     import netaddr
     
-    relay = Relay.get_relay(address=relay.address, port=relay.port)
-    relay.add_stream(Stream.query.first())
+    #relay = Relay.get_relay(address=relay.address, port=relay.port)
+    #relay.add_stream(Stream.query.first())
     #print relay.get_icecast_config()
+    t = Track.new_track(None, "penis", "mann")
+    rfk.database.session.add(t)
+    rfk.database.session.commit()
+    t = Track.new_track(None, "penis2", "mann")
+    rfk.database.session.add(t)
+    rfk.database.session.commit()
+    t = Track.new_track(None, "penis2", "mann2")
+    rfk.database.session.add(t)
+    rfk.database.session.commit()
+    t = Track.new_track(None, "penis", "mann2")
+    rfk.database.session.add(t)
     rfk.database.session.commit()

@@ -8,9 +8,10 @@ from rfk.database import Base
 from rfk import ENUM, SET
 
 class Show(Base):
+    """Show"""
     __tablename__ = 'shows'
     show = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    series_id = Column("series", Integer, ForeignKey('series.series',
+    series_id = Column("series", Integer(unsigned=True), ForeignKey('series.series',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))
     series = relationship("Series", backref=backref('shows'))
@@ -19,14 +20,16 @@ class Show(Base):
     end = Column(DateTime)
     name = Column(String(50))
     description = Column(Text)
-    flags = Column(Integer)
+    flags = Column(Integer(unsigned=True))
     FLAGS = SET(['DELETED','RECORD'])
 
     def add_tags(self, tags):
+        """ads a list of Tags to the Show"""
         for tag in tags:
             self.add_tag(tag=tag)
             
     def add_tag(self, tag=None, name=None):
+        """adds a Tag to the Show either by object or by identifier"""
         assert tag or name
         if tag is None:
             tag = Tag.get_tag(name)
@@ -40,6 +43,7 @@ class Show(Base):
     
     @staticmethod
     def get_current_show(user=None):
+        """returns the current show"""
         query = Show.query.join(UserShow).filter(between(datetime.utcnow(), Show.begin, Show.end))
         if user:
             query = query.filter(UserShow.user == user)
@@ -47,23 +51,24 @@ class Show(Base):
         
 
 class UserShow(Base):
+    """connection between users and show"""
     __tablename__ = 'user_shows'
     userShow = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    user_id = Column("user", Integer, ForeignKey('users.user',
+    user_id = Column("user", Integer(unsigned=True), ForeignKey('users.user',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))
     user = relationship("User", backref=backref('shows'))
-    show_id = Column("show", Integer,
+    show_id = Column("show", Integer(unsigned=True),
                            ForeignKey('shows.show',
                                       onupdate="CASCADE",
                                       ondelete="RESTRICT"))
     show = relationship("Show", backref=backref('users'))
-    role_id = Column("role", Integer,
+    role_id = Column("role", Integer(unsigned=True),
                            ForeignKey('roles.role',
                                       onupdate="CASCADE",
                                       ondelete="RESTRICT"))
     role = relationship("Role")
-    status = Column(Integer)
+    status = Column(Integer(unsigned=True))
     STATUS = ENUM(['UNKNOWN', 'STREAMING', 'STREAMED'])
     
     
@@ -75,6 +80,7 @@ class Tag(Base):
     
     @staticmethod
     def get_tag(name):
+        """returns a Tag object by given identifier"""
         try:
             return Tag.query.filter(Tag.name == name).one()
         except exc.NoResultFound:
@@ -82,20 +88,22 @@ class Tag(Base):
     
     @staticmethod
     def parse_tags(tags):
+        """parses a space separated list of tags and returns a list of Tag objects"""
         r = []
         for tag in tags.split(' '):
             r.append(Tag.get_tag(tag))
         return r
 
 class ShowTag(Base):
+    """connection between Shows and Tags"""
     __tablename__ = 'show_tags'
     show_tag = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    show_id = Column("show", Integer,
+    show_id = Column("show", Integer(unsigned=True),
                            ForeignKey('shows.show',
                                       onupdate="CASCADE",
                                       ondelete="RESTRICT"))
     show = relationship("Show", backref=backref('tags'))
-    tag_id = Column("tag", Integer,
+    tag_id = Column("tag", Integer(unsigned=True),
                            ForeignKey('tags.tag',
                                       onupdate="CASCADE",
                                       ondelete="RESTRICT"))
@@ -114,7 +122,7 @@ class Series(Base):
     __tablename__ = 'series'
     
     series = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    user_id = Column("user", Integer, ForeignKey('users.user',
+    user_id = Column("user", Integer(unsigned=True), ForeignKey('users.user',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))
     user = relationship("User", backref=backref('series'))
