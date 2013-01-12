@@ -37,6 +37,7 @@ if __name__ == '__main__':
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
     print 'starting'
+    print rfk.liquidsoap.gen_script(current_dir).encode('utf-8')
     print process.stdin.write(rfk.liquidsoap.gen_script(current_dir).encode('utf-8'))
     
     process.stdin.close()

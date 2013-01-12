@@ -4,6 +4,9 @@ from sqlalchemy.dialects.mysql import INTEGER as Integer
 
 from passlib.hash import bcrypt
 from flask.ext.login import AnonymousUser
+from rfk import SET
+from datetime import datetime, timedelta
+import time
 import hashlib
 import re
 
@@ -154,4 +157,41 @@ class News(Base):
     title = Column(String(255))
     content = Column(Text)
     
+class ApiKey(Base):
+    __tablename__ = 'apikeys'
+    apikey = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
+    user_id = Column("user", Integer(unsigned=True), ForeignKey('users.user',
+                                                 onupdate="CASCADE",
+                                                 ondelete="RESTRICT"))
+    user = relationship("User", backref="apikeys")
+    key = Column(String(128))
+    counter = Column(Integer(unsigned=True), default=0)
+    access = Column(DateTime, default=datetime.utcnow)
+    application = Column(String(128))
+    description = Column(String(255))
+    FLAGS = SET(['DISABLED', 'FASTQUERY', 'KICK', 'BAN', 'AUTH'])
+        
+    def gen_key(self):
+        c = 0
+        while True:
+            key = hashlib.sha1("%s%s%d%d" % (self.application, self.description, time.time(), c)).hexdigest()
+            if ApiKey.query.filter(ApiKey.key == key).first() == None:
+                break
+        self.key = key
+    
+    @staticmethod
+    def check_key(key):
+        try:
+            apikey = ApiKey.query.filter(ApiKey.key==key).one()
+        except (exc.NoResultFound, exc.MultipleResultsFound):
+            return False
+        if apikey.flag & ApiKey.FLAGS.DISABLED:
+            return False
+        elif not apikey.flag & ApiKey.FLAGS.FASTQUERY:
+            if datetime.utcnow() - apikey.access <= timedelta(seconds=1):
+                return False
+    
+        apikey.counter += 1
+        apikey.access = datetime.datetime.utcnow()
+        return apikey
     

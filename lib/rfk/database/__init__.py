@@ -20,4 +20,5 @@ def init_db(db_uri):
     import track
     Base.metadata.create_all(bind=engine)
     Base.query = session.query_property()
+    print session
     

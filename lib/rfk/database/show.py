@@ -21,7 +21,7 @@ class Show(Base):
     name = Column(String(50))
     description = Column(Text)
     flags = Column(Integer(unsigned=True))
-    FLAGS = SET(['DELETED','RECORD'])
+    FLAGS = SET(['DELETED', 'PLANNED', 'UNPLANNED', 'RECORD'])
 
     def add_tags(self, tags):
         """ads a list of Tags to the Show"""
@@ -40,6 +40,17 @@ class Show(Base):
         except exc.NoResultFound:
             self.tags.append(ShowTag(tag))
             return True
+    
+    def add_user(self, user, role=None):
+        if role is None:
+            role = Role.get_role('host')
+        try:
+            us = UserShow.query.filter(UserShow.user == user,
+                                       UserShow.show == self).one()
+            return us
+        except exc.NoResultFound:
+            return UserShow(show=self, user=user, role=role)
+            
     
     @staticmethod
     def get_current_show(user=None):
@@ -116,6 +127,13 @@ class Role(Base):
     __tablename__ = 'roles'
     role = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     name = Column(String(50))
+    
+    @staticmethod
+    def get_role(name):
+        try:
+            return Role.query.filter(Role.name == name).one()
+        except exc.NoResultFound:
+            return Role(name=name)
     
     
 class Series(Base):
