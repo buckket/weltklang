@@ -7,7 +7,7 @@ import rfk.database
 from rfk.database.base import User, News, ApiKey
 from rfk.database.show import Show, Tag
 from rfk.database.track import Track
-from rfk.database.streaming import Stream
+from rfk.database.streaming import Stream, Relay
 
 
 def add_users():
@@ -100,6 +100,22 @@ def add_streams():
     rfk.database.session.add(stream)
     rfk.database.session.commit()
 
+
+def add_relays():
+    relay = Relay()
+    relay.address = '192.168.122.222'
+    relay.type = Relay.TYPE.MASTER
+    relay.status = Relay.STATUS.UNKNOWN
+    relay.port = 8000
+    relay.admin_username = 'admin'
+    relay.admin_password = 'entengruetze'
+    relay.auth_username = 'master'
+    relay.auth_password = 'master'
+    relay.relay_password = 'radiowegrelayen'
+    relay.relay_username = 'relay'
+    rfk.database.session.add(relay)
+    rfk.database.session.commit()
+
 if __name__ == '__main__':
     current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     rfk.init(current_dir)
@@ -112,6 +128,7 @@ if __name__ == '__main__':
     add_shows()
     add_tracks()
     add_streams()
+    add_relays()
     add_news()
     add_apikey()
     
