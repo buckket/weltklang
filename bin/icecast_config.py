@@ -1,11 +1,18 @@
-from rfk.icecast import IcecastConfig, Mount
+import os
+
+import rfk
+import rfk.database
+from rfk.database.streaming import  Relay
 
 if __name__ == '__main__':
+    current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    rfk.init(current_dir)
+    rfk.database.init_db("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
+                                                              rfk.CONFIG.get('database', 'username'),
+                                                              rfk.CONFIG.get('database', 'password'),
+                                                              rfk.CONFIG.get('database', 'host'),
+                                                              rfk.CONFIG.get('database', 'database')))
     
-    conf = IcecastConfig()
-    conf.hostname = 'rfk-master'
-    conf.address = '192.168.122.222'
-    mogg = Mount()
-    mogg.mount = '/radio.ogg'
-    conf.mounts.append(mogg)
-    print conf.get_xml()
+    relay = Relay.get_master()
+    print relay.get_icecast_config(all_streams=True)
+    

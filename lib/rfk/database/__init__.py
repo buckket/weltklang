@@ -11,7 +11,7 @@ def init_db(db_uri):
     global session, engine
     engine = create_engine(db_uri)
     session = scoped_session(sessionmaker(autocommit=False,
-                                         autoflush=False,
+                                         autoflush=True,
                                          bind=engine))
     Base.query = session.query_property()
     import base
@@ -20,5 +20,4 @@ def init_db(db_uri):
     import track
     Base.metadata.create_all(bind=engine)
     Base.query = session.query_property()
-    print session
     

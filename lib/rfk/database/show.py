@@ -20,7 +20,7 @@ class Show(Base):
     end = Column(DateTime)
     name = Column(String(50))
     description = Column(Text)
-    flags = Column(Integer(unsigned=True))
+    flags = Column(Integer(unsigned=True), default=0)
     FLAGS = SET(['DELETED', 'PLANNED', 'UNPLANNED', 'RECORD'])
 
     def add_tags(self, tags):
@@ -84,7 +84,7 @@ class UserShow(Base):
                                       onupdate="CASCADE",
                                       ondelete="RESTRICT"))
     role = relationship("Role")
-    status = Column(Integer(unsigned=True))
+    status = Column(Integer(unsigned=True), default=0)
     STATUS = ENUM(['UNKNOWN', 'STREAMING', 'STREAMED'])
     
     
