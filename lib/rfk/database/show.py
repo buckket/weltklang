@@ -16,7 +16,7 @@ class Show(Base):
                                                  ondelete="RESTRICT"))
     series = relationship("Series", backref=backref('shows'))
     logo = Column(String(255))
-    begin = Column(DateTime)
+    begin = Column(DateTime, default=datetime.utcnow)
     end = Column(DateTime)
     name = Column(String(50))
     description = Column(Text)
