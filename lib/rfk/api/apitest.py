@@ -44,7 +44,7 @@ def current_dj():
 
 
 @api.route('/web/kick_dj')
-@check_auth(required_permissions=[rfk.ApiKey.FLAGS.KICK])
+@check_auth(required_permissions=[ApiKey.FLAGS.KICK])
 ## TODO ##
 def kick_dj():
     return "TODO"
