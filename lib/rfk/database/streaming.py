@@ -5,7 +5,7 @@ from sqlalchemy.dialects.mysql import INTEGER as Integer
 from datetime import datetime
 
 from rfk.database import Base
-from rfk import ENUM, SET
+from rfk import ENUM, SET, CONFIG
 import rfk.icecast
 import netaddr
 
@@ -44,7 +44,8 @@ class Listener(Base):
     def create(address, client, useragent, stream_relay):
         """adds a new listener to the database"""
         listener = Listener()
-        listener.address = int(netaddr.IPAddress(address))
+        if rfk.CONFIG.get('icecast', 'log_ip'):
+            listener.address = int(netaddr.IPAddress(address))
         listener.client = client
         listener.useragent = useragent
         listener.connect = datetime.utcnow()
