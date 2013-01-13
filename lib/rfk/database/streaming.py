@@ -122,7 +122,7 @@ class Relay(Base):
             return Relay.query.filter(Relay.address == address,
                                       Relay.port == port).one()
         
-    def get_icecast_config(self):
+    def get_icecast_config(self, all_streams=False):
         """returns the configuration XML for this Relay"""
         conf = rfk.icecast.IcecastConfig()
         conf.address = self.address
@@ -130,13 +130,22 @@ class Relay(Base):
         conf.admin = self.admin_username
         conf.password = self.admin_password
         conf.hostname = self.address
-        for stream in self.streams:
-            mount = rfk.icecast.Mount()
-            mount.api_url = 'http://192.168.122.1:5000/backend/icecast/'
-            mount.mount = stream.stream.mount
-            mount.username = self.auth_username
-            mount.password = self.auth_password
-            conf.mounts.append(mount)
+        if all_streams:
+            for stream in Stream.query.all():
+                mount = rfk.icecast.Mount()
+                mount.api_url = 'http://192.168.122.1:5000/backend/icecast/'
+                mount.mount = stream.mount
+                mount.username = self.auth_username
+                mount.password = self.auth_password
+                conf.mounts.append(mount)
+        else:
+            for stream in self.streams:
+                mount = rfk.icecast.Mount()
+                mount.api_url = 'http://192.168.122.1:5000/backend/icecast/'
+                mount.mount = stream.stream.mount
+                mount.username = self.auth_username
+                mount.password = self.auth_password
+                conf.mounts.append(mount)
         if self.type == Relay.TYPE.RELAY:
             master = Relay.get_master()
             conf.master = master.address
