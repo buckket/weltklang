@@ -6,6 +6,7 @@ import rfk
 import rfk.database
 from rfk.database.base import User, News, ApiKey
 from rfk.database.show import Show, Tag
+from rfk.database.track import Track
 
 
 def add_users():
@@ -34,8 +35,10 @@ def add_shows():
     for show in shows:
         user = User.get_user(username='teddydestodes')
         show.add_user(user)
+        rfk.database.session.commit()
         user = User.get_user(username='MrLoom')
         show.add_user(user)
+        rfk.database.session.commit()
         rfk.database.session.add(show)
         print "[shows] Added '%s' (%s)" % (show.name, show.description)
     rfk.database.session.commit()
@@ -57,6 +60,20 @@ def add_apikey():
     rfk.database.session.commit()
     print "[apikeys] Added key %s for user %s" % (key.key, key.user)
 
+def add_tracks():
+    show = Show.query.get(1)
+    t = Track.new_track(show, "penis", "mann")
+    rfk.database.session.add(t)
+    rfk.database.session.commit()
+    t = Track.new_track(show, "penis2", "mann")
+    rfk.database.session.add(t)
+    rfk.database.session.commit()
+    t = Track.new_track(show, "penis2", "mann2")
+    rfk.database.session.add(t)
+    rfk.database.session.commit()
+    t = Track.new_track(show, "penis", "mann2")
+    rfk.database.session.add(t)
+    rfk.database.session.commit()
 
 if __name__ == '__main__':
     current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -68,6 +85,7 @@ if __name__ == '__main__':
                                                             rfk.CONFIG.get('database', 'database')))
     add_users()
     add_shows()
+    add_tracks()
     add_news()
     add_apikey()
     
