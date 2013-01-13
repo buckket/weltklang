@@ -25,6 +25,7 @@ class User(Base):
     username = Column(String(50), unique=True)
     password = Column(String(64))
     mail = Column(String(255))
+    country = Column(String(3))
     
     def get_id(self):
         return unicode(self.user)
@@ -169,6 +170,7 @@ class ApiKey(Base):
     access = Column(DateTime, default=datetime.utcnow)
     application = Column(String(128))
     description = Column(String(255))
+    flag = Column(Integer(unsigned=True), default=0)
     FLAGS = SET(['DISABLED', 'FASTQUERY', 'KICK', 'BAN', 'AUTH'])
         
     def gen_key(self):
@@ -192,6 +194,6 @@ class ApiKey(Base):
                 return False
     
         apikey.counter += 1
-        apikey.access = datetime.datetime.utcnow()
+        apikey.access = datetime.utcnow()
         return apikey
     

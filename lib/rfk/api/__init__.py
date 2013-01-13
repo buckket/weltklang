@@ -2,6 +2,8 @@ import rfk
 from functools import wraps, partial
 from flask import Blueprint, g, request, jsonify
 
+import rfk.database
+from rfk.database.base import ApiKey
 
 api = Blueprint('api', __name__)
 
@@ -24,7 +26,7 @@ def check_auth(f=None, required_permissions=None):
             return raise_error('api key missing')
             
         key = request.args.get('key')
-        apikey = rfk.ApiKey.check_key(key, db.session)
+        apikey = ApiKey.check_key(key)
         
         if not apikey:
             return raise_error('api key invalid')
@@ -32,7 +34,7 @@ def check_auth(f=None, required_permissions=None):
             if required_permissions != None:
                 for required_permission in required_permissions:
                     if not apikey.flag & required_permission:
-                        return raise_error('Flag %s (%i) required' % (rfk.ApiKey.FLAGS.name(required_permission), required_permission))
+                        return raise_error('Flag %s (%i) required' % (ApiKey.FLAGS.name(required_permission), required_permission))
         
         g.apikey = apikey
         
