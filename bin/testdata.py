@@ -7,6 +7,7 @@ import rfk.database
 from rfk.database.base import User, News, ApiKey
 from rfk.database.show import Show, Tag
 from rfk.database.track import Track
+from rfk.database.streaming import Stream
 
 
 def add_users():
@@ -75,6 +76,30 @@ def add_tracks():
     rfk.database.session.add(t)
     rfk.database.session.commit()
 
+def add_streams():
+    stream = Stream()
+    stream.mount = '/radio.ogg'
+    stream.code = 'ogg'
+    stream.name = 'Vorbis'
+    stream.type = Stream.TYPES.OGG
+    stream.quality = 3
+    rfk.database.session.add(stream)
+    stream = Stream()
+    stream.mount = '/radiohq.ogg'
+    stream.code = 'ogghq'
+    stream.name = 'Vorbis HQ'
+    stream.type = Stream.TYPES.OGG
+    stream.quality = 6
+    rfk.database.session.add(stream)
+    stream = Stream()
+    stream.mount = '/radio.mp3'
+    stream.code = 'mp3'
+    stream.name = 'MPEG Layer3'
+    stream.type = Stream.TYPES.MP3
+    stream.quality = 4
+    rfk.database.session.add(stream)
+    rfk.database.session.commit()
+
 if __name__ == '__main__':
     current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     rfk.init(current_dir)
@@ -86,6 +111,7 @@ if __name__ == '__main__':
     add_users()
     add_shows()
     add_tracks()
+    add_streams()
     add_news()
     add_apikey()
     
