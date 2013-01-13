@@ -29,6 +29,7 @@ def add_shows():
     shows.append(show)
     
     show = Show(name='Testsendung #2', description='Hurf Durf')
+    show.begin = datetime.datetime.utcnow()
     show.end = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
     show.flags = Show.FLAGS.PLANNED
     shows.append(show)
@@ -39,6 +40,9 @@ def add_shows():
         rfk.database.session.commit()
         user = User.get_user(username='MrLoom')
         show.add_user(user)
+        rfk.database.session.commit()
+        tags = Tag.parse_tags('pups benis bagina')
+        show.add_tags(tags=tags)
         rfk.database.session.commit()
         rfk.database.session.add(show)
         print "[shows] Added '%s' (%s)" % (show.name, show.description)
