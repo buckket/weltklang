@@ -16,7 +16,7 @@ class Show(Base):
                                                  ondelete="RESTRICT"))
     series = relationship("Series", backref=backref('shows'))
     logo = Column(String(255))
-    begin = Column(DateTime)
+    begin = Column(DateTime, default=datetime.utcnow)
     end = Column(DateTime)
     name = Column(String(50))
     description = Column(Text)
@@ -47,10 +47,15 @@ class Show(Base):
         try:
             us = UserShow.query.filter(UserShow.user == user,
                                        UserShow.show == self).one()
+            if us.role != role:
+                us.role = role
             return us
         except exc.NoResultFound:
             return UserShow(show=self, user=user, role=role)
             
+    def remove_user(self, user):
+        UserShow.query.filter(UserShow.user == user,
+                              UserShow.show == self).delete()
     
     @staticmethod
     def get_current_show(user=None):
