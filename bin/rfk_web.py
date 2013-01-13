@@ -21,4 +21,4 @@ if __name__ == '__main__':
     rfk.site.app.static_folder = os.path.join(current_dir,'web_static')
     rfk.site.app.config['BABEL_LOCALE_PATH'] = os.path.join(current_dir,'var','translations')
     rfk.site.app.static_url_path = '/static'
-    rfk.site.app.run(host='192.168.122.1', debug=True)
+    rfk.site.app.run(host='0.0.0.0', debug=True)
