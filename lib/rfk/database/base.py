@@ -12,6 +12,7 @@ import re
 
 from rfk.database import Base, session
 
+
 class Anonymous(AnonymousUser):
     
     def __init__(self):
@@ -183,6 +184,7 @@ class ApiKey(Base):
     
     @staticmethod
     def check_key(key):
+        
         try:
             apikey = ApiKey.query.filter(ApiKey.key==key).one()
         except (exc.NoResultFound, exc.MultipleResultsFound):

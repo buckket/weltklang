@@ -55,7 +55,7 @@ def kick_dj():
 ## DONE ##
 def current_show():
     clauses = []
-    clauses.append(and_(Show.begin <= datetime.utcnow(), or_(Show.end >= datetime.utcnow(), Show.end == None)))
+    clauses.append((Show.begin <= datetime.utcnow()) & ((Show.end >= datetime.utcnow()) | (Show.end == None)))
     result = Show.query.join(UserShow).join(User).filter(*clauses).order_by(Show.begin.desc(), Show.end.asc()).all()
     
     data = {'current_show': {'shows': {}}}

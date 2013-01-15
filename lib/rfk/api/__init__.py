@@ -27,7 +27,7 @@ def check_auth(f=None, required_permissions=None):
             
         key = request.args.get('key')
         apikey = ApiKey.check_key(key)
-        
+
         if not apikey:
             return raise_error('api key invalid')
         else:
