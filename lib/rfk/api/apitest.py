@@ -14,6 +14,15 @@ from sqlalchemy import func, and_, or_, between
 @check_auth()
 ## DONE
 def dj():
+    """Return complete dj information
+    
+    Keyword arguments:
+    id -- database id of the requested dj
+    name -- nickname of the requested dj
+    
+    At least one argument is required
+    """
+    
     id = request.args.get('id', None)
     name = request.args.get('name', None)
     
@@ -35,6 +44,12 @@ def dj():
 @check_auth()
 ## BROKEN ##
 def current_dj():
+    """Return dj information for the currently streaming dj(s)
+    
+    Keyword arguments:
+    None
+    """
+    
     result = db.session.query(rfk.User).filter(rfk.User.status == rfk.User.STATUS.STREAMING).first()
     if result:
         data = {'current_dj': {'id': result.user, 'name': result.name, 'status': result.status}} 
@@ -47,13 +62,25 @@ def current_dj():
 @check_auth(required_permissions=[ApiKey.FLAGS.KICK])
 ## TODO ##
 def kick_dj():
-    return "TODO"
+    """Kick the dj, who's currently connected to the streaming server
+    
+    Keyword arguments:
+    None
+    """
+    
+    pass
 
 
 @api.route('/web/current_show')
 @check_auth()
 ## DONE ##
 def current_show():
+    """Return the currently running show
+    
+    Keyword arguments:
+    None    
+    """
+    
     clauses = []
     clauses.append((Show.begin <= datetime.utcnow()) & ((Show.end >= datetime.utcnow()) | (Show.end == None)))
     result = Show.query.join(UserShow).join(User).filter(*clauses).order_by(Show.begin.desc(), Show.end.asc()).all()
