@@ -194,7 +194,7 @@ class ApiKey(Base):
             raise rexc.api.KeyDisabledException()
         elif not apikey.flag & ApiKey.FLAGS.FASTQUERY:
             if datetime.utcnow() - apikey.access <= timedelta(seconds=1):
-                raise rexc.api.FastQueryException(lastaccess=apikey.access)
+                raise rexc.api.FastQueryException(last_access=apikey.access)
     
         apikey.counter += 1
         apikey.access = datetime.utcnow()

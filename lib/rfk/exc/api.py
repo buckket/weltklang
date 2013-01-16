@@ -1,8 +1,3 @@
-'''
-Created on Jan 16, 2013
-
-@author: teddydestodes
-'''
 
 class KeyInvalidException(Exception):
     pass
@@ -12,5 +7,5 @@ class KeyDisabledException(Exception):
 
 class FastQueryException(Exception):
     
-    def __init__(self, lastaccess=None):
-        self.lastaccess = lastaccess
+    def __init__(self, last_access=None):
+        self.last_access = last_access
