@@ -5,6 +5,7 @@ from sqlalchemy.dialects.mysql import INTEGER as Integer
 from passlib.hash import bcrypt
 from flask.ext.login import AnonymousUser
 from rfk import SET
+from rfk import exc as rexc
 from datetime import datetime, timedelta
 import time
 import hashlib
@@ -188,12 +189,12 @@ class ApiKey(Base):
         try:
             apikey = ApiKey.query.filter(ApiKey.key==key).one()
         except (exc.NoResultFound, exc.MultipleResultsFound):
-            return False
+            raise rexc.api.KeyInvalidException()
         if apikey.flag & ApiKey.FLAGS.DISABLED:
-            return False
+            raise rexc.api.KeyDisabledException()
         elif not apikey.flag & ApiKey.FLAGS.FASTQUERY:
             if datetime.utcnow() - apikey.access <= timedelta(seconds=1):
-                return False
+                raise rexc.api.FastQueryException(lastaccess=apikey.access)
     
         apikey.counter += 1
         apikey.access = datetime.utcnow()
