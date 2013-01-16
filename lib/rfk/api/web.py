@@ -1,4 +1,3 @@
-import rfk
 from rfk.api import api, check_auth, wrapper
 from flask import jsonify, request, g
 
@@ -23,18 +22,18 @@ def dj():
     At least one argument is required
     """
     
-    id = request.args.get('id', None)
-    name = request.args.get('name', None)
+    dj_id = request.args.get('id', None)
+    dj_name = request.args.get('name', None)
     
-    if id:
-        result = User.get_user(id=id)
-    elif name:
-        result = User.get_user(username=name)
+    if dj_id:
+        result = User.get_user(id=dj_id)
+    elif dj_name:
+        result = User.get_user(username=dj_name)
     else:
         return jsonify(wrapper(None, 400, 'missing required query parameter'))
     
     if result:
-        data = {'dj': {'id': result.user, 'name': result.username }}
+        data = {'dj': {'id': result.user, 'username': result.username }}
     else:
         data = {'dj': None}
     return jsonify(wrapper(data))
@@ -42,7 +41,7 @@ def dj():
 
 @api.route('/web/current_dj')
 @check_auth()
-## BROKEN ##
+## DONE (for now) ##
 def current_dj():
     """Return dj information for the currently streaming dj(s)
     
@@ -50,9 +49,9 @@ def current_dj():
     None
     """
     
-    result = db.session.query(rfk.User).filter(rfk.User.status == rfk.User.STATUS.STREAMING).first()
+    result = UserShow.query.join(User).filter(UserShow.status == UserShow.STATUS.STREAMING).first()
     if result:
-        data = {'current_dj': {'id': result.user, 'name': result.name, 'status': result.status}} 
+        data = {'current_dj': {'userid': result.user.user, 'username': result.user.username, 'status': result.status}} 
     else:
         data = {'current_dj': None}
     return jsonify(wrapper(data))
@@ -60,7 +59,7 @@ def current_dj():
 
 @api.route('/web/kick_dj')
 @check_auth(required_permissions=[ApiKey.FLAGS.KICK])
-## TODO ##
+## DONE ##
 def kick_dj():
     """Kick the dj, who's currently connected to the streaming server
     
@@ -68,7 +67,19 @@ def kick_dj():
     None
     """
     
-    pass
+    # just a testing dummy
+    def do_kick_dj(dj):
+        return True
+    
+    result = UserShow.query.join(User).filter(UserShow.status == UserShow.STATUS.STREAMING).first()
+    if result:
+        if do_kick_dj(result.user.user):
+            data = {'kick_dj': {'userid': result.user.user, 'username': result.user.username, 'success': True}}
+        else:
+            data = {'kick_dj': {'userid': result.user.user, 'username': result.user.username, 'success': False}}
+    else:
+        data = {'kick_dj': None}
+    return jsonify(wrapper(data))
 
 
 @api.route('/web/current_show')
@@ -95,7 +106,7 @@ def current_show():
             
             dj = []
             for usershow in show.users:
-                dj.append({'name': usershow.user.username, 'id': usershow.user.user, 'status': usershow.status })
+                dj.append({'username': usershow.user.username, 'userid': usershow.user.user, 'status': usershow.status })
                 
             if (show.flags & Show.FLAGS.UNPLANNED and len(result) == 2) or len(result) == 1:
                 data['current_show']['show'] = show.show
