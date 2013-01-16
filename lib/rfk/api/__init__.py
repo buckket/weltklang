@@ -50,9 +50,7 @@ def check_auth(f=None, required_permissions=None):
     return decorated_function
 
 
-from .apitest import *
-#from .webapi import *
-from .icecast import *
+from .web import *
 
 
 @api.route('/<path:path>')
