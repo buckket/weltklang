@@ -7,7 +7,7 @@ from rfk.database.streaming import Relay, Stream
 
 
 
-class LiquidInterface:
+class LiquidInterface(object):
     
     timeout = 5000
     
@@ -21,25 +21,65 @@ class LiquidInterface:
     def close(self):
         self.conn.close()
         
-    def getSinks(self):
-        return self._list(filter='input')
+    def get_sinks(self):
+        sinks = []
+        for item in self._list(filter='output'):
+            sinks.append(LiquidSink(self, item[0], item[1]))
+        return sinks
     
-    def getSources(self):
-        return self._list(filter='input')
+    def get_sources(self):
+        sources = []
+        for item in self._list(filter='input'):
+            sources.append(LiquidSource(self, item[0], item[1]))
+        return sources
     
-    def getVersion(self):
-        return self._executeCommand('version')
+    def get_status(self, sink_or_source):
+        assert isinstance(sink_or_source, (LiquidSink, LiquidSource))
+        return self._execute_command("%s.status" % (sink_or_source.handler)).splitlines()[1]
+        
+    
+    def get_version(self):
+        return self._execute_command('version').splitlines()[0]
         
     def _list(self,filter=None):
-        list = self._executeCommand('list')
+        list = self._execute_command('list')
         for line in list.splitlines():
-            print line
+            spl = map(str.strip, line.split(':'))
+            if len(spl) == 2 and (filter is None or spl[1].startswith('%s.' % (filter,))):
+                yield spl
     
     
-    def _executeCommand(self, command):
+    def _execute_command(self, command):
         self.conn.write("%s\n" % command)
         ret = self.conn.read_until('END', self.timeout)
         return ret
+
+class LiquidSink(object):
+    
+    def __init__(self, interface, handler, type):
+        self.interface = interface
+        self.handler = handler
+        self.type = type
+    
+    def status(self):
+        return self.interface.get_status(self)
+    
+    def __repr__(self):
+        return "<rfk.liquidsoap.LiquidSink %s at %s>" % (self.type, self.handler)
+
+class LiquidSource(object):
+    
+    def __init__(self, interface, handler, type):
+        self.interface = interface
+        self.handler = handler
+        self.type = type
+    
+    def status(self):
+        return self.interface.get_status(self)
+    
+    def __repr__(self):
+        return "<rfk.liquidsoap.LiquidSource %s at %s>" % (self.type, self.handler)
+    
 
 def gen_script(dir):
     """generates liquidsoap script from templates
