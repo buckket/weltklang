@@ -18,6 +18,7 @@ class Show(Base):
     logo = Column(String(255))
     begin = Column(DateTime, default=datetime.utcnow)
     end = Column(DateTime)
+    updated = Column(DateTime, default=datetime.utcnow)
     name = Column(String(50))
     description = Column(Text)
     flags = Column(Integer(unsigned=True), default=0)
