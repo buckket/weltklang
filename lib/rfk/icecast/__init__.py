@@ -1,4 +1,33 @@
 from xml.dom.minidom import Document
+import xml.etree.ElementTree as ET
+import urllib2
+import base64
+class Icecast(object):
+    
+    def __init__(self, host, port, username='', password=''):
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self.status_xml = None
+        
+    def _get_status(self):
+        if self.status_xml is not None:
+            return
+        request = urllib2.Request("http://%s:%s/admin/status.xml" % (self.host, self.port))
+        base64string = base64.encodestring('%s:%s' % (self.username, self.password)).replace('\n', '')
+        request.add_header("Authorization", "Basic %s" % base64string)   
+        result = urllib2.urlopen(request)
+        self.status_xml = ET.parse(result)
+        result.close()
+        
+    def get_traffic(self):
+        self._get_status()
+        return self.status_xml.find('outgoing_kbitrate').text
+    
+    def get_version(self):
+        self._get_status()
+        return self.status_xml.find('server_id').text
 
 class IcecastConfig(object):
     
