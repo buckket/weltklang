@@ -20,24 +20,47 @@ import sys
 import base64
 from datetime import datetime
 from rfk.database import init_db, session
-
+from rfk.database.base import User
+from rfk.database.show import Show
+from rfk.liquidsoap import LiquidInterface
+from rfk import exc as rexc
 
 username_delimiter = '|'
 
-def doAuth(username, password, session):
+def doAuth(username, password):
+    """authenticates the user
+    this function will also disconnect the current user
+    if the user to be authenticated has a show registered.
+    if that happened this function will print false to the
+    user since we need a graceperiod to actually disconnect
+    the other user.
+    
+    Keyword arguments:
+    username
+    password
+    """
     if username == 'source':
         username, password = password.split(username_delimiter)
-    user = session.query(rfk.User).filter(rfk.User.name == username).first();
-    if user != None and user.checkStreamPassword(password):
-        sys.stdout.write('true')
-    else:
-        sys.stdout.write('false')
+    try:
+        user = User.authenticate(username, password)
+        show = Show.get_current_show(user)
+        if show is not None:
+            liquidsoap = LiquidInterface()
+            liquidsoap.connect()
+            liquidsoap.kick_harbor()
+            print 'false'
+        else:
+            print 'true'
+        return
+    except rexc.base.InvalidPasswordException, rexc.base.UserNotFoundException:
+        pass
+    print 'false'
 
 def doMetaData(data, session):
     if 'userid' not in data or data['userid'] == 'none':
         print 'no userid'
         return
-    user = session.query(rfk.User).get(int(data['userid']))
+    user = User.get_user(id=data['userid'])
     if user == None:
         print 'user not found'
         return
@@ -61,7 +84,7 @@ def doMetaData(data, session):
     session.add(song)
     session.commit()
 
-def doConnect(data, session):
+def doConnect(data):
     auth = data['Authorization'].strip().split(' ')
     if auth[0].lower() == 'basic':
         a = base64.b64decode(auth[1]).split(':', 1)
@@ -69,8 +92,14 @@ def doConnect(data, session):
             a = a[1].split(username_delimiter, 1)
         username = a[0]
         password = a[1]
-    user = session.query(rfk.User).filter(rfk.User.name == username).first();
-    if user != None and user.checkStreamPassword(password):
+    else:
+        return 
+    try:
+        user = User.authenticate(username, password)
+        show = Show.get_current_show(user)
+    except rexc.base.InvalidPasswordException, rexc.base.UserNotFoundException:
+        pass   
+    if user != None and user.check_password(password):
         shows = rfk.Show.getCurrentShows(session, user)
         if len(shows) == 0:
             show = rfk.Show(begin=datetime.today())

@@ -40,6 +40,11 @@ class LiquidInterface(object):
     
     def get_version(self):
         return self._execute_command('version').splitlines()[0]
+    
+    def kick_harbor(self):
+        for source in self.get_sinks():
+            if source.type == 'input.harbor':
+                source.kick()
         
     def _list(self,filter=None):
         list = self._execute_command('list')
@@ -76,6 +81,9 @@ class LiquidSource(object):
     
     def status(self):
         return self.interface.get_status(self)
+    
+    def kick(self):
+        self.interface._execute_command("%s.kick" % (self.handler,))
     
     def __repr__(self):
         return "<rfk.liquidsoap.LiquidSource %s at %s>" % (self.type, self.handler)

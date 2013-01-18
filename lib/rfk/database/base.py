@@ -4,7 +4,7 @@ from sqlalchemy.dialects.mysql import INTEGER as Integer
 
 from passlib.hash import bcrypt
 from flask.ext.login import AnonymousUser
-from rfk import SET
+from rfk import SET, ENUM
 from rfk import exc as rexc
 from datetime import datetime, timedelta
 import time
@@ -40,6 +40,25 @@ class User(Base):
     
     def is_authenticated(self):
         return True
+    
+    @staticmethod
+    def authenticate(username,password):
+        """shorthand function for authentication a user
+        returns the user object
+        
+        Keyword arguments:
+        username -- username
+        password -- unencrypted password
+        """
+        try:
+            user = User.get_user(username=username)
+            if user.check_password(password):
+                return user
+            else:
+                raise rexc.base.InvalidPasswordException()
+        except exc.NoResultFound:
+            raise rexc.base.UserNotFoundException()
+            
     
     @staticmethod
     def get_user(id=None, username=None):
@@ -105,6 +124,51 @@ class User(Base):
         except exc.NoResultFound:
             return False
 
+class Setting(Base):
+    __tablename__ = 'settings'
+    setting = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
+    code = Column(String(25), unique=True)
+    name = Column(String(50))
+    val_type = Column(Integer(unsigned=True))
+    TYPES = ENUM(['INT','STR'])
+    
+    @staticmethod
+    def get_setting(code):
+        return Setting.query.filter(Permission.code == code).one()
+    
+    @staticmethod
+    def add_setting(code,name):
+        try:
+            return Setting.query.filter(Permission.code == code).one()
+        except exc.NoResultFound:
+            return Setting(code=code, name=name)
+
+
+class UserSetting(Base):
+    __tablename__ = 'user_settings'
+    userSetting = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
+    user_id = Column("user", Integer(unsigned=True), ForeignKey('users.user',
+                                                 onupdate="CASCADE",
+                                                 ondelete="RESTRICT"))
+    user = relationship("User", backref=backref('settings'))
+    setting_id = Column("setting", Integer(unsigned=True),
+                           ForeignKey('settings.setting',
+                                      onupdate="CASCADE",
+                                      ondelete="RESTRICT"))
+    setting = relationship("Setting")
+    val_int = Column(Integer)
+    val_str = Column(String(255))
+    
+    def __init__(self, setting, val_int=None, val_str=None):
+        self.setting = setting
+        if self.setting.val_type == Setting.TYPES.INT:
+            if val_int is None:
+                raise rexc.base.InvalidSettingException('value should be an integer')
+            self.val_int = val_int
+        elif self.setting.val_type == Setting.TYPES.STR:
+            if val_int is None:
+                raise rexc.base.InvalidSettingException('value should be a string')
+            self.val_str = val_str
 
 class Permission(Base):
     __tablename__ = 'permissions'

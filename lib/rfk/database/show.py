@@ -65,6 +65,9 @@ class Show(Base):
         if user:
             query = query.filter(UserShow.user == user)
         return query.first()
+    
+    def __repr__(self):
+        return "<rfk.database.show.Show id=%d>" % (self.show,)
         
 
 class UserShow(Base):
