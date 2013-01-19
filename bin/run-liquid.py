@@ -1,6 +1,7 @@
 #!/usr/bin/python2.7
 import rfk
 import rfk.liquidsoap
+import rfk.database
 import os
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
@@ -11,13 +12,12 @@ import time
 
 current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-rfk.config.read(os.path.join(current_dir,'etc','config.cfg'))
-
-engine = create_engine("%s://%s:%s@%s/%s?charset=utf8" % (rfk.config.get('database', 'engine'),
-                                                          rfk.config.get('database', 'username'),
-                                                          rfk.config.get('database', 'password'),
-                                                          rfk.config.get('database', 'host'),
-                                                          rfk.config.get('database', 'database')))
+rfk.init(current_dir)
+rfk.database.init_db("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
+                                               rfk.CONFIG.get('database', 'username'),
+                                               rfk.CONFIG.get('database', 'password'),
+                                               rfk.CONFIG.get('database', 'host'),
+                                               rfk.CONFIG.get('database', 'database')))
 process = None
 
 def cleanup():
@@ -31,15 +31,13 @@ def cleanup():
 
 if __name__ == '__main__':
     args = ['liquidsoap','-']
-    Session = sessionmaker(bind=engine)
-    session = Session()
     atexit.register(cleanup)
     process = subprocess.Popen(args,bufsize=-1,
                                stdin=subprocess.PIPE,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
     print 'starting'
-    print process.stdin.write(rfk.liquidsoap.gen_script(session, current_dir).encode('utf-8'))
+    print process.stdin.write(rfk.liquidsoap.gen_script(current_dir).encode('utf-8'))
     
     process.stdin.close()
     print 'started'
@@ -47,5 +45,3 @@ if __name__ == '__main__':
         print process.stdout.readline()
         #print process.stderr.readline()
         process.poll()
-    
-    session.close()

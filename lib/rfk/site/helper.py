@@ -8,7 +8,9 @@ import rfk.site
 import rfk
 import postmarkup
 import datetime
-from babel.dates import format_time
+from flaskext.babel import format_time
+from flask import request
+
 def nowPlaying():
     song = rfk.site.db.session.query(rfk.Song).filter(rfk.Song.end == None).first()
     if song:
@@ -25,7 +27,10 @@ def nowPlaying():
                 }
     else:
         return None
-    
+
+def menu():
+    return request.menu
+
 markup = postmarkup.PostMarkup()
 markup.default_tags()
 def bbcode(value):

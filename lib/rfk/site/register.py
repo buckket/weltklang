@@ -4,8 +4,8 @@ Created on Sep 1, 2012
 @author: teddydestodes
 '''
 from flask import Blueprint, render_template, request, jsonify
-from rfk.model import User
-from rfk.site import db
+from rfk.database.base import User
+from rfk.database import session
 register = Blueprint('register',__name__)
 
 
@@ -17,7 +17,7 @@ def form():
 def check():
     ret = {}
     try:
-        if User.get_user(db.session, request.form['username']) == None:
+        if User.get_user(username=request.form['username']) == None:
             ret['username'] = 'ok'
         else:
             ret['username'] = 'taken'
@@ -37,13 +37,13 @@ def finish():
             ret['password'] = 'invalid'
         elif len(request.form['stream_password']) == 0:
             ret['stream_password'] = 'invalid'
-        elif User.get_user(db.session, request.form['username']) == None:
+        elif User.get_user(username=request.form['username']) == None:
             ret['success'] = True
             user = User(request.form['username'],
                         User.make_password(request.form['password']),
                         User.make_password(request.form['stream_password']))
-            db.session.add(user)
-            db.session.commit()
+            session.add(user)
+            session.commit()
         else:
             ret['username'] = 'taken'
     except KeyError:

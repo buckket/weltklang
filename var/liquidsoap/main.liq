@@ -53,10 +53,16 @@ end
 def writemeta(mdata)
     ignore(system("$script meta #{quote(json_of(compact=true,mdata))}"))
 end
+def get_playlist_item() = 
+  result =
+    list.hd(
+      get_process_lines("$script playlist"))
+  request.create(result)
+end
 
 live = input.harbor(port= $port,on_connect = live_start, on_disconnect = live_stop, buffer=0., max = 10., auth = auth, "/live.ogg")
 
-playlist = request.dynamic({ request.create("bar:foo", indicators= get_process_lines("$script playlist"))})
+playlist = request.dynamic(get_playlist_item)
 playlist = drop_metadata(playlist)
 playlist = rewrite_metadata([("title","Kein Strömbernd")], playlist)
 playlist = rewrite_metadata([("artist","Radio freies Krautchan")], playlist)

@@ -1,34 +1,28 @@
-from flask import Flask, session, g, render_template, flash, redirect, url_for, request
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, session, g, render_template, flash, redirect, url_for, request, jsonify
 from flask.ext.login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flaskext.babel import Babel
+import datetime
 
-import rfk
+from rfk.database import session
+from rfk.database.base import User, Anonymous, News
 from . import helper
-from rfk.model import User, News
 
-app = Flask(__name__, template_folder='/home/teddydestodes/src/PyRfK/var/template/',
-                      static_folder='/home/teddydestodes/src/PyRfK/web_static/',
-                      static_url_path='/static')
-app.config['SQLALCHEMY_DATABASE_URI'] = "%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
-                                                              rfk.CONFIG.get('database', 'username'),
-                                                              rfk.CONFIG.get('database', 'password'),
-                                                              rfk.CONFIG.get('database', 'host'),
-                                                              rfk.CONFIG.get('database', 'database'))
+app = Flask(__name__)
 app.config['DEBUG'] = True
 app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europe/Berlin'
 app.config['BABEL_DEFAULT_LOCALE'] = 'de'
-#app.config['BABEL_LOCALE_PATH'] = 'de'
+app.config['BABEL_LOCALE_PATH'] = 'de'
 app.secret_key = 'PENISPENISPENISPENISPENIS'
 
 app.jinja_env.globals['nowPlaying'] = helper.nowPlaying
 app.jinja_env.filters['bbcode'] = helper.bbcode
 app.jinja_env.filters['timedelta'] = helper.timedelta
 
-db = SQLAlchemy(app)
-rfk.init_db(db.engine, db.Model.metadata)
-
 babel = Babel(app)
+
+@app.teardown_request
+def shutdown_session(exception=None):
+    session.remove()
 
 @babel.localeselector
 def get_locale():
@@ -38,26 +32,27 @@ def get_locale():
 
 @babel.timezoneselector
 def get_timezone():
-    user = getattr(g, 'user', None)
-    if user is not None:
-        return user.timezone
+    if request.cookies.get('timezone') is not None:
+        request.cookies.get('timezone')
+    if current_user is not None:
+        return current_user.timezone
 
 login_manager = LoginManager()
 login_manager.setup_app(app)
 
-login_manager.anonymous_user = rfk.model.Anonymous
+login_manager.anonymous_user = Anonymous
 login_manager.login_view = "login"
 login_manager.login_message = u"Please log in to access this page."
 #login_manager.refresh_view = "reauth"
 
 @login_manager.user_loader
 def load_user(userid):
-    return db.session.query(User).get(int(userid))
+    return User.get_user(id=int(userid))
 
 from . import user
 app.register_blueprint(user.user, url_prefix='/user')
 from . import show
-app.register_blueprint(show.show, url_prefix='/show')
+app.register_blueprint(show.show)
 from . import admin
 app.register_blueprint(admin.admin, url_prefix='/admin')
 from . import listen
@@ -66,18 +61,77 @@ from . import register
 app.register_blueprint(register.register)
 from rfk.api import api
 app.register_blueprint(api, url_prefix='/api')
+from . import backend
+app.register_blueprint(backend.backend, url_prefix='/backend')
 
-     
+def after_this_request(f):
+    if not hasattr(g, 'after_request_callbacks'):
+        g.after_request_callbacks = []
+    g.after_request_callbacks.append(f)
+    return f
+
+@app.after_request
+def call_after_request_callbacks(response):
+    for callback in getattr(g, 'after_request_callbacks', ()):
+        response = callback(response)
+    return response
+
 
 @app.before_request
-def lang():
+def before_request():
     if request.method == 'GET': 
         if request.args.get('lang') is not None and request.args.get('lang') != '':
-            current_user.locale = request.args.get('lang') 
+            current_user.locale = request.args.get('lang')
+            @after_this_request
+            def remember_locale(response):
+                response.set_cookie('locale', current_user.locale, expires=datetime.datetime.utcnow()+datetime.timedelta(days=365))
+                return response
+        if request.args.get('tz') is not None and request.args.get('tz') != '':
+            current_user.timezone = request.args.get('tz')
+            @after_this_request
+            def remember_timezone(response):
+                response.set_cookie('timezone', current_user.timezone)
+                return response
+
+@app.before_request
+def make_menu():
+    request.menu = {}
+    for bpname in app.blueprints.keys():
+        try:
+            request.menu[bpname] = app.blueprints[bpname].create_menu()
+        except AttributeError:
+            pass
+
+@app.route('/timezones')
+def timezones():
+    import pytz
+    regions = {}
+    for tz in pytz.common_timezones:
+        zone = tz.split('/',1)
+        if zone[0] not in regions.keys():
+            regions[zone[0]] = []
+        try:
+            regions[zone[0]].append(zone[1])
+        except IndexError:
+            pass
+    response = jsonify(regions);
+    return response
+
+locales = {'de': {'name':'Bernd','img':'/static/img/cb/de.png'},
+           'en': {'name':'English','img':'/static/img/cb/gb.png'}}
+@app.route('/locales')
+def get_locales():
+    response = jsonify(locales)
+    return response
+
+@app.route('/locale/<locale>')
+def get_localeinfo(locale):
+    response = jsonify(locales[locale])
+    return response
 
 @app.route('/')
 def index():
-    news = db.session.query(News).all()
+    news = News.query.all()
     #print app.template_folder
     return render_template('index.html', news=news)
 
@@ -90,8 +144,8 @@ def shutdown():
 def login():
     if request.method == "POST" and "username" in request.form:
         username = request.form["username"]
-        user = rfk.User.get_user(db.session, username=username)
-        if user and user.check_password(db.session, password=request.form['password']):
+        user = User.get_user(username=username)
+        if user and user.check_password(password=request.form['password']):
             user.authenticated = True
             remember = request.form.get("remember", "no") == "yes"
             if login_user(user, remember=remember):

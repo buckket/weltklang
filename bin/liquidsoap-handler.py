@@ -18,30 +18,71 @@ import json
 import os
 import sys
 import base64
-from sqlalchemy import *
-from sqlalchemy.orm import sessionmaker
 from datetime import datetime
-
+import rfk.database 
+from rfk.database.base import User, Log
+from rfk.database.show import Show, Tag, UserShow
+from rfk.database.track import Track
+from rfk.liquidsoap import LiquidInterface
+from rfk import exc as rexc
 
 username_delimiter = '|'
 
-current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-rfk.config.read(os.path.join(current_dir, 'etc', 'config.cfg'))
+def log(message):
+    """shorthand method for writing log to database
+    
+    Keyword arguments:
+    message -- string to write
+    
+    """
+    log = Log(message=message)
+    rfk.database.session.add(log)
+    rfk.database.session.commit()
 
-def doAuth(username, password, session):
+def kick():
+    """shorthand method for kicking the currently connected user  
+    """
+    liquidsoap = LiquidInterface()
+    liquidsoap.connect()
+    liquidsoap.kick_harbor()
+    
+def doAuth(username, password):
+    """authenticates the user
+    this function will also disconnect the current user
+    if the user to be authenticated has a show registered.
+    if that happened this function will print false to the
+    user since we need a graceperiod to actually disconnect
+    the other user.
+    
+    Keyword arguments:
+    username
+    password
+    
+    """
     if username == 'source':
         username, password = password.split(username_delimiter)
-    user = session.query(rfk.User).filter(rfk.User.name == username).first();
-    if user != None and user.checkStreamPassword(password):
-        sys.stdout.write('true')
-    else:
-        sys.stdout.write('false')
+    try:
+        user = User.authenticate(username, password)
+        show = Show.get_current_show(user)
+        if show is not None:
+            kick()
+            log('kicked user')
+            sys.stdout.write('false')
+        else:
+            log('accepted auth for %s' %(username,))
+            sys.stdout.write('true')
+        return
+    except rexc.base.InvalidPasswordException, rexc.base.UserNotFoundException:
+        pass
+    log('rejected auth for %s' %(username,))
+    sys.stdout.write('false')
 
-def doMetaData(data, session):
+def doMetaData(data):
+    log('meta %s' % (json.dumps(data),))
     if 'userid' not in data or data['userid'] == 'none':
         print 'no userid'
         return
-    user = session.query(rfk.User).get(int(data['userid']))
+    user = User.get_user(id=data['userid'])
     if user == None:
         print 'user not found'
         return
@@ -53,19 +94,19 @@ def doMetaData(data, session):
             artist = song[0]
         if ('title' not in data) or (len(data['title'].strip()) == 0):
             title = song[1]
-    shows = rfk.Show.getCurrentShows(session, user)
-    currshow = None
-    for show in shows:
-        if currshow and show.end is None:
-            print show.show
-            show.end = datetime.today()
-            break
-        currshow = show
-    song = rfk.Song.beginSong(session, datetime.today(), artist, title, currshow)
-    session.add(song)
-    session.commit()
+    show = Show.get_current_show(user)
+    track = Track.new_track(show, artist, title)
+    rfk.database.session.add(track)
+    rfk.database.session.commit()
 
-def doConnect(data, session):
+def doConnect(data):
+    """handles a connect from liquidsoap
+    
+    Keyword arguments:
+    data -- list of headers
+    
+    """
+    log('auth request %s' % (json.dumps(data),))
     auth = data['Authorization'].strip().split(' ')
     if auth[0].lower() == 'basic':
         a = base64.b64decode(auth[1]).split(':', 1)
@@ -73,43 +114,55 @@ def doConnect(data, session):
             a = a[1].split(username_delimiter, 1)
         username = a[0]
         password = a[1]
-    user = session.query(rfk.User).filter(rfk.User.name == username).first();
-    if user != None and user.checkStreamPassword(password):
-        shows = rfk.Show.getCurrentShows(session, user)
-        if len(shows) == 0:
-            show = rfk.Show(begin=datetime.today())
-            session.add(show)
-            show.users.append(user)
-            if True:
+    else:
+        kick()
+        return 
+    try:
+        user = User.authenticate(username, password)
+        show = Show.get_current_show(user)
+        if show is None:
+            show = Show()
+            if user.get_setting(code='use_icy'):
                 if 'ice-genre' in data:
-                    show.updateTags(session, data['ice-genre'])
+                    show.add_tags(Tag.parse_tags(data['ice-genre']))
                 if 'ice-name' in data:
                     show.name = data['ice-name']
                 if 'ice-description' in data:
-                    show.description = data['ice-description']
-            session.commit()
-        else:
-            for show in shows:
-                pass
+                    show.description = data['ice-decription']
+            else:
+                show.add_tags(Tag.parse_tags(user.get_setting(code='show_def_tags')))
+                show.description = user.get_setting(code='show_def_desc')
+                show.name = user.get_setting(code='show_def_name')
+            show.flags = Show.FLAGS.UNPLANNED
+            us = show.add_user(user)
+            us.status = UserShow.STATUS.STREAMING
+            rfk.database.session.commit()
+        log('accepted auth for %s' %(user.username,))
         print user.user
+    except rexc.base.InvalidPasswordException, rexc.base.UserNotFoundException:
+        log('rejected auth for %s' %(username,))
+        kick()
 
-def doDisconnect(userid, session):
+def doDisconnect(userid):
     if userid == "none":
         print "Whooops no userid?"
         return
     
-    user = session.query(rfk.User).get(int(userid))
+    user = User.get_user(id=int(userid))
     if user:
-        shows = rfk.Show.getCurrentShows(session, user)
-        for show in shows:
-            show.endShow()
-        session.commit()
+        usershows = UserShow.query.filter(UserShow.user == user,
+                                          UserShow.status == UserShow.STATUS.STREAMING).all()
+        for usershow in usershows:
+            usershow.status = UserShow.STATUS.STREAMED
+            if usershow.show.end is None:
+                usershow.show.end = datetime.utcnow()
+        rfk.database.session.commit()
     else:
         print "no user found"
 
-def doPlaylist(session):
-    item = rfk.Playlist.getCurrentItem(session)
-    print os.path.join(current_dir, 'var', 'music', item.file)
+def doPlaylist():
+    #item = rfk.Playlist.getCurrentItem(session)
+    print os.path.join(current_dir, 'var', 'music', 'loop.mp3')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyRfK Interface for liquidsoap',
@@ -121,7 +174,7 @@ if __name__ == '__main__':
     authparser.add_argument('username')
     authparser.add_argument('password')
     
-    metadataparser = subparsers.add_parser('metadata', help='a help')
+    metadataparser = subparsers.add_parser('meta', help='a help')
     metadataparser.add_argument('data', metavar='data', help='mostly some json encoded string from liquidsoap')
     connectparser = subparsers.add_parser('connect', help='a help')
     connectparser.add_argument('data', metavar='data', help='mostly some json encoded string from liquidsoap')
@@ -130,24 +183,25 @@ if __name__ == '__main__':
     playlistparser = subparsers.add_parser('playlist', help='a help')
     
     args = parser.parse_args()
-    engine = create_engine("%s://%s:%s@%s/%s?charset=utf8" % (rfk.config.get('database', 'engine'),
-                                                              rfk.config.get('database', 'username'),
-                                                              rfk.config.get('database', 'password'),
-                                                              rfk.config.get('database', 'host'),
-                                                              rfk.config.get('database', 'database')), echo=False)
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    
+    current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    rfk.init(current_dir)
+    rfk.database.init_db("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
+                                                              rfk.CONFIG.get('database', 'username'),
+                                                              rfk.CONFIG.get('database', 'password'),
+                                                              rfk.CONFIG.get('database', 'host'),
+                                                              rfk.CONFIG.get('database', 'database')))
     if args.command == 'auth':
-        doAuth(args.username, args.password, session)
-    elif args.command == 'metadata':
+        doAuth(args.username, args.password)
+    elif args.command == 'meta':
         data = json.loads(args.data);
-        doMetaData(data, session)
+        doMetaData(data)
     elif args.command == 'connect':
         data = json.loads(args.data);
-        doConnect(data, session)
+        doConnect(data)
     elif args.command == 'disconnect':
         data = json.loads(args.data);
-        doDisconnect(data, session)
+        doDisconnect(data)
     elif args.command == 'playlist':
-        doPlaylist(session)
-    session.close()
+        doPlaylist()
+    #session.remove()
