@@ -123,6 +123,23 @@ class User(Base):
             return True
         except exc.NoResultFound:
             return False
+    
+    def get_setting(self, setting=None, code=None):
+        assert setting or code
+        if setting is None:
+            setting = Setting.get_setting(code)
+        try:
+            us = UserSetting.query.filter(UserSetting.user == self,
+                                          UserSetting.setting == setting).one()
+            return us.get_value()
+        except exc.NoResultFound:
+            return None
+    
+    def set_setting(self, value, setting=None, code=None):
+        assert setting or code
+        if setting is None:
+            setting = Setting.get_setting(code)
+        UserSetting.set_value(self, setting, value)
 
 class Setting(Base):
     __tablename__ = 'settings'
@@ -134,41 +151,49 @@ class Setting(Base):
     
     @staticmethod
     def get_setting(code):
-        return Setting.query.filter(Permission.code == code).one()
+        return Setting.query.filter(Setting.code == code).one()
     
     @staticmethod
-    def add_setting(code,name):
+    def add_setting(code, name, val_type):
         try:
-            return Setting.query.filter(Permission.code == code).one()
+            return Setting.query.filter(Setting.code == code).one()
         except exc.NoResultFound:
-            return Setting(code=code, name=name)
+            return Setting(code=code, name=name, val_type=val_type)
 
 
 class UserSetting(Base):
     __tablename__ = 'user_settings'
     userSetting = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     user_id = Column("user", Integer(unsigned=True), ForeignKey('users.user',
-                                                 onupdate="CASCADE",
-                                                 ondelete="RESTRICT"))
+                                                     onupdate="CASCADE",
+                                                     ondelete="RESTRICT"))
     user = relationship("User", backref=backref('settings'))
     setting_id = Column("setting", Integer(unsigned=True),
-                           ForeignKey('settings.setting',
-                                      onupdate="CASCADE",
-                                      ondelete="RESTRICT"))
+                                ForeignKey('settings.setting',
+                                           onupdate="CASCADE",
+                                           ondelete="RESTRICT"))
     setting = relationship("Setting")
     val_int = Column(Integer)
     val_str = Column(String(255))
     
-    def __init__(self, setting, val_int=None, val_str=None):
-        self.setting = setting
+    def get_value(self):
         if self.setting.val_type == Setting.TYPES.INT:
-            if val_int is None:
-                raise rexc.base.InvalidSettingException('value should be an integer')
-            self.val_int = val_int
+            return self.val_int
         elif self.setting.val_type == Setting.TYPES.STR:
-            if val_int is None:
-                raise rexc.base.InvalidSettingException('value should be a string')
-            self.val_str = val_str
+            return self.val_str
+ 
+    @staticmethod
+    def set_value(user, setting, value):
+        try:
+            us = UserSetting.query.filter(UserSetting.user == user,
+                                          UserSetting.setting == setting).one()
+        except exc.NoResultFound:
+            us = UserSetting(user=user, setting=setting)
+        if us.setting.val_type == Setting.TYPES.INT:
+            us.val_int = value
+        elif us.setting.val_type == Setting.TYPES.STR:
+            us.val_str = value
+            
 
 class Permission(Base):
     __tablename__ = 'permissions'
@@ -263,4 +288,10 @@ class ApiKey(Base):
         apikey.counter += 1
         apikey.access = datetime.utcnow()
         return apikey
+    
+class Log(Base):
+    __tablename__ = 'log'
+    log = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    message = Column(Text)
     

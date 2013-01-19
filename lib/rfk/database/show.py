@@ -61,7 +61,7 @@ class Show(Base):
     @staticmethod
     def get_current_show(user=None):
         """returns the current show"""
-        query = Show.query.join(UserShow).filter(between(datetime.utcnow(), Show.begin, Show.end))
+        query = Show.query.join(UserShow).filter(or_(between(datetime.utcnow(), Show.begin, Show.end), Show.end == None))
         if user:
             query = query.filter(UserShow.user == user)
         return query.first()
@@ -110,8 +110,9 @@ class Tag(Base):
     def parse_tags(tags):
         """parses a space separated list of tags and returns a list of Tag objects"""
         r = []
-        for tag in tags.split(' '):
-            r.append(Tag.get_tag(tag))
+        if tags is not None and len(tags) > 0:
+            for tag in tags.split(' '):
+                r.append(Tag.get_tag(tag))
         return r
 
 class ShowTag(Base):

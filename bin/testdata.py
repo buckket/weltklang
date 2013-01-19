@@ -4,7 +4,7 @@ from pprint import pprint
 import datetime
 import rfk
 import rfk.database
-from rfk.database.base import User, News, ApiKey
+from rfk.database.base import User, News, ApiKey, Setting
 from rfk.database.show import Show, Tag
 from rfk.database.track import Track
 from rfk.database.streaming import Stream, Relay
@@ -120,6 +120,16 @@ def add_relays():
     rfk.database.session.add(relay)
     rfk.database.session.commit()
 
+def add_settings():
+    settings = []
+    settings.append(Setting.add_setting('use_icy', 'Use ICY-Tags for unplanned Shows', Setting.TYPES.INT))
+    settings.append(Setting.add_setting('show_def_name', 'Default Name for new Shows', Setting.TYPES.STR))
+    settings.append(Setting.add_setting('show_def_desc', 'Default Description for new Shows', Setting.TYPES.STR))
+    settings.append(Setting.add_setting('show_def_tags', 'Default Tags for new Shows', Setting.TYPES.STR))
+    for setting in settings:
+        rfk.database.session.add(setting)
+    rfk.database.session.commit()    
+    
 if __name__ == '__main__':
     current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     rfk.init(current_dir)
@@ -128,11 +138,12 @@ if __name__ == '__main__':
                                                             rfk.CONFIG.get('database', 'password'),
                                                             rfk.CONFIG.get('database', 'host'),
                                                             rfk.CONFIG.get('database', 'database')))
-    add_users()
-    add_shows()
-    add_tracks()
-    add_streams()
-    add_relays()
-    add_news()
-    add_apikey()
+    add_settings()
+    #add_users()
+    #add_shows()
+    #add_tracks()
+    #add_streams()
+    #add_relays()
+    #add_news()
+    #add_apikey()
     
