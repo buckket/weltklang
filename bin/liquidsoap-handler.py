@@ -22,6 +22,7 @@ from datetime import datetime
 import rfk.database 
 from rfk.database.base import User, Log
 from rfk.database.show import Show, Tag, UserShow
+from rfk.database.track import Track
 from rfk.liquidsoap import LiquidInterface
 from rfk import exc as rexc
 
@@ -76,7 +77,8 @@ def doAuth(username, password):
     log('rejected auth for %s' %(username,))
     sys.stdout.write('false')
 
-def doMetaData(data, session):
+def doMetaData(data):
+    log('meta %s' % (json.dumps(data),))
     if 'userid' not in data or data['userid'] == 'none':
         print 'no userid'
         return
@@ -92,17 +94,10 @@ def doMetaData(data, session):
             artist = song[0]
         if ('title' not in data) or (len(data['title'].strip()) == 0):
             title = song[1]
-    shows = rfk.Show.getCurrentShows(session, user)
-    currshow = None
-    for show in shows:
-        if currshow and show.end is None:
-            print show.show
-            show.end = datetime.today()
-            break
-        currshow = show
-    song = rfk.Song.beginSong(session, datetime.today(), artist, title, currshow)
-    session.add(song)
-    session.commit()
+    show = Show.get_current_show(user)
+    track = Track.new_track(show, artist, title)
+    rfk.database.session.add(track)
+    rfk.database.session.commit()
 
 def doConnect(data):
     """handles a connect from liquidsoap
@@ -179,7 +174,7 @@ if __name__ == '__main__':
     authparser.add_argument('username')
     authparser.add_argument('password')
     
-    metadataparser = subparsers.add_parser('metadata', help='a help')
+    metadataparser = subparsers.add_parser('meta', help='a help')
     metadataparser.add_argument('data', metavar='data', help='mostly some json encoded string from liquidsoap')
     connectparser = subparsers.add_parser('connect', help='a help')
     connectparser.add_argument('data', metavar='data', help='mostly some json encoded string from liquidsoap')
@@ -198,12 +193,10 @@ if __name__ == '__main__':
                                                               rfk.CONFIG.get('database', 'database')))
     if args.command == 'auth':
         doAuth(args.username, args.password)
-    elif args.command == 'metadata':
-        
+    elif args.command == 'meta':
         data = json.loads(args.data);
         doMetaData(data)
     elif args.command == 'connect':
-        print args.data
         data = json.loads(args.data);
         doConnect(data)
     elif args.command == 'disconnect':

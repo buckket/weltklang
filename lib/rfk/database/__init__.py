@@ -7,9 +7,9 @@ engine = None
 session = None
 
 
-def init_db(db_uri):
+def init_db(db_uri, debug=False):
     global session, engine
-    engine = create_engine(db_uri)
+    engine = create_engine(db_uri, echo=debug)
     session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=True,
                                          bind=engine))

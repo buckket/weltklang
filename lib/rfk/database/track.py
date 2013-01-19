@@ -40,7 +40,6 @@ class Track(Base):
     def new_track(show, artist, title):
         """adds a new Track to database and ends the current track (if any)"""
         current_track = Track.current_track()
-        print current_track
         if current_track:
             current_track.end_track()
         title = Title.add_title(artist, title)
