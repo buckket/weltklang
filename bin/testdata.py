@@ -139,11 +139,11 @@ if __name__ == '__main__':
                                                             rfk.CONFIG.get('database', 'host'),
                                                             rfk.CONFIG.get('database', 'database')))
     add_settings()
-    #add_users()
-    #add_shows()
-    #add_tracks()
-    #add_streams()
-    #add_relays()
-    #add_news()
-    #add_apikey()
+    add_users()
+    add_shows()
+    add_tracks()
+    add_streams()
+    add_relays()
+    add_news()
+    add_apikey()
     

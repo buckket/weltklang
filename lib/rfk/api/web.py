@@ -93,7 +93,7 @@ def current_show():
     """
     
     clauses = []
-    clauses.append((Show.begin <= datetime.utcnow()) & ((Show.end >= datetime.utcnow()) | (Show.end == None)))
+    clauses.append((between(datetime.utcnow(), Show.begin, Show.end)) | (Show.end == None))
     result = Show.query.join(UserShow).join(User).filter(*clauses).order_by(Show.begin.desc(), Show.end.asc()).all()
     
     data = {'current_show': {'shows': {}}}
