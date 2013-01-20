@@ -61,6 +61,8 @@ from . import register
 app.register_blueprint(register.register)
 from rfk.api import api
 app.register_blueprint(api, url_prefix='/api')
+from rfk.feeds import feeds
+app.register_blueprint(feeds, url_prefix='/feeds')
 from . import backend
 app.register_blueprint(backend.backend, url_prefix='/backend')
 
