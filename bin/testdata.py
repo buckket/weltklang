@@ -132,6 +132,8 @@ def add_settings():
     settings.append(Setting.add_setting('show_def_name', 'Default Name for new Shows', Setting.TYPES.STR))
     settings.append(Setting.add_setting('show_def_desc', 'Default Description for new Shows', Setting.TYPES.STR))
     settings.append(Setting.add_setting('show_def_tags', 'Default Tags for new Shows', Setting.TYPES.STR))
+    settings.append(Setting.add_setting('locale', 'Locale', Setting.TYPES.STR))
+    settings.append(Setting.add_setting('timezone', 'Timezone', Setting.TYPES.STR))
     for setting in settings:
         rfk.database.session.add(setting)
     rfk.database.session.commit()    
@@ -145,11 +147,11 @@ if __name__ == '__main__':
                                                             rfk.CONFIG.get('database', 'host'),
                                                             rfk.CONFIG.get('database', 'database')))
     add_settings()
-    add_users()
-    add_shows()
-    add_tracks()
-    add_streams()
-    add_relays()
-    add_news()
-    add_apikey()
+    #add_users()
+    #add_shows()
+    #add_tracks()
+    #add_streams()
+    #add_relays()
+    #add_news()
+    #add_apikey()
     
