@@ -4,26 +4,24 @@ Created on 14.05.2012
 @author: teddydestodes
 '''
 
-import rfk.site
-import rfk
+from rfk.database.track import Track
 import postmarkup
 import datetime
 from flaskext.babel import format_time
 from flask import request
 
 def nowPlaying():
-    song = rfk.site.db.session.query(rfk.Song).filter(rfk.Song.end == None).first()
-    if song:
-        title = "%s - %s" % (song.title.artist.name,song.title.name)
+    track = Track.current_track()
+    if track:
+        title = "%s - %s" % (track.title.artist.name,track.title.name)
         users = []
-        for user in song.show.users:
-            users.append(user.name)
-        show = song.show
+        for usershow in track.show.users:
+            users.append(usershow)
         return {
                 'title': title,
                 'users': users,
-                'showname': show.name,
-                'showdescription': show.description
+                'showname': track.show.name,
+                'showdescription':track.show.description
                 }
     else:
         return None

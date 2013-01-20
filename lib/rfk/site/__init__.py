@@ -27,7 +27,7 @@ def shutdown_session(exception=None):
 @babel.localeselector
 def get_locale():
     if current_user is not None:
-        return current_user.locale
+        return current_user.get_locale()
     return request.accept_languages.best_match(['de', 'en'])
 
 @babel.timezoneselector
@@ -35,7 +35,7 @@ def get_timezone():
     if request.cookies.get('timezone') is not None:
         request.cookies.get('timezone')
     if current_user is not None:
-        return current_user.timezone
+        return current_user.get_timezone()
 
 login_manager = LoginManager()
 login_manager.setup_app(app)

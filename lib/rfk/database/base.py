@@ -20,6 +20,12 @@ class Anonymous(AnonymousUser):
         AnonymousUser.__init__(self)
         self.locale = 'de'
         self.timezone = 'Europe/Berlin'
+        
+    def get_locale(self):
+        return self.locale
+    
+    def get_timezone(self):
+        return self.timezone
 
 class User(Base):
     __tablename__ = 'users'
@@ -40,6 +46,12 @@ class User(Base):
     
     def is_authenticated(self):
         return True
+    
+    def get_locale(self):
+        return self.get_setting(code='locale')
+    
+    def get_timezone(self):
+        return self.get_setting(code='timezone')
     
     @staticmethod
     def authenticate(username,password):
@@ -242,6 +254,7 @@ class Ban(Base):
 class News(Base):
     __tablename__ = 'news'
     news = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
+    time = Column(DateTime, default=datetime.utcnow)
     user_id = Column("user", Integer(unsigned=True), ForeignKey('users.user',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))

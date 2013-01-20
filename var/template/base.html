@@ -27,14 +27,17 @@
         {% include "menu.html"%}
 
         <div class="container">
-
-            {% include "nowplaying.html"%}
-            
-
-            {% block content %}
-            <div class="hero"><h1>Nothing here</h1></div>
-            {% endblock %}
-
+			<div class="row">
+				<div class="span3"></div>
+				<div class="span9">
+					<div class="hero-unit">{% include "nowplaying.html"%}</div>
+					{% block content %}
+					<div class="row">
+						<div class="hero-unit">Nothing here</div>
+					</div>
+            		{% endblock %}
+				</div>
+			</div>
             <hr>
 
             <footer>
