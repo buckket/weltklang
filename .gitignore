@@ -2,4 +2,3 @@ data.db
 .settings
 *.pyc
 *.mo
-/web_static
