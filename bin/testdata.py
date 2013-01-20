@@ -29,11 +29,17 @@ def add_shows():
     shows.append(show)
     
     show = Show(name='Testsendung #2', description='Hurf Durf')
-    show.begin = datetime.datetime.utcnow()
-    show.end = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+    show.begin = datetime.datetime.utcnow() + datetime.timedelta(days=1)
+    show.end = datetime.datetime.utcnow() + datetime.timedelta(days=1, hours=1)
     show.flags = Show.FLAGS.PLANNED
     shows.append(show)
-    
+
+    show = Show(name='Testsendung #3', description='gooby pls')
+    show.begin = datetime.datetime.utcnow() + datetime.timedelta(days=2)
+    show.end = datetime.datetime.utcnow() + datetime.timedelta(days=2, hours=1)
+    show.flags = Show.FLAGS.PLANNED
+    shows.append(show)
+        
     for show in shows:
         user = User.get_user(username='teddydestodes')
         show.add_user(user)
