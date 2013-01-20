@@ -32,6 +32,7 @@ def ical():
     if result:
         for show in result:
             event = Event()
+            event.add('uid', show.show)
             event.add('summary', show.name)
             event.add('description', show.description)
             event.add('dtstart', utc.localize(show.begin))
