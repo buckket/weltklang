@@ -96,7 +96,7 @@ def current_show():
     clauses.append((between(datetime.utcnow(), Show.begin, Show.end)) | (Show.end == None))
     result = Show.query.join(UserShow).join(User).filter(*clauses).order_by(Show.begin.desc(), Show.end.asc()).all()
     
-    data = {'current_show': {'shows': {}}}
+    data = {'current_show': {}}
     if result:
         for show in result:
             
@@ -109,11 +109,12 @@ def current_show():
                 dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status })
                 
             if (show.flags & Show.FLAGS.UNPLANNED and len(result) == 2) or len(result) == 1:
-                data['current_show']['show'] = show.show
+                target = 'running_show'
             if (show.flags & Show.FLAGS.PLANNED and len(result) == 2):
-                data['current_show']['planned'] = show.show
+                target = 'planned_show'
                 
-            data['current_show']['shows'][show.show] = {
+            data['current_show'][target] = {
+                'show_id': show.show,
                 'show_name': show.name,
                 'show_description': show.description,
                 'show_flags': show.flags,
@@ -153,7 +154,7 @@ def next_shows():
         
     result = Show.query.join(UserShow).join(User).filter(*clauses).order_by(Show.begin.asc()).limit(limit).all()
     
-    data = {'next_shows': {'show': [], 'shows': {}}}
+    data = {'next_shows': {'shows': []}}
     if result:
         for show in result:
             
@@ -164,17 +165,17 @@ def next_shows():
             for usershow in show.users:
                 dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status })
                 
-            data['next_shows']['show'].append(show.show)
-
-            data['next_shows']['shows'][show.show] = {
+            data['next_shows']['shows'].append({
+                'show_id': show.show,
                 'show_name': show.name,
                 'show_description': show.description,
                 'show_flags': show.flags,
                 'show_begin': show.begin,
                 'show_end': show.end,
                 'dj': dj
-            }
+            })
     else:
         data = {'next_shows': None}
     return jsonify(wrapper(data))
+    
     
