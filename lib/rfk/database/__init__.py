@@ -1,10 +1,27 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, types
 from sqlalchemy.orm import relationship, sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
+import pytz
 
 Base = declarative_base()
 engine = None
 session = None
+
+
+class UTCDateTime(types.TypeDecorator):
+
+    impl = types.DateTime
+
+    def process_bind_param(self, value, engine):
+        if value is not None:
+            if value.tzinfo is None:
+                return pytz.utc.localize(value)
+            else:
+                return pytz.utc.normalize(value.astimezone(pytz.utc))
+
+    def process_result_value(self, value, engine):
+        if value is not None:
+            return pytz.utc.localize(value)
 
 
 def init_db(db_uri, debug=False):
