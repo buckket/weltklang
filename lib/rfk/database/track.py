@@ -2,15 +2,15 @@ from sqlalchemy import *
 from sqlalchemy.orm import relationship, backref, exc
 from sqlalchemy.dialects.mysql import INTEGER as Integer
 
-from rfk.database import Base
+from rfk.database import Base, UTCDateTime
 from datetime import datetime
 
 class Track(Base):
     """Database representation of a Track played in a show"""
     __tablename__ = 'tracks'
     track = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    begin = Column(DateTime())
-    end = Column(DateTime())
+    begin = Column(UTCDateTime())
+    end = Column(UTCDateTime())
     title_id = Column("title", Integer(unsigned=True),
                                ForeignKey('titles.title',
                                           onupdate="CASCADE",
@@ -30,20 +30,27 @@ class Track(Base):
         except exc.NoResultFound:
             return None
     
-    def end_track(self):
+    def end_track(self, end=None):
         """ends the track and updates length in artist/title DB"""
-        self.end = datetime.utcnow()
+        if end is None:
+            self.end = datetime.utcnow()
+        else:
+            self.end = end
+        print 'b', self.begin,'e', self.end
         length = self.end - self.begin
         self.title.update_length(length.total_seconds())
     
     @staticmethod
-    def new_track(show, artist, title):
+    def new_track(show, artist, title, begin=None):
         """adds a new Track to database and ends the current track (if any)"""
-        current_track = Track.current_track()
-        if current_track:
-            current_track.end_track()
+        if begin is None:
+            current_track = Track.current_track()
+            if current_track:
+                current_track.end_track()
         title = Title.add_title(artist, title)
-        return Track(title=title, begin=datetime.utcnow(), show=show)
+        if begin is None:
+            begin = datetime.utcnow()
+        return Track(title=title, begin=begin, show=show)
     
 class Title(Base):
     """Artist/Title combination"""
