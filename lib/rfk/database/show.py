@@ -4,7 +4,7 @@ from sqlalchemy.sql.expression import between
 from sqlalchemy.dialects.mysql import INTEGER as Integer 
 
 from datetime import datetime
-from rfk.database import Base
+from rfk.database import Base, UTCDateTime
 from rfk import ENUM, SET
 
 class Show(Base):
@@ -16,9 +16,9 @@ class Show(Base):
                                                  ondelete="RESTRICT"))
     series = relationship("Series", backref=backref('shows'))
     logo = Column(String(255))
-    begin = Column(DateTime, default=datetime.utcnow)
-    end = Column(DateTime)
-    updated = Column(DateTime, default=datetime.utcnow)
+    begin = Column(UTCDateTime, default=datetime.utcnow)
+    end = Column(UTCDateTime)
+    updated = Column(UTCDateTime, default=datetime.utcnow)
     name = Column(String(50))
     description = Column(Text)
     flags = Column(Integer(unsigned=True), default=0)

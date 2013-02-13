@@ -4,7 +4,7 @@ from sqlalchemy.dialects.mysql import INTEGER as Integer
 
 from datetime import datetime
 
-from rfk.database import Base
+from rfk.database import Base, UTCDateTime
 from rfk import ENUM, SET, CONFIG
 import rfk.icecast
 import netaddr
@@ -14,8 +14,8 @@ class Listener(Base):
     """database representation of a Listener"""
     __tablename__ = 'listeners'
     listener = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    connect = Column(DateTime)
-    disconnect = Column(DateTime)
+    connect = Column(UTCDateTime)
+    disconnect = Column(UTCDateTime)
     location = Column(String(10))
     address = Column(Integer(unsigned=True))
     client = Column(Integer(unsigned=True))
