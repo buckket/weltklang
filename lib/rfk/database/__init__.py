@@ -4,9 +4,8 @@ from sqlalchemy.ext.declarative import declarative_base
 import pytz
 
 Base = declarative_base()
-engine = None
 session = None
-
+engine = None
 
 class UTCDateTime(types.TypeDecorator):
 
@@ -23,6 +22,10 @@ class UTCDateTime(types.TypeDecorator):
         if value is not None:
             return pytz.utc.localize(value)
 
+import base
+import show
+import streaming
+import track
 
 def init_db(db_uri, debug=False):
     global session, engine
@@ -31,10 +34,6 @@ def init_db(db_uri, debug=False):
                                          autoflush=True,
                                          bind=engine))
     Base.query = session.query_property()
-    import base
-    import show
-    import streaming
-    import track
     Base.metadata.create_all(bind=engine)
     Base.query = session.query_property()
     

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}<h1>{% trans %}Listeners{% endtrans %}</h1>
+<div class="row-fluid">
+<div class="span12" id="listenergraph" style="height:150px;">
+</div>
+</div>
+<script>
+$(function() {
+	function onDataReceived(series) {
+
+	    var data = [];
+	    
+        
+        var options = {
+                series: {
+                    shadowSize: 0
+                },
+                lines: {
+                    show: true,
+                    steps: true
+                },
+                xaxis: {
+                    mode: "time",
+                    //minTickSize: [1, "year"],
+                    //min: (new Date(2010, 0, 1)).getTime(),
+                    //max: (new Date(2011, 0, 1)).getTime()
+                },
+                grid: {
+                	markings: []
+                }
+            };
+        $.each(series['data'], function(index,value){
+            data.push([value['ts']*1000,value['c']])
+        });
+        $.each(series['shows'], function(index,value){
+            options.grid.markings.push({color: '#000', lineWidth: 1, xaxis: { from: value['b']*1000, to: value['e']*1000 }});
+        });
+        var plot = $.plot("#listenergraph", [data], options);
+        var placeholder = $("#listenergraph");
+        $.each(series['shows'], function(index,value){
+        	o = plot.pointOffset({ x: value['b']*1000, y: 10});
+            placeholder.append("<div style='position:absolute;left:" + (o.left + 4) + "px;top:" + o.top + "px;color:#666;font-size:smaller'>"+ value['name'] +"</div>");
+        });
+        setTimeout(poll,1000);
+    }
+	
+	function poll() {
+		$.ajax({
+	        url: '/listenerdata',
+	        type: "GET",
+	        dataType: "json",
+	        success: onDataReceived
+	    });
+	}
+	poll();
+});
+</script>
+{% endblock %}
+

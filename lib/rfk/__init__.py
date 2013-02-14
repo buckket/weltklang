@@ -60,4 +60,4 @@ class ENUM(Set):
 
 
 def init(basepath):
-    CONFIG.read(os.path.join(basepath, 'etc', 'config.cfg'))
+    CONFIG.read(os.path.join(basepath,'etc', 'config.cfg'))

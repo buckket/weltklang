@@ -5,6 +5,7 @@ import datetime
 
 from rfk.database import session
 from rfk.database.base import User, Anonymous, News
+
 from . import helper
 
 app = Flask(__name__)
@@ -166,7 +167,35 @@ def logout():
     flash("Logged out.")
     return redirect(url_for("index"))
 
+from rfk.database.streaming import ListenerStats
+from rfk.database.show import Show
+from sqlalchemy.sql.expression import between
+import pytz
 
+@app.route('/listeners')
+def listeners():
+    return render_template("listenergraph.html")
+
+@app.route("/listenerdata", methods=['GET'])
+def listenerdata():
+    lls = ListenerStats.query.order_by(ListenerStats.timestamp.desc()).limit(1).scalar()
+    stop = lls.timestamp
+    start = stop - datetime.timedelta(days=2)
+    ls = ListenerStats.get(start)
+    ret = {'data':[], 'shows':[]}
+    c = 0
+    for stat in ls:
+        ret['data'].append({'sr':stat.stream_relay_id,
+                    'ts':int(stat.timestamp.strftime("%s")),
+                    'c':int(stat.count)})
+        c+=1
+    shows = Show.query.filter(between(Show.begin, start, stop)| between(Show.end,start,stop)).order_by(Show.begin.asc()).all()
+    for show in shows:
+        ret['shows'].append({'name': show.name,
+                             'b':int(show.begin.strftime("%s")),
+                             'e':int(show.end.strftime("%s")),})
+    return jsonify(ret)
+    
 
 def shutdown_server():
     func = request.environ.get('werkzeug.server.shutdown')

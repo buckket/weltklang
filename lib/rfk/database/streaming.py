@@ -6,6 +6,7 @@ from datetime import datetime
 
 from rfk.database import Base, UTCDateTime
 from rfk import ENUM, SET, CONFIG
+import rfk.database
 import rfk.icecast
 import netaddr
 
@@ -203,6 +204,7 @@ class StreamRelay(Base):
             
 class ListenerStats(Base):
     __tablename__ = 'listenerstats'
+    listenerstat = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     stream_relay_id = Column("stream_relay",
                              Integer(unsigned=True),
                              ForeignKey('stream_relays.stream_relay',
@@ -210,4 +212,24 @@ class ListenerStats(Base):
                                         ondelete="RESTRICT"))
     stream_relay = relationship("StreamRelay")
     timestamp = Column(UTCDateTime())
+    count = Column(Integer(unsigned=True))
     
+    @staticmethod
+    def set(stream_relay, timestamp, count):
+        try:
+            ls = ListenerStats.query.filter(ListenerStats.timestamp == timestamp, ListenerStats.stream_relay == stream_relay).one()
+            ls.count = count
+        except exc.NoResultFound:
+            ls = ListenerStats(stream_relay=stream_relay, timestamp=timestamp, count=count)
+            rfk.database.session.add(ls)
+            
+    @staticmethod        
+    def get(start=None, stop=None, stream_relay=None, num=None):
+        clauses = []
+        if start is not None:
+            clauses.append(ListenerStats.timestamp >= start)
+        if stop is not None:
+            clauses.append(ListenerStats.timestamp <= stop)
+        if stream_relay is not None:
+            clauses.append(ListenerStats.stream_relay == stream_relay)
+        return ListenerStats.query.filter(*clauses).order_by(ListenerStats.timestamp.asc()).all()
