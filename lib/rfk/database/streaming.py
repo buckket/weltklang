@@ -200,3 +200,14 @@ class StreamRelay(Base):
                                                     Listener.disconnect == None).all()
         for listener in connected_listeners:
             listener.disconnect = datetime.utcnow()
+            
+class ListenerStats(Base):
+    __tablename__ = 'listenerstats'
+    stream_relay_id = Column("stream_relay",
+                             Integer(unsigned=True),
+                             ForeignKey('stream_relays.stream_relay',
+                                        onupdate="CASCADE",
+                                        ondelete="RESTRICT"))
+    stream_relay = relationship("StreamRelay")
+    timestamp = Column(UTCDateTime())
+    
