@@ -11,7 +11,7 @@ import time
 import hashlib
 import re
 
-from rfk.database import Base, session
+from rfk.database import Base, session, UTCDateTime
 
 
 class Anonymous(AnonymousUser):
@@ -249,12 +249,12 @@ class Ban(Base):
                                                  ondelete="RESTRICT"))
     user = relationship("User", backref=backref('bans'))
     range = Column(String(50))
-    expiration = Column(DateTime)
+    expiration = Column(UTCDateTime)
     
 class News(Base):
     __tablename__ = 'news'
     news = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    time = Column(DateTime, default=datetime.utcnow)
+    time = Column(UTCDateTime, default=datetime.utcnow)
     user_id = Column("user", Integer(unsigned=True), ForeignKey('users.user',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))
@@ -271,7 +271,7 @@ class ApiKey(Base):
     user = relationship("User", backref="apikeys")
     key = Column(String(128))
     counter = Column(Integer(unsigned=True), default=0)
-    access = Column(DateTime, default=datetime.utcnow)
+    access = Column(UTCDateTime, default=datetime.utcnow)
     application = Column(String(128))
     description = Column(String(255))
     flag = Column(Integer(unsigned=True), default=0)
@@ -305,6 +305,6 @@ class ApiKey(Base):
 class Log(Base):
     __tablename__ = 'log'
     log = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(UTCDateTime, default=datetime.utcnow)
     message = Column(Text)
     
