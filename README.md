@@ -13,6 +13,7 @@ Requirements:
 * passlib
 * py-bcrypt
 * icalendar
+* parsedatetime
 * netaddr
 * babel
 * pytz
