@@ -104,9 +104,9 @@ def current_show():
     if result:
         for show in result:
             
-            show.begin = show.begin.isoformat()
+            begin = show.begin.isoformat()
             if show.end:
-                show.end = show.end.isoformat()
+                end = show.end.isoformat()
             
             dj = []
             for usershow in show.users:
@@ -122,8 +122,8 @@ def current_show():
                 'show_name': show.name,
                 'show_description': show.description,
                 'show_flags': show.flags,
-                'show_begin': show.begin,
-                'show_end': show.end,
+                'show_begin': begin,
+                'show_end': end,
                 'dj': dj
             }
     else:
@@ -162,8 +162,8 @@ def next_shows():
     if result:
         for show in result:
             
-            show.begin = show.begin.isoformat()
-            show.end = show.end.isoformat()
+            begin = show.begin.isoformat()
+            end = show.end.isoformat()
             
             dj = []
             for usershow in show.users:
@@ -174,8 +174,8 @@ def next_shows():
                 'show_name': show.name,
                 'show_description': show.description,
                 'show_flags': show.flags,
-                'show_begin': show.begin,
-                'show_end': show.end,
+                'show_begin': begin,
+                'show_end': end,
                 'dj': dj
             })
     else:
