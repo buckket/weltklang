@@ -99,9 +99,13 @@ def before_request():
 @app.before_request
 def make_menu():
     request.menu = {}
+    entries = [['index', 'Home']]
+    app.logger.warn(request.endpoint)
+    request.menu['app.home'] = {'name': entries[0][1],
+                                'url': url_for(entries[0][0]), 'active':(entries[0][0] == request.endpoint) }
     for bpname in app.blueprints.keys():
         try:
-            request.menu[bpname] = app.blueprints[bpname].create_menu()
+            request.menu[bpname] = app.blueprints[bpname].create_menu(request.endpoint)
         except AttributeError:
             pass
 
