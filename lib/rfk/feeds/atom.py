@@ -1,6 +1,6 @@
 from flask import Response
 from werkzeug.contrib.atom import AtomFeed
-from rfk.feeds import feeds, get_shows
+from rfk.feeds import feeds, get_shows, get_djs
 
 
 @feeds.route('/atom')
@@ -14,10 +14,14 @@ def atom():
     
     if result:
         for show in result:
+            
+            djs = get_djs(show)
+            author = ', '.join(djs)
+            
             feed.add(id=str(show.show),
                      title=show.name,
                      content=show.description,
-                     author='dj',
+                     author=author,
                      url='http://krautchan.net',
                      updated=show.begin,
                      published=show.begin)

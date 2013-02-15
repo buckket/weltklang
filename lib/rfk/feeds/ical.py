@@ -1,6 +1,6 @@
 from flask import Response
 from icalendar import Calendar, Event
-from rfk.feeds import feeds, get_shows
+from rfk.feeds import feeds, get_shows, get_djs
 
 
 @feeds.route('/ical')
@@ -22,9 +22,13 @@ def ical():
     
     if result:
         for show in result:
+            
+            djs = get_djs(show)
+            summary = "%s with %s" % (show.name, ', '.join(djs))
+            
             event = Event()
             event.add('uid', str(show.show))
-            event.add('summary', show.name)
+            event.add('summary', summary)
             event.add('description', show.description)
             event.add('dtstart', show.begin)
             event.add('dtend', show.end)

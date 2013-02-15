@@ -196,10 +196,10 @@ def current_track():
     result = Track.current_track()
     if result:
         data = {'current_track' : {
-            'track': result.track,
-            'begin': result.begin.isoformat(),
-            'title': result.title.name,
-            'artist': result.title.artist.name
+            'track_id': result.track,
+            'track_begin': result.begin.isoformat(),
+            'track_title': result.title.name,
+            'track_artist': result.title.artist.name
         }}  
     else:
         data = {'current_track': None}
