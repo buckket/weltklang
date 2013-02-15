@@ -161,12 +161,11 @@ class Relay(Base):
     def add_stream(self, stream):
         """adds a Stream to this Relay"""
         try:
-            StreamRelay.query.filter(StreamRelay.relay == self,
-                                     StreamRelay.stream == stream).one()
-            return False
+            return StreamRelay.query.filter(StreamRelay.relay == self,
+                                            StreamRelay.stream == stream).one()
         except exc.NoResultFound:
-            self.streams.append(StreamRelay(stream=stream))
-            return True
+            return self.streams.append(StreamRelay(stream=stream))
+            
     
     def get_stream_relay(self, stream):
         """returns the StreamRelay combination for the given Stream and this Relay"""
@@ -205,22 +204,20 @@ class StreamRelay(Base):
 class ListenerStats(Base):
     __tablename__ = 'listenerstats'
     listenerstat = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    stream_relay_id = Column("stream_relay",
-                             Integer(unsigned=True),
-                             ForeignKey('stream_relays.stream_relay',
-                                        onupdate="CASCADE",
-                                        ondelete="RESTRICT"))
-    stream_relay = relationship("StreamRelay")
+    stream_id = Column("stream", Integer(unsigned=True), ForeignKey('streams.stream',
+                                                 onupdate="CASCADE",
+                                                 ondelete="RESTRICT"))
+    stream = relationship("Stream")
     timestamp = Column(UTCDateTime())
     count = Column(Integer(unsigned=True))
     
     @staticmethod
-    def set(stream_relay, timestamp, count):
+    def set(stream, timestamp, count):
         try:
-            ls = ListenerStats.query.filter(ListenerStats.timestamp == timestamp, ListenerStats.stream_relay == stream_relay).one()
+            ls = ListenerStats.query.filter(ListenerStats.timestamp == timestamp, ListenerStats.stream == stream).one()
             ls.count = count
         except exc.NoResultFound:
-            ls = ListenerStats(stream_relay=stream_relay, timestamp=timestamp, count=count)
+            ls = ListenerStats(stream=stream, timestamp=timestamp, count=count)
             rfk.database.session.add(ls)
             
     @staticmethod        
@@ -232,4 +229,4 @@ class ListenerStats(Base):
             clauses.append(ListenerStats.timestamp <= stop)
         if stream_relay is not None:
             clauses.append(ListenerStats.stream_relay == stream_relay)
-        return ListenerStats.query.filter(*clauses).order_by(ListenerStats.timestamp.asc()).all()
+        return ListenerStats.query.filter(*clauses).order_by(ListenerStats.timestamp.asc(),ListenerStats.stream_id.desc() ).all()

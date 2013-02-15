@@ -178,18 +178,34 @@ def listeners():
 
 @app.route("/listenerdata", methods=['GET'])
 def listenerdata():
+    #detemine a starting point, wont be needed in productive code
     lls = ListenerStats.query.order_by(ListenerStats.timestamp.desc()).limit(1).scalar()
     stop = lls.timestamp
     start = stop - datetime.timedelta(days=2)
     ls = ListenerStats.get(start)
-    ret = {'data':[], 'shows':[]}
-    c = 0
+    ret = {'data':{}, 'shows':[]}
+    mindate = stop
+    maxdate = start 
     for stat in ls:
-        ret['data'].append({'sr':stat.stream_relay_id,
-                    'ts':int(stat.timestamp.strftime("%s")),
-                    'c':int(stat.count)})
-        c+=1
-    shows = Show.query.filter(between(Show.begin, start, stop)| between(Show.end,start,stop)).order_by(Show.begin.asc()).all()
+        if str(stat.stream.mount) not in ret['data'].keys():
+            ret['data'][str(stat.stream.mount)] = []
+            #just set an initial stating point from before the starting point
+            if stat.timestamp != start:
+                fls = ListenerStats.query.filter(ListenerStats.stream == stat.stream, ListenerStats.timestamp <= start).order_by(ListenerStats.timestamp.desc()).limit(1).scalar()
+                app.logger.warn(fls.timestamp)
+                if fls is not None:
+                    c = fls.count
+                else:
+                    c = 0
+                ret['data'][str(stat.stream.mount)].append((int(start.strftime("%s"))*1000,int(c)))
+                
+        ret['data'][str(stat.stream.mount)].append((int(stat.timestamp.strftime("%s"))*1000,int(stat.count)))
+        if stat.timestamp > maxdate:
+            maxdate = stat.timestamp
+        if stat.timestamp < mindate:
+            mindate = stat.timestamp
+    #get the shows for the graph
+    shows = Show.query.filter(between(Show.begin, mindate, maxdate)| between(Show.end,mindate,maxdate)).order_by(Show.begin.asc()).all()
     for show in shows:
         ret['shows'].append({'name': show.name,
                              'b':int(show.begin.strftime("%s")),
