@@ -1,11 +1,7 @@
 from flask import Response
-from datetime import datetime
 from icalendar import Calendar, Event
+from rfk.feeds import feeds, get_shows
 
-from rfk.feeds import feeds
-import rfk.database
-from rfk.database.base import User
-from rfk.database.show import Show, UserShow
 
 @feeds.route('/ical')
 def ical():
@@ -22,9 +18,7 @@ def ical():
     cal.add('x-wr-timezone', 'UTC')
     
     # adding planned shows
-    clauses = []
-    clauses.append(Show.end > datetime.utcnow())
-    result = Show.query.join(UserShow).join(User).filter(*clauses).order_by(Show.begin.asc()).all()
+    result = get_shows()
     
     if result:
         for show in result:
