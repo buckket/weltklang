@@ -16,5 +16,11 @@ def get_shows():
     result = Show.query.join(UserShow).join(User).filter(*clauses).order_by(Show.begin.asc()).all()
     return result
 
+def get_djs(show):
+    djs = []
+    for usershow in show.users:
+        djs.append(usershow.user.username)
+    return djs
+
 from .ical import *
 from .atom import *
