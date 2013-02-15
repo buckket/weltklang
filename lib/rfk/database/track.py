@@ -3,7 +3,10 @@ from sqlalchemy.orm import relationship, backref, exc
 from sqlalchemy.dialects.mysql import INTEGER as Integer
 
 from rfk.database import Base, UTCDateTime
+from rfk.helper import now
+
 from datetime import datetime
+import pytz
 
 class Track(Base):
     """Database representation of a Track played in a show"""
@@ -33,7 +36,7 @@ class Track(Base):
     def end_track(self, end=None):
         """ends the track and updates length in artist/title DB"""
         if end is None:
-            self.end = datetime.utcnow()
+            self.end = now()
         else:
             self.end = end
         print 'b', self.begin,'e', self.end
