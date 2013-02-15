@@ -12,6 +12,7 @@ import hashlib
 import re
 
 from rfk.database import Base, session, UTCDateTime
+from rfk.helper import now
 
 
 class Anonymous(AnonymousUser):
@@ -254,7 +255,7 @@ class Ban(Base):
 class News(Base):
     __tablename__ = 'news'
     news = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    time = Column(UTCDateTime, default=datetime.utcnow)
+    time = Column(UTCDateTime, default=now())
     user_id = Column("user", Integer(unsigned=True), ForeignKey('users.user',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))
@@ -271,7 +272,7 @@ class ApiKey(Base):
     user = relationship("User", backref="apikeys")
     key = Column(String(128))
     counter = Column(Integer(unsigned=True), default=0)
-    access = Column(UTCDateTime, default=datetime.utcnow)
+    access = Column(UTCDateTime, default=now())
     application = Column(String(128))
     description = Column(String(255))
     flag = Column(Integer(unsigned=True), default=0)
@@ -295,16 +296,16 @@ class ApiKey(Base):
         if apikey.flag & ApiKey.FLAGS.DISABLED:
             raise rexc.api.KeyDisabledException()
         elif not apikey.flag & ApiKey.FLAGS.FASTQUERY:
-            if datetime.utcnow() - apikey.access <= timedelta(seconds=1):
+            if now() - apikey.access <= timedelta(seconds=1):
                 raise rexc.api.FastQueryException(last_access=apikey.access)
     
         apikey.counter += 1
-        apikey.access = datetime.utcnow()
+        apikey.access = now()
         return apikey
     
 class Log(Base):
     __tablename__ = 'log'
     log = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    timestamp = Column(UTCDateTime, default=datetime.utcnow)
+    timestamp = Column(UTCDateTime, default=now())
     message = Column(Text)
     

@@ -7,7 +7,6 @@ import rfk.database
 from rfk.database.base import User
 from rfk.database.show import Show, UserShow
 
-import pytz
 
 feeds = Blueprint('feeds', __name__)
 

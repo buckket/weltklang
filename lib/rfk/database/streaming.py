@@ -10,6 +10,8 @@ import rfk.database
 import rfk.icecast
 import netaddr
 
+from rfk.helper import now
+
 
 class Listener(Base):
     """database representation of a Listener"""
@@ -49,13 +51,13 @@ class Listener(Base):
             listener.address = int(netaddr.IPAddress(address))
         listener.client = client
         listener.useragent = useragent
-        listener.connect = datetime.utcnow()
+        listener.connect = now()
         listener.stream_relay = stream_relay
         return listener
         
     def set_disconnected(self):
         """updates the listener to disconnected state"""
-        self.disconnect = datetime.utcnow()
+        self.disconnect = now()
         
 class Stream(Base):
     """database representation of an outputStream"""
@@ -199,7 +201,7 @@ class StreamRelay(Base):
         connected_listeners = Listener.query.filter(Listener.stream_relay == self,
                                                     Listener.disconnect == None).all()
         for listener in connected_listeners:
-            listener.disconnect = datetime.utcnow()
+            listener.disconnect = now()
             
 class ListenerStats(Base):
     __tablename__ = 'listenerstats'

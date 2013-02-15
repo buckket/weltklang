@@ -4,6 +4,10 @@ from flask import jsonify, request, g
 import rfk.database
 from rfk.database.base import User, News, ApiKey
 from rfk.database.show import Show, UserShow, Tag
+from rfk.database.track import Track, Artist, Title
+
+import rfk.helper
+from rfk.helper import now
 
 from datetime import datetime, timedelta
 from sqlalchemy import func, and_, or_, between
@@ -176,6 +180,29 @@ def next_shows():
             })
     else:
         data = {'next_shows': None}
+    return jsonify(wrapper(data))
+
+    
+@api.route('/web/current_track')
+@check_auth
+#WIP
+def current_track():
+    """Return the currently playing track
+    
+    Keyword arguments:
+        None
+    """
+
+    result = Track.current_track()
+    if result:
+        data = {'current_track' : {
+            'track': result.track,
+            'begin': result.begin.isoformat(),
+            'title': result.title.name,
+            'artist': result.title.artist.name
+        }}  
+    else:
+        data = {'current_track': None}
     return jsonify(wrapper(data))
     
     

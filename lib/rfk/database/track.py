@@ -52,7 +52,7 @@ class Track(Base):
                 current_track.end_track()
         title = Title.add_title(artist, title)
         if begin is None:
-            begin = datetime.utcnow()
+            begin = now()
         return Track(title=title, begin=begin, show=show)
     
 class Title(Base):
