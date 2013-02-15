@@ -1,5 +1,3 @@
-import pytz
-
 from flask import Response
 from datetime import datetime
 from icalendar import Calendar, Event
@@ -13,7 +11,6 @@ from rfk.database.show import Show, UserShow
 def ical():
         
     # init calendar
-    utc = pytz.utc
     cal = Calendar()
     cal.add('prodid', '-//Radio freies Krautchan//EN')
     cal.add('version', '2.0')
@@ -32,11 +29,11 @@ def ical():
     if result:
         for show in result:
             event = Event()
-            event.add('uid', show.show)
+            event.add('uid', str(show.show))
             event.add('summary', show.name)
             event.add('description', show.description)
-            event.add('dtstart', utc.localize(show.begin))
-            event.add('dtend', utc.localize(show.end))
+            event.add('dtstart', show.begin)
+            event.add('dtend', show.end)
             cal.add_component(event)
             
     return Response(cal.to_ical(), mimetype='text/calendar')
