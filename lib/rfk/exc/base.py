@@ -6,6 +6,9 @@ Created on Jan 18, 2013
 class UserNotFoundException(Exception):
     pass
 
+class UserNameTakenException(Exception):
+    pass
+
 class InvalidPasswordException(Exception):
     pass
 

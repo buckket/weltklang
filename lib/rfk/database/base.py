@@ -11,7 +11,8 @@ import time
 import hashlib
 import re
 
-from rfk.database import Base, session, UTCDateTime
+from rfk.database import Base, UTCDateTime
+import rfk.database
 from rfk.helper import now
 
 
@@ -98,9 +99,13 @@ class User(Base):
     @staticmethod
     def add_user(username, password):
         try:
-            return User.query.filter(User.username == username).one()
+            User.query.filter(User.username == username).one()
+            raise rexc.base.UserNameTakenException() 
         except exc.NoResultFound:
-            return User(username=username, password=User.make_password(password))
+            user = User(username=username, password=User.make_password(password))
+            rfk.database.session.add(user)
+            rfk.database.session.flush()
+            return user
     
     def check_password(self, password):
         try:

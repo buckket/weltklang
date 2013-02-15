@@ -36,19 +36,22 @@
         {% include "menu.html"%}
 
         <div class="container-fluid">
-			<div class="row-fluid">
-			<div class="hero-unit">{% include "nowplaying.html"%}</div>
-			</div>
-			<div class="row-fluid">
-				<div class="span3">penis</div>
-				<div class="span9">
-					{% block content %}
-					<div class="row-fluid">
-						<div class="hero-unit">Nothing here</div>
-					</div>
-            		{% endblock %}
-				</div>
-			</div>
+			{% if sidebar %}
+		      <div class="row-fluid">
+		        <div class="span3">
+		          <div class="well sidebar-nav">
+		            {% block sidebar %}
+		            {% endblock sidebar %}
+		          </div>
+		        </div>
+		        <div class="span9">
+		      {% endif %}
+		          {% block content %}
+		          {% endblock content %}
+		      {% if sidebar %}
+		        </div>
+		      </div>
+		      {% endif %}
             <hr>
 
             <footer>

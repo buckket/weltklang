@@ -5,7 +5,8 @@ import datetime
 
 from rfk.database import session
 from rfk.database.base import User, Anonymous, News
-
+from rfk.site.forms.login import login_form, register_form
+from rfk.exc.base import UserNameTakenException
 from . import helper
 
 app = Flask(__name__)
@@ -58,8 +59,6 @@ from . import admin
 app.register_blueprint(admin.admin, url_prefix='/admin')
 from . import listen
 app.register_blueprint(listen.listen, url_prefix='/listen')
-from . import register
-app.register_blueprint(register.register)
 from rfk.api import api
 app.register_blueprint(api, url_prefix='/api')
 from rfk.feeds import feeds
@@ -100,9 +99,10 @@ def before_request():
 def make_menu():
     request.menu = {}
     entries = [['index', 'Home']]
-    app.logger.warn(request.endpoint)
+    
     request.menu['app.home'] = {'name': entries[0][1],
                                 'url': url_for(entries[0][0]), 'active':(entries[0][0] == request.endpoint) }
+    
     for bpname in app.blueprints.keys():
         try:
             request.menu[bpname] = app.blueprints[bpname].create_menu(request.endpoint)
@@ -149,20 +149,23 @@ def shutdown():
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
-    if request.method == "POST" and "username" in request.form:
-        username = request.form["username"]
+    form = login_form(request.form)
+    if request.method == "POST" and form.validate():
+        username = form.username.data
         user = User.get_user(username=username)
-        if user and user.check_password(password=request.form['password']):
+        if user and user.check_password(password=form.password.data):
             user.authenticated = True
-            remember = request.form.get("remember", "no") == "yes"
+            remember = form.remember.data
             if login_user(user, remember=remember):
                 flash("Logged in!")
                 return redirect(request.args.get("next") or url_for("index"))
             else:
+                form.username.errors.append('There was an error while logging you in.')
                 flash("Sorry, but you could not log in.")
         else:
+            form.username.errors.append('Invalid User or Password.')
             flash(u"Invalid username or password.")
-    return render_template("login.html")
+    return render_template("login.html", form=form)
 
 @app.route("/logout")
 @login_required
@@ -170,6 +173,20 @@ def logout():
     logout_user()
     flash("Logged out.")
     return redirect(url_for("index"))
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    form = register_form(request.form)
+    if request.method == "POST" and form.validate():
+        try:
+            user = User.add_user(form.username.data, form.password.data)
+            if form.email.data:
+                user.mail = form.email.data
+            session.commit()
+        except UserNameTakenException:
+            form.username.errors.append('Username already taken!')
+            
+    return render_template("register.html", form=form)
 
 @app.route('/listeners')
 def listeners():

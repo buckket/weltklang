@@ -1,0 +1,31 @@
+{% macro render_field_horizontal(field) %}
+  <div class="control-group{% if field.errors %} error{% endif %}">
+    {% if field.type != 'SubmitField' %}
+      <label class="control-label" for="{{ field.id }}">{{ field.label }}</label>
+    {% endif %}
+    <div class="controls">
+      {{ field(**kwargs)|safe }}
+      {% if field.errors %}
+	    {% for error in field.errors %}
+	      <span class="help-inline">{{ error }}</span>
+	    {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+{% endmacro %}
+
+{% macro render_fieldlist_horizontal(fieldlist) %}
+  <div class="control-group{% if fieldlist.errors %} error{% endif %}">
+    <label class="control-label" for="{{ fieldlist.id }}">{{ fieldlist.label }}</label>
+    <div class="controls">
+      {% for field in fieldlist.entries %}
+      {{ field(**kwargs)|safe }}
+      {% if field.errors %}
+        {% for error in field.errors %}
+          <span class="help-inline">{{ error }}</span>
+        {% endfor %}
+      {% endif %}<br>
+      {% endfor %}
+    </div>
+  </div>
+{% endmacro %}

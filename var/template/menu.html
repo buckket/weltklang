@@ -35,7 +35,7 @@
                 {% else %}
                 
                 <li>
-	                <form class="navbar-form" method="post" action="/login">
+	                <form class="navbar-form" method="post" action="/login?next={{request.path}}">
 	                    <input class="span2" name="username" type="text" placeholder="Username">
 	                    <input class="span2" name="password" type="password" placeholder="Password">
 	                    <button type="submit" class="btn">Sign in</button>
