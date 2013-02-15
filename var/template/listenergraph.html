@@ -1,9 +1,14 @@
 {% extends "base.html" %}
 {% block content %}<h1>{% trans %}Listeners{% endtrans %}</h1>
 <div class="row-fluid">
-<div class="span12" id="listenergraph" style="height:150px;">
+<div class="span12" id="listenergraph-today" style="height:150px;"></div>
 </div>
+<div class="row-fluid">
+<div class="span12" id="listenergraph-week" style="height:150px;"></div>
 </div>
+<!-- <div class="row-fluid">
+<div class="span12" id="listenergraph-month" style="height:150px;"></div>
+</div> -->
 <script>
 $(function() {
 	
@@ -20,149 +25,150 @@ $(function() {
         }).appendTo("body").fadeIn(200);
     }
 	
-	function onDataReceived(series) {
 
-	    var data = [];
-	    
-        var options = {
-                series: {
-                    shadowSize: 0,
-                    stack: true
-                },
-                lines: {
-                    show: true,
-                    steps: true
-                },
-                yaxis: {
-                	min: 0
-                },
-                xaxis: {
-                    mode: "time",
-                    //minTickSize: [1, "year"],
-                    //min: (new Date(2010, 0, 1)).getTime(),
-                    //max: (new Date(2011, 0, 1)).getTime()
-                },
-                crosshair: {
-                    mode: "x"
-                },
-                grid: {
-                	hoverable: true,
-                	autoHighlight: false,
-                	markings: []
-                },
-                legend: {
-                    show: true,
-                    noColumns: 7,
-                    position: "nw"
-                }
-            };
-        $.each(series['data'], function(index,value){
-            data.push({
-            	label: index+ ' = 00',
-                data: value,
-                lines: { show: true,steps: true}
-            });
-        });
-        $.each(series['shows'], function(index,value){
-            options.grid.markings.push({color: '#ddd', lineWidth: 1, xaxis: { from: value['b']*1000, to: value['e']*1000 }});
-        });
-        var plot = $.plot("#listenergraph", data, options);
-        var placeholder = $("#listenergraph");
-        var legends = $("#listenergraph .legendLabel");
-        //$.each(series['shows'], function(index,value){
-        //	o = plot.pointOffset({ x: value['b']*1000, y: 10});
-        //    placeholder.append("<div style='position:absolute;left:" + (o.left + 4) + "px;top:" + o.top + "px;color:#666;font-size:smaller'>"+ value['name'] +"</div>");
-        //});
-        
-        
-        var updateLegendTimeout = null;
-        var latestPosition = null;
+	function load_graph(placeholder, timespan) {
+		  function onDataReceived(series) {
 
-        function updateLegend() {
+		        var data = [];
+		        
+		        var options = {
+		                series: {
+		                    shadowSize: 0,
+		                    stack: true
+		                },
+		                lines: {
+		                    show: true,
+		                    steps: true
+		                },
+		                yaxis: {
+		                    min: 0
+		                },
+		                xaxis: {
+		                    mode: "time",
+		                    //minTickSize: [1, "year"],
+		                    //min: (new Date(2010, 0, 1)).getTime(),
+		                    //max: (new Date(2011, 0, 1)).getTime()
+		                },
+		                crosshair: {
+		                    mode: "x"
+		                },
+		                grid: {
+		                    hoverable: true,
+		                    autoHighlight: false,
+		                    markings: []
+		                },
+		                legend: {
+		                    show: true,
+		                    noColumns: 7,
+		                    position: "nw"
+		                }
+		            };
+		        $.each(series['data'], function(index,value){
+		            data.push({
+		                label: index+ ' = 00',
+		                data: value,
+		                lines: { show: true,steps: true}
+		            });
+		        });
+		        $.each(series['shows'], function(index,value){
+		            options.grid.markings.push({color: '#ddd', lineWidth: 1, xaxis: { from: value['b']*1000, to: value['e']*1000 }});
+		        });
+		        var plot = $.plot("#"+placeholder.attr('id'), data, options);
+		        var legends = $("#listenergraph .legendLabel");
+		        //$.each(series['shows'], function(index,value){
+		        //  o = plot.pointOffset({ x: value['b']*1000, y: 10});
+		        //    placeholder.append("<div style='position:absolute;left:" + (o.left + 4) + "px;top:" + o.top + "px;color:#666;font-size:smaller'>"+ value['name'] +"</div>");
+		        //});
+		        
+		        
+		        var updateLegendTimeout = null;
+		        var latestPosition = null;
 
-            updateLegendTimeout = null;
+		        function updateLegend() {
 
-            var pos = latestPosition;
+		            updateLegendTimeout = null;
 
-            var axes = plot.getAxes();
-            if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max ||
-                pos.y < axes.yaxis.min || pos.y > axes.yaxis.max) {
-                return;
-            }
+		            var pos = latestPosition;
 
-            var i, j, dataset = plot.getData();
-            for (i = 0; i < dataset.length; ++i) {
+		            var axes = plot.getAxes();
+		            if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max ||
+		                pos.y < axes.yaxis.min || pos.y > axes.yaxis.max) {
+		                return;
+		            }
 
-                var series = dataset[i];
+		            var i, j, dataset = plot.getData();
+		            for (i = 0; i < dataset.length; ++i) {
 
-                // Find the nearest points, x-wise
+		                var series = dataset[i];
 
-                for (j = 0; j < series.data.length; ++j) {
-                    if (series.data[j][0] > pos.x) {
-                        break;
-                    }
-                }
+		                // Find the nearest points, x-wise
 
-                // Now Interpolate
+		                for (j = 0; j < series.data.length; ++j) {
+		                    if (series.data[j][0] > pos.x) {
+		                        break;
+		                    }
+		                }
 
-                var y,
-                    p1 = series.data[j - 1],
-                    p2 = series.data[j];
+		                // Now Interpolate
 
-                if (p1 == null) {
-                    y = p2[1];
-                } else if (p2 == null) {
-                    y = p1[1];
-                } else {
-                    y = p1[1] + (p2[1] - p1[1]) * (pos.x - p1[0]) / (p2[0] - p1[0]);
-                }
+		                var y,
+		                    p1 = series.data[j - 1],
+		                    p2 = series.data[j];
 
-                legends.eq(i).text(series.label.replace(/=.*/, "= " + y.toFixed(0)));
-            }
-        }
-        
-        var previousShow = null;
-        placeholder.bind("plothover", function (event, pos, item) {
-        	latestPosition = pos;
-            if (!updateLegendTimeout) {
-                updateLegendTimeout = setTimeout(updateLegend, 50);
-            }
-            
-            var show = null;
-            //alert('irgendwas');
-        	$.each(series['shows'], function(index,value){
-                if (value['b']*1000 <= pos.x && value['e']*1000 >= pos.x) {
-                	show = index;
-                	
-                	return false;
-                } 
-            });
-        	if (show) {
-        		if (previousShow != show) {
-        			previousShow = show;
-        			$("#tooltip").remove();
-        			showTooltip(pos.pageX, pos.pageY,series['shows'][show]['name']);
-        			
-        		}
-        	} else {
-        		$("#tooltip").remove();
-        		previousShow = null;
-        	}
+		                if (p1 == null) {
+		                    y = p2[1];
+		                } else if (p2 == null) {
+		                    y = p1[1];
+		                } else {
+		                    y = p1[1] + (p2[1] - p1[1]) * (pos.x - p1[0]) / (p2[0] - p1[0]);
+		                }
 
-        });
-        
-        setTimeout(poll,5000);
-    }
-	
-	function poll() {
+		                legends.eq(i).text(series.label.replace(/=.*/, "= " + y.toFixed(0)));
+		            }
+		        }
+		        
+		        var previousShow = null;
+		        placeholder.bind("plothover", function (event, pos, item) {
+		            latestPosition = pos;
+		            if (!updateLegendTimeout) {
+		                updateLegendTimeout = setTimeout(updateLegend, 50);
+		            }
+		            
+		            var show = null;
+		            //alert('irgendwas');
+		            $.each(series['shows'], function(index,value){
+		                if (value['b']*1000 <= pos.x && value['e']*1000 >= pos.x) {
+		                    show = index;
+		                    
+		                    return false;
+		                } 
+		            });
+		            if (show) {
+		                if (previousShow != show) {
+		                    previousShow = show;
+		                    $("#tooltip").remove();
+		                    showTooltip(pos.pageX, pos.pageY,series['shows'][show]['name']);
+		                    
+		                }
+		            } else {
+		                $("#tooltip").remove();
+		                previousShow = null;
+		            }
+
+		        });
+		        
+		    }
+		
 		$.ajax({
-	        url: '/listenerdata',
+	        url: '/api/site/listenergraphdata/'+timespan,
 	        type: "GET",
 	        dataType: "json",
 	        success: onDataReceived
 	    });
 	}
-	poll();
+	load_graph($('#listenergraph-today'), '-1 days');
+	load_graph($('#listenergraph-week'), '-7 days');
+	//load_graph($('#listenergraph-month'), '-31 days');
 });
 </script>
 {% endblock %}
