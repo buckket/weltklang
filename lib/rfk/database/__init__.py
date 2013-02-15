@@ -13,10 +13,17 @@ class UTCDateTime(types.TypeDecorator):
 
     def process_bind_param(self, value, engine):
         if value is not None:
-            if value.tzinfo is None:
-                return pytz.utc.localize(value)
+            
+            # check whether it's a datetime with tzinfo at all
+            if hasattr(value, 'tzinfo'):
+                if value.tzinfo is None:
+                    return pytz.utc.localize(value)
+                else:
+                    return pytz.utc.normalize(value.astimezone(pytz.utc))
+                
+            # nope, just return the value unchanged
             else:
-                return pytz.utc.normalize(value.astimezone(pytz.utc))
+                return value
 
     def process_result_value(self, value, engine):
         if value is not None:
