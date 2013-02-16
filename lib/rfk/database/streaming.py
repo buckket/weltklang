@@ -231,4 +231,4 @@ class ListenerStats(Base):
             clauses.append(ListenerStats.timestamp <= stop)
         if stream_relay is not None:
             clauses.append(ListenerStats.stream_relay == stream_relay)
-        return ListenerStats.query.filter(*clauses).order_by(ListenerStats.timestamp.asc(),ListenerStats.stream_id.desc() ).all()
+        return ListenerStats.query.filter(*clauses).order_by(ListenerStats.timestamp.asc(),ListenerStats.stream_id.desc() ).yield_per(100)

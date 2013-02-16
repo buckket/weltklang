@@ -1,0 +1,109 @@
+{% from "_helpers.html" import render_field_horizontal %}
+{% extends "base.html" %}
+{% block content %}<h1>{% trans %}Series{% endtrans %}</h1>
+<style>
+<!--
+.imageuploader {
+position: relative;
+width: 310px;
+}
+.imageuploader .actions {
+    background-color: #000000;
+    border-radius: 5px 5px 5px 5px;
+    height: 16px;
+    left: 50%;
+    margin-left: -24px;
+    margin-top: -13px;
+    opacity: 0;
+    padding: 5px 8px;
+    position: absolute;
+    top: 50%;
+    transition: opacity 0.3s ease-in-out 0s;
+    width: 32px;
+}
+.imageuploader .status {
+    border-radius: 5px 5px 5px 5px;
+    height: 16px;
+    left: 50%;
+    margin-left: -48px;
+    margin-top: -13px;
+    padding: 5px 8px;
+    position: absolute;
+    top: 50%;
+    transition: opacity 0.3s ease-in-out 0s;
+    width: 64px;
+}
+
+.imageuploader:hover .actions {
+    opacity: 1;
+}
+
+-->
+</style>
+<div class="row-fluid">
+<div class="span12">
+  <form class="form-horizontal" method="POST">
+  {{ render_field_horizontal(form.name) }}
+  <div class="control-group">
+    <label class="control-label" for="image">Image</label>
+    <div class="controls">
+	    <div class="imageuploader">
+	        <a class="thumbnail" href="#" >
+	            <img id="preview" alt="" src="http://placehold.it/150x300" style="height:150px;width:300px;">
+	        </a>
+	        <div class="actions">
+	            <a href="#" title="" onclick="open_file();">
+	                <i class="icon-pencil icon-white"></i>
+	            </a>
+	            <a href="#" title="">
+	                <i class="icon-remove icon-white"></i>
+	            </a>
+	        </div>
+	        <div id="uploadstatus" class="status" style="display:none;">
+                <div class="progress progress-striped active">
+                    <div class="bar" style="width: 100%;"></div>
+                </div>
+            </div>
+	    </div>
+	    <input id="filechooser" style="visibility: collapse; width: 0px;" type="file" onchange="upload(this.files[0])">
+    </div>
+  </div>
+  {{ render_field_horizontal(form.description) }}
+  {{ render_field_horizontal(form.public) }}
+  {{form.image}}
+  <div class="control-group">
+  <div class="controls">
+    <button type="submit" class="btn btn-primary">Login</button>
+    <a class="btn" href="/register">Register</a>
+  </div>
+</div>
+  </form>
+</div>
+
+</div>
+<script>
+function open_file() {
+	$('#filechooser').click();
+	return false;
+}
+
+function upload(file) {
+    if (!file || !file.type.match(/image.*/)) return;
+
+    var fd = new FormData();
+    fd.append("image", file);
+    fd.append("type", 'file');
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://api.imgur.com/3/image"); // Boooom!
+    xhr.setRequestHeader("Authorization", "Client-ID {{ imgur.client | safe }}");
+    xhr.onload = function() {
+    	var img_url = $.parseJSON(xhr.responseText).data.link;
+    	$('#preview').attr("src", img_url);
+    	$('#uploadstatus').hide();
+    	$('#image').val(img_url)
+    }
+    $('#uploadstatus').show();
+    xhr.send(fd);
+}
+</script>
+{% endblock %}

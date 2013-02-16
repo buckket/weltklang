@@ -36,8 +36,8 @@ def listenerdata(start,stop):
     for stream in streams:
         ret['data'][str(stream.mount)] = []
         #just set an initial stating point from before the starting point
-        fls = ListenerStats.query.filter(ListenerStats.stream == stream,
-                                         ListenerStats.timestamp <= start)\
+        fls = ListenerStats.query.filter(ListenerStats.timestamp <= start,
+                                         ListenerStats.stream == stream)\
                                  .order_by(ListenerStats.timestamp.desc()).limit(1).scalar()
         if fls is not None:
             c = fls.count
@@ -46,12 +46,13 @@ def listenerdata(start,stop):
         ret['data'][str(stream.mount)].append((int(start.strftime("%s"))*1000,int(c)))
     
     #fill in the actual datapoints
+    ls = ListenerStats.get(start, stop=stop)
     for stat in ls:
         ret['data'][str(stat.stream.mount)].append((int(stat.timestamp.strftime("%s"))*1000,int(stat.count)))
     
     for stream in streams:
-        lls = ListenerStats.query.filter(ListenerStats.stream == stream,
-                                         ListenerStats.timestamp <= stop)\
+        lls = ListenerStats.query.filter(ListenerStats.timestamp <= stop,
+                                         ListenerStats.stream == stream)\
                                  .order_by(ListenerStats.timestamp.desc()).limit(1).scalar()
         if lls is not None:
             c = lls.count
