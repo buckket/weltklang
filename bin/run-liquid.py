@@ -1,47 +1,27 @@
 #!/usr/bin/python2.7
-import rfk
-import rfk.liquidsoap
-import rfk.database
+
+## too lazy to add pythonpath in env
 import os
-from sqlalchemy import *
-from sqlalchemy.orm import sessionmaker
-import subprocess
-from threading  import Thread
-import atexit
-import time
-
+import sys
 current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(current_dir, 'lib/'))
 
-rfk.init(current_dir)
-rfk.database.init_db("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
-                                               rfk.CONFIG.get('database', 'username'),
-                                               rfk.CONFIG.get('database', 'password'),
-                                               rfk.CONFIG.get('database', 'host'),
-                                               rfk.CONFIG.get('database', 'database')))
-process = None
+import rfk
+import rfk.database
+import rfk.helper.daemonize
+from rfk.liquidsoap.daemon import LiquidsoapDaemon
 
-def cleanup():
-    if process.returncode == None:
-        print 'shutting down liquidsoap'
-        process.terminate()
-        time.sleep(5)
-        if process.returncode == None:
-            print 'killing liquidsoap'
-            process.kill()
+#import atexit
 
 if __name__ == '__main__':
-    args = ['liquidsoap','-']
-    atexit.register(cleanup)
-    process = subprocess.Popen(args,bufsize=-1,
-                               stdin=subprocess.PIPE,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
-    print 'starting'
-    print process.stdin.write(rfk.liquidsoap.gen_script(current_dir).encode('utf-8'))
+    rfk.helper.daemonize.createDaemon(current_dir)
+    rfk.init(current_dir)
+    rfk.database.init_db("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
+                                                            rfk.CONFIG.get('database', 'username'),
+                                                            rfk.CONFIG.get('database', 'password'),
+                                                            rfk.CONFIG.get('database', 'host'),
+                                                            rfk.CONFIG.get('database', 'database')))
+    daemon = LiquidsoapDaemon(current_dir)
+    #atexit.register(daemon.shutdown)
+    daemon.run()
     
-    process.stdin.close()
-    print 'started'
-    while process.returncode == None:
-        print process.stdout.readline()
-        #print process.stderr.readline()
-        process.poll()
