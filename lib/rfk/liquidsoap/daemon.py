@@ -149,7 +149,7 @@ class SocketConnectionHandler(threading.Thread):
         
 class LiquidDaemonClient(object):
     
-    def __init__(self, path):
+    def __init__(self, path='/tmp/liquiddaemon.sock'):
         self.path = path
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         

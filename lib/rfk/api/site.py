@@ -3,18 +3,59 @@ Created on Feb 15, 2013
 
 @author: teddydestodes
 '''
-
-from rfk.api import api, check_auth, wrapper
 from flask import jsonify, request, g
-
-from rfk.database.streaming import ListenerStats, Stream
-from rfk.database.show import Show
 from sqlalchemy.sql.expression import between
-
 import pytz
 import parsedatetime.parsedatetime as pdt
 from time import mktime
 from datetime import datetime
+from subprocess import call
+import os
+
+from rfk.api import api, check_auth, wrapper
+from rfk.database.streaming import ListenerStats, Stream
+from rfk.database.show import Show
+from rfk.liquidsoap.daemon import LiquidDaemonClient
+from rfk.site import app
+
+@api.route("/site/admin/liquidsoap/status")
+def liquidsoap_status():
+    pass
+
+@api.route("/site/admin/liquidsoap/start")
+def liquidsoap_start():
+    returncode = call([os.path.join(app.config['BASEDIR'], 'bin','run-liquid.py')])
+    return jsonify({'status': returncode})
+
+@api.route("/site/admin/liquidsoap/shutdown")
+def liquidsoap_shutdown():
+    try:
+        client = LiquidDaemonClient()
+        client.connect()
+        client.shutdown_daemon()
+        client.close()
+        return jsonify({'status': 'done'})
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+@api.route("/site/admin/liquidsoap/log")
+def liquidsoap_log():
+    try:
+        client = LiquidDaemonClient()
+        client.connect()
+        offset = request.args.get('offset')
+        if offset is not None:
+            offset = int(offset)
+        
+        offset, log = client.get_log(offset)
+        client.close()
+        lines = []
+        for line in log:
+            ts = pytz.utc.localize(datetime.utcfromtimestamp(int(line[0])))
+            lines.append((ts.isoformat(), line[1]))
+        return jsonify({'log': lines, 'offset': offset})
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 def parse_datetimestring(datestring):
     cal = pdt.Calendar()
