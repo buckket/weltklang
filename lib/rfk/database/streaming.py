@@ -5,7 +5,8 @@ from sqlalchemy.dialects.mysql import INTEGER as Integer
 from datetime import datetime
 
 from rfk.database import Base, UTCDateTime
-from rfk import ENUM, SET, CONFIG
+from rfk.types import ENUM, SET
+from rfk import CONFIG
 import rfk.database
 import rfk.icecast
 import netaddr

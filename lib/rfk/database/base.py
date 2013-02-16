@@ -4,7 +4,7 @@ from sqlalchemy.dialects.mysql import INTEGER as Integer
 
 from passlib.hash import bcrypt
 from flask.ext.login import AnonymousUser
-from rfk import SET, ENUM
+from rfk.types import SET, ENUM
 from rfk import exc as rexc
 from datetime import datetime, timedelta
 import time
