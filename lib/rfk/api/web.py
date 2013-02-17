@@ -5,6 +5,7 @@ import rfk.database
 from rfk.database.base import User, News, ApiKey
 from rfk.database.show import Show, UserShow, Tag
 from rfk.database.track import Track, Artist, Title
+from rfk.database.streaming import Listener
 
 import rfk.helper
 from rfk.helper import now
@@ -53,7 +54,7 @@ def current_dj():
         None
     """
     
-    result = UserShow.query.join(User).filter(UserShow.status == UserShow.STATUS.STREAMING).first()
+    result = UserShow.query.filter(UserShow.status == UserShow.STATUS.STREAMING).first()
     if result:
         data = {'current_dj': {'dj_id': result.user.user, 'dj_name': result.user.username, 'dj_status': result.status}} 
     else:
@@ -75,7 +76,7 @@ def kick_dj():
     def do_kick_dj(dj):
         return True
     
-    result = UserShow.query.join(User).filter(UserShow.status == UserShow.STATUS.STREAMING).first()
+    result = UserShow.query.filter(UserShow.status == UserShow.STATUS.STREAMING).first()
     if result:
         if do_kick_dj(result.user.user):
             data = {'kick_dj': {'dj_id': result.user.user, 'dj_name': result.user.username, 'success': True}}
@@ -98,7 +99,7 @@ def current_show():
     
     clauses = []
     clauses.append((between(datetime.utcnow(), Show.begin, Show.end)) | (Show.end == None))
-    result = Show.query.join(UserShow).join(User).filter(*clauses).order_by(Show.begin.desc(), Show.end.asc()).all()
+    result = Show.query.filter(*clauses).order_by(Show.begin.desc(), Show.end.asc()).all()
     
     data = {'current_show': {}}
     if result:
@@ -133,7 +134,7 @@ def current_show():
 
 @api.route('/web/next_shows')
 @check_auth
-## WIP ##
+## DONE ##
 def next_shows():
     """Return the next planned show(s)
     
@@ -147,7 +148,6 @@ def next_shows():
     dj_name = request.args.get('dj_name', None)
     limit = request.args.get('limit', 5)
     
-    
     clauses = []
     clauses.append(Show.begin > datetime.utcnow())
     
@@ -156,7 +156,7 @@ def next_shows():
     if dj_name:
         clauses.append(UserShow.user == User.get_user(username=dj_name))
         
-    result = Show.query.join(UserShow).join(User).filter(*clauses).order_by(Show.begin.asc()).limit(limit).all()
+    result = Show.query.filter(*clauses).order_by(Show.begin.asc()).limit(limit).all()
     
     data = {'next_shows': {'shows': []}}
     if result:
@@ -182,10 +182,61 @@ def next_shows():
         data = {'next_shows': None}
     return jsonify(wrapper(data))
 
+
+@api.route('/web/last_shows')
+@check_auth
+## DONE ##
+def last_shows():
+    """Return show history
     
+    Keyword arguments:
+        dj_id -- filter by dj
+        dj_name -- filter by dj
+        limit -- limit the output (default=5)
+    """
+    
+    dj_id = request.args.get('dj_id', None)
+    dj_name = request.args.get('dj_name', None)
+    limit = request.args.get('limit', 5)
+    
+    clauses = []
+    clauses.append(Show.end < datetime.utcnow())
+    
+    if dj_id:
+        clauses.append(UserShow.user == User.get_user(id=dj_id))
+    if dj_name:
+        clauses.append(UserShow.user == User.get_user(username=dj_name))
+        
+    result = Show.query.filter(*clauses).order_by(Show.begin.desc()).limit(limit).all()
+    
+    data = {'last_shows': {'shows': []}}
+    if result:
+        for show in result:
+            
+            begin = show.begin.isoformat()
+            end = show.end.isoformat()
+            
+            dj = []
+            for usershow in show.users:
+                dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status })
+                
+            data['last_shows']['shows'].append({
+                'show_id': show.show,
+                'show_name': show.name,
+                'show_description': show.description,
+                'show_flags': show.flags,
+                'show_begin': begin,
+                'show_end': end,
+                'dj': dj
+            })
+    else:
+        data = {'last_shows': None}
+    return jsonify(wrapper(data))
+   
+
 @api.route('/web/current_track')
 @check_auth
-#WIP
+## DONE ##
 def current_track():
     """Return the currently playing track
     
@@ -204,5 +255,75 @@ def current_track():
     else:
         data = {'current_track': None}
     return jsonify(wrapper(data))
+
+
+@api.route('/web/last_tracks')
+@check_auth
+## DONE ##
+def last_tracks():
+    """Return the last played tracks
+    
+    Keyword arguments:
+        dj_id -- filter by dj
+        dj_name -- filter by dj
+        limit -- limit the output (default=5)
+    """
+    
+    dj_id = request.args.get('dj_id', None)
+    dj_name = request.args.get('dj_name', None)
+    limit = request.args.get('limit', 5)
+    
+    clauses = []
+    clauses.append(Track.end < datetime.utcnow())
+    
+    if dj_id:
+        clauses.append(UserShow.user == User.get_user(id=dj_id))
+    if dj_name:
+        clauses.append(UserShow.user == User.get_user(username=dj_name))
+        
+    result = Track.query.filter(*clauses).order_by(Track.end.desc()).limit(limit).all()
+    
+    data = {'last_tracks': {'tracks': []}}
+    if result:
+        for track in result:
+            
+            begin = track.begin.isoformat()
+            end = track.end.isoformat()
+            
+            data['last_tracks']['tracks'].append({
+                'track_id': track.track,
+                'track_begin': begin,
+                'track_end': end,
+                'track_title': track.title.name,
+                'track_artist': track.title.artist.name
+            })
+    else:
+        data = {'last_tracks': None}
+    return jsonify(wrapper(data))
+
+
+@api.route('/web/listeners')
+@check_auth
+## WIP ##
+def listeners():
+    """Return current listener count
+    
+    Keyword arguments:
+        None
+    """
+    
+    clauses = []
+    clauses.append(Listener.disconnect == None)
+    
+    result = Listener.query.filter(*clauses).all()
+    
+    data = {'listeners': {'listeners': []}}
+    if result:
+        pass
+    else:
+        data = {'listeners': None}
+    return jsonify(wrapper(data))
+        
+    
     
     
