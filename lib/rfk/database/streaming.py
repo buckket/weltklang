@@ -38,7 +38,6 @@ class Listener(Base):
     @staticmethod
     def get_listener(stream_relay, client, disconnect=None):
         """returns a listener"""
-        print stream_relay, client
         listener = Listener.query.filter(Listener.disconnect == disconnect,
                                          Listener.stream_relay == stream_relay,
                                          Listener.client == client).one()
