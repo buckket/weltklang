@@ -16,11 +16,36 @@ from rfk.api import api, check_auth, wrapper
 from rfk.database.streaming import ListenerStats, Stream
 from rfk.database.show import Show
 from rfk.liquidsoap.daemon import LiquidDaemonClient
+from rfk.liquidsoap import LiquidInterface
 from rfk.site import app
+
+@api.route("/site/admin/liquidsoap/endpoint/<string:action>")
+def endpoint_action(action):
+    pass
 
 @api.route("/site/admin/liquidsoap/status")
 def liquidsoap_status():
-    pass
+    try:
+        ret = {}
+        li = LiquidInterface()
+        li.connect()
+        ret['version'] = li.get_version()
+        ret['uptime'] = li.get_uptime()
+        ret['sources'] = []
+        for source in li.get_sources():
+            ret['sources'].append({'handler': source.handler,
+                                   'type': source.type,
+                                   'status': (source.status() != 'no source client connected')})
+            
+        ret['sinks'] = []
+        for sink in li.get_sinks():
+            ret['sinks'].append({'handler': sink.handler,
+                                   'type': sink.type,
+                                   'status': (sink.status() == 'on')})
+        li.close()
+        return jsonify(ret)
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 @api.route("/site/admin/liquidsoap/start")
 def liquidsoap_start():

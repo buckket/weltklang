@@ -39,7 +39,14 @@ class LiquidInterface(object):
         
     
     def get_version(self):
-        return self._execute_command('version').splitlines()[0]
+        for line in self._execute_command('version').splitlines():
+            if len(line) > 0:
+                return line
+    
+    def get_uptime(self):
+        for line in self._execute_command('uptime').splitlines():
+            if len(line) > 0:
+                return line
     
     def kick_harbor(self):
         for source in self.get_sinks():

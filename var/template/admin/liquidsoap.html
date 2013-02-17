@@ -82,13 +82,124 @@ $(function() {
 	    });
     }
 	poll_log();
+	
+	function update_status(data) {
+		if (data.error) {
+			$('#liquidsoap-version').html('Offline');
+			$('#liquidsoap-uptime').html('Offline');
+			setTimeout(poll_status, 5000);
+			return;
+		}
+		if (data.version) {
+			$('#liquidsoap-version').html(data.version);
+		}
+		if (data.uptime) {
+            $('#liquidsoap-uptime').html(data.uptime);
+        }
+		$.each(data.sources, function(index, source){
+			id = source.handler.replace('(dot)', '.');
+			id = id.replace('/', '');
+			
+			if ($('#sources #'+id).length == 0) {
+				$('<button class="btn" id="'+id+'"><span class="label label-success"><i class="icon-off"></i></span> '+source.handler+'</button>').appendTo('#sources');
+			}
+			var label = $('#sources #'+id+' span');
+            if (source.status) {
+                label.removeClass('label-error');
+                label.addClass('label-success');
+            } else {
+                label.removeClass('label-success');
+                label.addClass('label-error');
+            }
+		});
+		$.each(data.sinks, function(index, sink){
+            id = sink.handler.replace('(dot)', '-');
+            id = id.replace('/', '');
+            
+            if ($('#sinks #'+id).length == 0) {
+                $('<button class="btn" id="'+id+'"><span class="label"><i class="icon-off"></i></span> '+sink.handler+'</button>').appendTo('#sinks');
+            }
+            var label = $('#sinks #'+id+' span');
+            if (sink.status) {
+            	label.removeClass('label-error');
+                label.addClass('label-success');
+            } else {
+            	label.removeClass('label-success');
+            	label.addClass('label-error');
+            }
+        });
+		setTimeout(poll_status, 2500);
+	}
+	
+	function poll_status() {
+        $.ajax({
+            url: '/api/site/admin/liquidsoap/status',
+            type: "GET",
+            dataType: "json",
+            success: update_status
+        });
+    }
+	
+	poll_status();
 });
+
+function after_command(data) {
+    
+}
+
+function shutdown() {
+    $.ajax({
+        url: '/api/site/admin/liquidsoap/shutdown',
+        type: "GET",
+        dataType: "json",
+        success: after_command
+    });
+    return false;
+}
+
+function start() {
+    $.ajax({
+        url: '/api/site/admin/liquidsoap/start',
+        type: "GET",
+        dataType: "json",
+        success: after_command
+    });
+    return false;
+}
 </script>
 <div class="row-fluid">
-<div class="span12">
-<div class="log" id="logviewer" style="height:300px;">
-    
+<div class="span3">
+    <div class="well">
+        <strong>Version:</strong> <span id="liquidsoap-version">Unknown</span><br>
+        <strong>Uptime:</strong> <span id="liquidsoap-uptime">Unknown</span>
+    </div>
 </div>
+<div class="span9">
+<div class="btn-toolbar">
+    <div class="btn-group">
+        <button class="btn dropdown-toggle" data-toggle="dropdown">
+            <i class="icon-wrench"></i> Liquidsoap <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li>
+                <a href="#" onclick="start();">Start</a>
+			</li>
+			<li>
+                <a href="#" onclick="shutdown();">Stop</a>
+			</li>
+        </ul>
+    </div>
+    <div class="btn-group" id="sources">
+    </div>
+    <div class="btn-group" id="sinks">
+    </div>
+</div>
+</div>
+</div>
+<div class="row-fluid">
+<div class="span12">
+<div class="log" id="logviewer" style="height:300px;"></div>
+
 </div>
 </div>
 {% endblock %}
