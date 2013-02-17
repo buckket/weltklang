@@ -47,14 +47,14 @@ class Listener(Base):
     def create(address, client, useragent, stream_relay):
         """adds a new listener to the database"""
         listener = Listener()
-        if rfk.CONFIG.get('icecast', 'log_ip'):
+        if rfk.CONFIG.getboolean('icecast', 'log_ip'):
             listener.address = int(netaddr.IPAddress(address))
         listener.client = client
         listener.useragent = useragent
         listener.connect = now()
         listener.stream_relay = stream_relay
         return listener
-        
+    
     def set_disconnected(self):
         """updates the listener to disconnected state"""
         self.disconnect = now()
@@ -133,10 +133,11 @@ class Relay(Base):
         conf.admin = self.admin_username
         conf.password = self.admin_password
         conf.hostname = self.address
+        api_url = "http://%s%s" % (CONFIG.get('site', 'url'),'/backend/icecast/')
         if all_streams:
             for stream in Stream.query.all():
                 mount = rfk.icecast.Mount()
-                mount.api_url = 'http://192.168.122.1:5000/backend/icecast/'
+                mount.api_url = api_url 
                 mount.mount = stream.mount
                 mount.username = self.auth_username
                 mount.password = self.auth_password
@@ -144,7 +145,7 @@ class Relay(Base):
         else:
             for stream in self.streams:
                 mount = rfk.icecast.Mount()
-                mount.api_url = 'http://192.168.122.1:5000/backend/icecast/'
+                mount.api_url = api_url
                 mount.mount = stream.stream.mount
                 mount.username = self.auth_username
                 mount.password = self.auth_password
