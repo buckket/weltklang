@@ -21,7 +21,18 @@ from rfk.site import app
 
 @api.route("/site/admin/liquidsoap/endpoint/<string:action>")
 def endpoint_action(action):
-    pass
+    if request.args.get('endpoint') is None:
+        return jsonify({'error':'no endpoint supplied!'})
+    try:
+        ret = {}
+        li = LiquidInterface()
+        li.connect()
+        ret['status'] = li.endpoint_action(request.args.get('endpoint').encode('ascii','ignore'),
+                                           action.encode('ascii','ignore'))
+        li.close()
+        return jsonify(ret)
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 @api.route("/site/admin/liquidsoap/status")
 def liquidsoap_status():
@@ -35,7 +46,8 @@ def liquidsoap_status():
         for source in li.get_sources():
             ret['sources'].append({'handler': source.handler,
                                    'type': source.type,
-                                   'status': (source.status() != 'no source client connected')})
+                                   'status': (source.status() != 'no source client connected'),
+                                   'status_msg':source.status()})
             
         ret['sinks'] = []
         for sink in li.get_sinks():

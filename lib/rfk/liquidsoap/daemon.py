@@ -12,6 +12,7 @@ import select
 import pickle
 import traceback
 import sys
+import re
 
 import rfk.liquidsoap
 from rfk.types import RingBuffer
@@ -35,11 +36,8 @@ def read(_socket):
 class LiquidsoapDaemon(object):
     
     def __init__(self, basedir,socket='/tmp/liquiddaemon.sock', workdir=None, autostart=True):
-        try:
-            os.unlink(socket)
-        except OSError:
-            if os.path.exists(socket):
-                raise
+        if os.path.exists(socket):
+            raise
         self.basedir = basedir
         if workdir:
             self.workdir = workdir
@@ -51,6 +49,7 @@ class LiquidsoapDaemon(object):
         self.log = RingBuffer(1000)
         self.quit = False
         self.run_liquid = True
+        self.skip_telnet = True
         if autostart:
             self.run()
         
@@ -119,7 +118,14 @@ class LiquidsoapDaemon(object):
         self.process.stdin.close()
         while self.process.returncode == None:
             try:
-                self.write_log(self.process.stdout.readline())
+                
+                    
+                line = re.sub(r'^\d{4}/d{2}/d{2} d{2}:d{2}:d{2} ', '', self.process.stdout.readline()) 
+                if not (self.skip_telnet and\
+                   (line.endswith('New client: localhost.\n') or\
+                    line.endswith('Client localhost disconnected without saying goodbye..!\n') or\
+                    line.endswith('Client localhost disconnected.\n'))):
+                    self.write_log(line)
             finally:
                 self.process.poll()
 

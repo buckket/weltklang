@@ -35,8 +35,12 @@ class LiquidInterface(object):
     
     def get_status(self, sink_or_source):
         assert isinstance(sink_or_source, (LiquidSink, LiquidSource))
-        return self._execute_command("%s.status" % (sink_or_source.handler)).splitlines()[1]
-        
+        return self.endpoint_action(sink_or_source.handler, 'status')
+    
+    def endpoint_action(self, handler, action):
+        for line in self._execute_command("%s.%s" % (handler, action)).splitlines():
+            if len(line) > 0:
+                return line
     
     def get_version(self):
         for line in self._execute_command('version').splitlines():

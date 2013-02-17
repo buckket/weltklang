@@ -47,7 +47,34 @@ background-color: #f5f5f5;
   text-align: right;
   vertical-align: middle;
 }
+.btn-toolbar2 >.btn-group + .btn-group {
+margin-left: -5px;
+}
 
+.btn-toolbar2 > .btn-group > .btn, .btn-toolbar2 > .btn-group > .dropdown-toggle
+{
+    -webkit-border-radius: 0px;
+    border-radius: 0px;
+    -moz-border-radius: 0px;
+}
+
+.btn-toolbar2 > .btn-group:first-child > .btn, .btn-toolbar2 > .btn-group:first-child > .dropdown-toggle{
+    -webkit-border-bottom-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    -webkit-border-top-left-radius: 4px;
+    border-top-left-radius: 4px;
+    -moz-border-radius-bottomleft: 4px;
+    -moz-border-radius-topleft: 4px;    
+}
+
+.btn-toolbar2 > .btn-group:last-child > .btn:last-child, .btn-toolbar2 > .btn-group:last-child > .dropdown-toggle:nth-last-child(2){
+    -webkit-border-bottom-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    -webkit-border-top-right-radius: 4px;
+    border-top-right-radius: 4px;
+    -moz-border-radius-bottomright: 4px;
+    -moz-border-radius-topright: 4px;    
+}
 
 </style>
 <script>
@@ -59,6 +86,7 @@ $(function() {
 		if (data.error) {
 			append_log('','Could not get Logs (Error:'+data.error+') retrying in 10 seconds');
 			setTimeout(poll_log, 10000);
+			return;
 		}
 		offset = data.offset;
 		$.each(data.log, function(index, line){
@@ -87,6 +115,7 @@ $(function() {
 		if (data.error) {
 			$('#liquidsoap-version').html('Offline');
 			$('#liquidsoap-uptime').html('Offline');
+			$('#liquidsoap-toolbar > .btn-group > button span').removeClass('label-warning label-success');
 			setTimeout(poll_status, 5000);
 			return;
 		}
@@ -100,32 +129,49 @@ $(function() {
 			id = source.handler.replace('(dot)', '.');
 			id = id.replace('/', '');
 			
-			if ($('#sources #'+id).length == 0) {
-				$('<button class="btn" id="'+id+'"><span class="label label-success"><i class="icon-off"></i></span> '+source.handler+'</button>').appendTo('#sources');
+			if ($('#liquidsoap-toolbar #'+id).length == 0) {
+				$('<div class="btn-group"><button class="btn" id="'+id+'" data-toggle="dropdown">' +
+				  '<span class="label label-success"><i class="icon-off"></i></span> '+
+				  source.handler+'</button>'+
+				  '<ul class="dropdown-menu"><li class="disabled">'+
+				  '<a href="#" tabindex="-1" id="status-'+id+'">'+source.status_msg+'</a>'+
+				  '</li><li>'+
+				  '<a href="#" onclick="stop_endpoint(\''+source.handler+'\');">Stop</a>'+
+				  '</li></ul></div>'
+				).appendTo('#liquidsoap-toolbar');
 			}
-			var label = $('#sources #'+id+' span');
+			var label = $('#liquidsoap-toolbar #'+id+' span');
             if (source.status) {
-                label.removeClass('label-error');
+                label.removeClass('label-warning');
                 label.addClass('label-success');
             } else {
                 label.removeClass('label-success');
-                label.addClass('label-error');
+                label.addClass('label-warning');
             }
+            $('#status-'+id+'').html(source.status_msg);
 		});
 		$.each(data.sinks, function(index, sink){
             id = sink.handler.replace('(dot)', '-');
             id = id.replace('/', '');
             
-            if ($('#sinks #'+id).length == 0) {
-                $('<button class="btn" id="'+id+'"><span class="label"><i class="icon-off"></i></span> '+sink.handler+'</button>').appendTo('#sinks');
+            if ($('#liquidsoap-toolbar #'+id).length == 0) {
+                $('<div class="btn-group"><button class="btn" id="'+id+'" data-toggle="dropdown">'+
+                  '<span class="label"><i class="icon-off"></i></span> '+
+                  sink.handler+'</button>'+
+                  '<ul class="dropdown-menu"><li>'+
+                  '<a href="#" onclick="start_endpoint(\''+sink.handler+'\');">Start</a>'+
+                  '</li><li>'+
+                  '<a href="#" onclick="stop_endpoint(\''+sink.handler+'\');">Stop</a>'+
+                  '</li></ul></div>'
+                 ).appendTo('#liquidsoap-toolbar');
             }
-            var label = $('#sinks #'+id+' span');
+            var label = $('#liquidsoap-toolbar #'+id+' span');
             if (sink.status) {
-            	label.removeClass('label-error');
+            	label.removeClass('label-important');
                 label.addClass('label-success');
             } else {
             	label.removeClass('label-success');
-            	label.addClass('label-error');
+            	label.addClass('label-important');
             }
         });
 		setTimeout(poll_status, 2500);
@@ -144,7 +190,9 @@ $(function() {
 });
 
 function after_command(data) {
-    
+    if (data.error) {
+    	alert(data.error);
+    }
 }
 
 function shutdown() {
@@ -166,7 +214,27 @@ function start() {
     });
     return false;
 }
+
+function endpoint_action(handler, action) {
+	$.ajax({
+        url: '/api/site/admin/liquidsoap/endpoint/'+action,
+        type: "GET",
+        data: {endpoint:handler},
+        dataType: "json",
+        success: after_command
+    });
+}
+function stop_endpoint(handler) {
+    endpoint_action(handler,'stop');
+    return false;
+}
+
+function start_endpoint(handler) {
+	endpoint_action(handler,'start');
+    return false;
+}
 </script>
+<h2>Liquidsoap Monitor</h2>
 <div class="row-fluid">
 <div class="span3">
     <div class="well">
@@ -175,7 +243,7 @@ function start() {
     </div>
 </div>
 <div class="span9">
-<div class="btn-toolbar">
+<div class="btn-toolbar btn-toolbar2" id="liquidsoap-toolbar">
     <div class="btn-group">
         <button class="btn dropdown-toggle" data-toggle="dropdown">
             <i class="icon-wrench"></i> Liquidsoap <span class="caret"></span>
@@ -188,10 +256,6 @@ function start() {
                 <a href="#" onclick="shutdown();">Stop</a>
 			</li>
         </ul>
-    </div>
-    <div class="btn-group" id="sources">
-    </div>
-    <div class="btn-group" id="sinks">
     </div>
 </div>
 </div>
