@@ -3,8 +3,7 @@ Created on Aug 11, 2012
 
 @author: teddydestodes
 '''
-
-from flask import Blueprint, render_template, g
+from flask import Blueprint, render_template, url_for
 from functools import wraps
 import rfk
 from flask.ext.login import login_required, current_user
@@ -33,4 +32,20 @@ def streams():
 @admin.route('/liquidsoap')
 @login_required
 def liquidsoap():
-    return render_template('admin/streams.html')
+    return render_template('admin/liquidsoap.html')
+
+
+def create_menu(endpoint):
+    menu = {'name': 'Admin', 'submenu': [], 'active': False}
+    entries = [['admin.liquidsoap', 'Liquidsoap', 'admin'],
+               ]
+    for entry in entries:
+        active = endpoint == entry[0]
+        menu['submenu'].append({'name': entry[1],
+                                'url': url_for(entry[0]),
+                                'active': (active)})
+        if active:
+            menu['active'] = True
+    return menu
+
+admin.create_menu = create_menu

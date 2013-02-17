@@ -22,6 +22,4 @@ if __name__ == '__main__':
                                                             rfk.CONFIG.get('database', 'host'),
                                                             rfk.CONFIG.get('database', 'database')))
     daemon = LiquidsoapDaemon(current_dir)
-    #atexit.register(daemon.shutdown)
-    daemon.run()
     

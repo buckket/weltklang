@@ -127,10 +127,12 @@ def make_output(dir):
         if stream.type == Stream.TYPES.OGG:
             file = 'output_vorbis.liq'
         elif stream.type == Stream.TYPES.AACP:
+            continue
             file = 'output_aacp.liq'
         elif stream.type == Stream.TYPES.MP3:
             file = 'output_mp3.liq'
         elif stream.type == Stream.TYPES.OPUS:
+            continue
             file = 'output_opus.liq'
         else:
             continue
