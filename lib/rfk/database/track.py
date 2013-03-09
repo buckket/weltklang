@@ -39,7 +39,6 @@ class Track(Base):
             self.end = now()
         else:
             self.end = end
-        print 'b', self.begin,'e', self.end
         length = self.end - self.begin
         self.title.update_length(length.total_seconds())
     
