@@ -22,7 +22,7 @@ def atom():
                      title=show.name,
                      content=show.description,
                      author=author,
-                     url='http://krautchan.net',
+                     url='http://radio.krautchan.net',
                      updated=show.begin,
                      published=show.begin)
             
