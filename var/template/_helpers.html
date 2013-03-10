@@ -29,3 +29,21 @@
     </div>
   </div>
 {% endmacro %}
+
+{% macro weekday(dayofweek) %}
+    {% if dayofweek == 0 %}
+        {% trans %}Monday{% endtrans %}
+    {% elif dayofweek == 1 %}
+        {% trans %}Tuesday{% endtrans %}
+    {% elif dayofweek == 2 %}
+        {% trans %}Wednesday{% endtrans %}
+    {% elif dayofweek == 3 %}
+        {% trans %}Thursday{% endtrans %}
+    {% elif dayofweek == 4 %}
+        {% trans %}Friday{% endtrans %}
+    {% elif dayofweek == 5 %}
+        {% trans %}Saturday{% endtrans %}
+    {% elif dayofweek == 6 %}
+        {% trans %}Sunday{% endtrans %}
+    {% endif %}
+{% endmacro %}

@@ -1,6 +1,7 @@
 from flask import Flask, session, g, render_template, flash, redirect, url_for, request, jsonify
 from flask.ext.login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from flaskext.babel import Babel
+from flaskext.babel import Babel, get_locale, get_timezone, refresh
+import pytz
 import datetime
 
 from rfk.database import session
@@ -16,9 +17,16 @@ app.config['BABEL_DEFAULT_LOCALE'] = 'de'
 app.config['BABEL_LOCALE_PATH'] = 'de'
 app.secret_key = 'PENISPENISPENISPENISPENIS'
 
-app.jinja_env.globals['nowPlaying'] = helper.nowPlaying
-app.jinja_env.filters['bbcode'] = helper.bbcode
-app.jinja_env.filters['timedelta'] = helper.timedelta
+locales = {'de': {'name':'Bernd','img':'/static/img/cb/de.png'},
+           'en': {'name':'English','img':'/static/img/cb/gb.png'}}
+
+
+app.jinja_env.filters.update(bbcode=helper.bbcode,
+                             timedelta=helper.timedelta
+                             )
+
+
+app.jinja_env.globals.update(nowPlaying= helper.nowPlaying)
 
 babel = Babel(app)
 
@@ -27,17 +35,25 @@ def shutdown_session(exception=None):
     session.remove()
 
 @babel.localeselector
-def get_locale():
-    if current_user is not None:
+def babel_localeselector():
+    if hasattr(g, 'current_locale'):
+        return g.current_locale  
+    elif request.cookies.get('locale') is not None:
+        return request.cookies.get('locale')
+    elif current_user is not None:
         return current_user.get_locale()
-    return request.accept_languages.best_match(['de', 'en'])
+    return request.accept_languages.best_match(locales.keys())
 
 @babel.timezoneselector
-def get_timezone():
-    if request.cookies.get('timezone') is not None:
-        request.cookies.get('timezone')
-    if current_user is not None:
+def babel_timezoneselector():
+    if hasattr(g, 'current_timezone'):
+        return g.current_timezone
+    elif request.cookies.get('timezone') is not None:
+        return request.cookies.get('timezone')
+    elif current_user is not None:
         return current_user.get_timezone()
+    return 'Europe/Berlin';
+    
 
 login_manager = LoginManager()
 login_manager.setup_app(app)
@@ -84,16 +100,22 @@ def before_request():
     if request.method == 'GET': 
         if request.args.get('lang') is not None and request.args.get('lang') != '':
             current_user.locale = request.args.get('lang')
+            g.current_locale = request.args.get('lang')
             @after_this_request
             def remember_locale(response):
                 response.set_cookie('locale', current_user.locale, expires=datetime.datetime.utcnow()+datetime.timedelta(days=365))
                 return response
-        if request.args.get('tz') is not None and request.args.get('tz') != '':
+        if request.args.get('tz') is not None and\
+           request.args.get('tz') in pytz.common_timezones:
             current_user.timezone = request.args.get('tz')
+            g.current_timezone = request.args.get('tz')
             @after_this_request
             def remember_timezone(response):
                 response.set_cookie('timezone', current_user.timezone)
                 return response
+    refresh()
+    request.current_locale = get_locale()
+    request.current_timezone = str(get_timezone())
 
 @app.before_request
 def make_menu():
@@ -108,33 +130,6 @@ def make_menu():
             request.menu[bpname] = app.blueprints[bpname].create_menu(request.endpoint)
         except AttributeError:
             pass
-
-@app.route('/timezones')
-def timezones():
-    import pytz
-    regions = {}
-    for tz in pytz.common_timezones:
-        zone = tz.split('/',1)
-        if zone[0] not in regions.keys():
-            regions[zone[0]] = []
-        try:
-            regions[zone[0]].append(zone[1])
-        except IndexError:
-            pass
-    response = jsonify(regions);
-    return response
-
-locales = {'de': {'name':'Bernd','img':'/static/img/cb/de.png'},
-           'en': {'name':'English','img':'/static/img/cb/gb.png'}}
-@app.route('/locales')
-def get_locales():
-    response = jsonify(locales)
-    return response
-
-@app.route('/locale/<locale>')
-def get_localeinfo(locale):
-    response = jsonify(locales[locale])
-    return response
 
 @app.route('/')
 def index():

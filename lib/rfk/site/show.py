@@ -58,6 +58,9 @@ def new_series():
 def view_series(series):
     return 'blah'
 
+@show.route('/calendar/<int:year>/week/<int:week>')
+def calender_week(year, week):
+    return render_template('shows/calendar/week.html')
 def create_menu(endpoint):
     menu = {'name': 'Programme', 'submenu': [], 'active': False}
     entries = [['show.upcoming', 'Upcomming Shows'],

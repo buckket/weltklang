@@ -13,7 +13,7 @@ from subprocess import call
 import os
 
 from rfk.api import api, check_auth, wrapper
-from rfk.database.streaming import ListenerStats, Stream
+#from rfk.database.streaming import ListenerStats, Stream
 from rfk.database.show import Show
 from rfk.liquidsoap.daemon import LiquidDaemonClient
 from rfk.liquidsoap import LiquidInterface

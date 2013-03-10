@@ -52,6 +52,7 @@ def check_auth(f=None, required_permissions=None):
 
 from .web import *
 from .site import *
+from .locale_timezone import *
 
 
 @api.route('/<path:path>')
