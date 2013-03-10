@@ -1,8 +1,3 @@
-'''
-Created on Feb 15, 2013
-
-@author: teddydestodes
-'''
 from flask import jsonify, request, g
 from sqlalchemy.sql.expression import between
 import pytz

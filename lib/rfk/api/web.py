@@ -10,6 +10,8 @@ from rfk.database.streaming import Listener
 import rfk.helper
 from rfk.helper import now
 
+from rfk.liquidsoap import LiquidInterface
+
 from datetime import datetime, timedelta
 from sqlalchemy import func, and_, or_, between
 
@@ -72,13 +74,19 @@ def kick_dj():
         None
     """
     
-    # just a testing dummy
-    def do_kick_dj(dj):
-        return True
-    
+    def try_kick():
+        try:
+            li = LiquidInterface()
+            li.connect()
+            li.kick_harbor()
+            li.close()
+            return True
+        except:
+            return False
+            
     result = UserShow.query.filter(UserShow.status == UserShow.STATUS.STREAMING).first()
     if result:
-        if do_kick_dj(result.user.user):
+        if try_kick():
             data = {'kick_dj': {'dj_id': result.user.user, 'dj_name': result.user.username, 'success': True}}
         else:
             data = {'kick_dj': {'dj_id': result.user.user, 'dj_name': result.user.username, 'success': False}}
