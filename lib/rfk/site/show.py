@@ -10,7 +10,9 @@ import rfk.database
 from rfk import CONFIG
 from rfk.site.forms.show import new_series_form
 from flask.ext.login import login_required, current_user
+from flaskext.babel import to_user_timezone, to_utc
 import datetime
+import pytz
 
 
 show = Blueprint('show',__name__)
@@ -58,9 +60,66 @@ def new_series():
 def view_series(series):
     return 'blah'
 
-@show.route('/calendar/<int:year>/week/<int:week>')
-def calender_week(year, week):
-    return render_template('shows/calendar/week.html')
+@show.route('/calendar/week')
+def calendar_week():
+    now = to_user_timezone(datetime.datetime.utcnow()).date()
+    return calendar_week_spec(int(now.strftime('%Y')), int(now.strftime('%W'))+1)
+
+@show.route('/calendar/week/<int:year>/<int:week>')
+def calendar_week_spec(year, week):
+    from rfk.site import app
+    if week < 1:
+        week = 1
+    sunday = datetime.datetime.strptime("%s %s 0" % (year, week-1), "%Y %W %w")
+    monday = sunday-datetime.timedelta(days=6)
+    begin = to_utc(monday+datetime.timedelta(hours=8))
+    days = {}
+    
+    for wd in range(0,7):
+        days[wd] = _get_shows(begin, begin+datetime.timedelta(hours=24))
+        begin = begin+datetime.timedelta(hours=24)
+    
+    #app.logger.warn(days)
+    next_week = (sunday+datetime.timedelta(days=1))
+    prev_week = (sunday+datetime.timedelta(days=-7))
+    return render_template('shows/calendar/week.html',
+                           shows=days,
+                           year=year,
+                           week=week,
+                           monday=monday.date(),
+                           sunday=sunday.date(),
+                           next_week=url_for('.calendar_week_spec', year=next_week.strftime('%Y'), week=int(next_week.strftime('%W'))+1 ),
+                           prev_week=url_for('.calendar_week_spec', year=prev_week.strftime('%Y'), week=int(prev_week.strftime('%W'))+1 )
+                           )
+
+def _get_shows(begin, end):
+    shows = Show.query.filter(Show.end > begin , Show.begin < end).all()
+    planned = []
+    unplanned = []
+    for show in shows:
+        b = show.begin
+        e = show.end
+        if b < begin:
+            b = begin
+        if e > end:
+            e = end
+        t = {'offset': (b-begin).total_seconds(),
+             'duration': (e-b).total_seconds(),
+             'name': show.name,
+             'description': show.description,
+             'tags': []}
+        for tag in show.tags:
+            if tag.tag.icon and len(tag.tag.icon) > 0 :
+                t['tags'].append({'icon':tag.tag.icon, 'alt': tag.tag.description})
+        if show.flags & Show.FLAGS.RECORD:
+            t['tags'].append({'icon':'icon-save', 'alt': ''})
+        if show.flags & Show.FLAGS.PLANNED:
+            planned.append(t)
+        elif show.flags & Show.FLAGS.UNPLANNED:
+            unplanned.append(t)
+    return (planned, unplanned)
+        
+
 def create_menu(endpoint):
     menu = {'name': 'Programme', 'submenu': [], 'active': False}
     entries = [['show.upcoming', 'Upcomming Shows'],

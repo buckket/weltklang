@@ -97,8 +97,9 @@ class UserShow(Base):
 class Tag(Base):
     __tablename__ = 'tags'
     tag = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    name = Column(String(25))
-    description = Column(Text)
+    name = Column(String(25), nullable=False)
+    icon = Column(String(30))
+    description = Column(Text, nullable=False)
     
     @staticmethod
     def get_tag(name):

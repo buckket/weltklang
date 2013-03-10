@@ -95,6 +95,9 @@
     width:100%;
     position:absolute;
 }
+.day .hours .entry .content {
+    margin-top:1.5em;
+}
 .day .hours .entry .footer {
     border-top: 1px dotted #CDCDCD;
     background-color: #EFEFEF;
@@ -199,9 +202,9 @@
 }
 </style>
 <div class="row-fluid calendar-head">
-<a href="#" class="prev"><i class="icon-angle-left"></i></a>
-<a href="#" class="next"><i class="icon-angle-right"></i></a>
-<div>2012 W15</div>
+<a href="{{ prev_week }}" class="prev"><i class="icon-angle-left"></i></a>
+<a href="{{ next_week }}" class="next"><i class="icon-angle-right"></i></a>
+<div>{{ year }} W{{ week }} ({{ monday }} - {{ sunday }})</div>
 </div>
 <div class="row-fluid week">
     {% for d in range(7) %}
@@ -211,7 +214,18 @@
 		    {% for h in range(24) %}
 		    <div class="hour">{{ (h + 8)%24  }}</div>
 		    {% endfor %}
-		    <div class="entry" style="top:120px;height:20px;">
+		    {% for show in shows[d][0] %}
+		    <div class="entry" style="top:{{ (show.offset/3600)*40 }}px;height:{{ (show.duration/3600)*40 }}px;">
+              <div class="content">{{ show.description }}</div>              
+              <div class="footer">
+                {% for tag in show.tags %}
+                <i class="{{ tag.icon }}" title="{{tag.alt}}"></i>
+                {% endfor %}
+              </div>
+              <div class="header">{{ show.name }}</div>
+            </div>
+		    {% endfor %}
+		    <!-- <div class="entry" style="top:120px;height:20px;">
 		      
 		      beschreibung
 		      <div class="footer">
@@ -275,7 +289,7 @@
             </div>
             <div class="entry-unplanned" style="top:300px;height:400px;">
                 <span>Ungeplante-show3</span>
-            </div>
+            </div> -->
 	    </div>
     </div>
     {% endfor %}

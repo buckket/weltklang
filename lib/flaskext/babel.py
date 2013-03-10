@@ -294,7 +294,7 @@ def to_utc(datetime):
     """
     if datetime.tzinfo is None:
         datetime = get_timezone().localize(datetime)
-    return datetime.astimezone(UTC).replace(tzinfo=None)
+    return datetime.astimezone(UTC).replace(tzinfo=UTC)
 
 
 def format_datetime(datetime=None, format=None, rebase=True):
