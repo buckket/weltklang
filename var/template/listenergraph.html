@@ -11,6 +11,8 @@
 <!-- <div class="row-fluid">
 <div class="span12" id="listenergraph-month" style="height:150px;"></div>
 </div> -->
+{% endblock %}
+{% block js %}
 <script>
 $(function() {
 	
@@ -28,7 +30,7 @@ $(function() {
     }
 	
 
-	function load_graph(placeholder, timespan) {
+	function load_graph(placeholder, begin, end) {
 		  function onDataReceived(series) {
 
 		        var data = [];
@@ -153,16 +155,16 @@ $(function() {
 		    }
 		
 		$.ajax({
-	        url: '/api/site/listenergraphdata/'+timespan,
+	        url: '/api/site/listenergraphdata/'+begin+'/'+end,
 	        type: "GET",
 	        dataType: "json",
 	        success: onDataReceived
 	    });
 	}
-	load_graph($('#listenergraph-today'), '-1 days');
-	load_graph($('#listenergraph-week'), '-7 days');
+	load_graph($('#listenergraph-today'), '-1days', 'now');
+	load_graph($('#listenergraph-week'), '-7days', 'now');
 	//load_graph($('#listenergraph-month'), '-31 days');
 });
 </script>
-{% endblock %}
+{% endblock js%}
 

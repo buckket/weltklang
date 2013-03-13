@@ -8,7 +8,7 @@ from subprocess import call
 import os
 
 from rfk.api import api, check_auth, wrapper
-#from rfk.database.streaming import ListenerStats, Stream
+from rfk.database.streaming import Stream
 from rfk.database.show import Show
 from rfk.liquidsoap.daemon import LiquidDaemonClient
 from rfk.liquidsoap import LiquidInterface
@@ -102,33 +102,33 @@ def listenerdata(start,stop):
     #detemine a starting point, wont be needed in productive code
     stop = parse_datetimestring(stop)
     start = parse_datetimestring(start)
-    ls = ListenerStats.get(start)
+    app.logger.warn(start)
+    app.logger.warn(stop)
     ret = {'data':{}, 'shows':[]}
     
     streams = Stream.query.all()
     for stream in streams:
         ret['data'][str(stream.mount)] = []
         #just set an initial stating point from before the starting point
-        fls = ListenerStats.query.filter(ListenerStats.timestamp <= start,
-                                         ListenerStats.stream == stream)\
-                                 .order_by(ListenerStats.timestamp.desc()).limit(1).scalar()
-        if fls is not None:
-            c = fls.count
+        stats = stream.statistic.get(stop=start, num=1, reverse=True)
+        for stat in stats:
+            c = stat.value
         else:
             c = 0
         ret['data'][str(stream.mount)].append((int(start.strftime("%s"))*1000,int(c)))
     
     #fill in the actual datapoints
-    ls = ListenerStats.get(start, stop=stop)
-    for stat in ls:
-        ret['data'][str(stat.stream.mount)].append((int(stat.timestamp.strftime("%s"))*1000,int(stat.count)))
-    
+    streams = Stream.query.all()
     for stream in streams:
-        lls = ListenerStats.query.filter(ListenerStats.timestamp <= stop,
-                                         ListenerStats.stream == stream)\
-                                 .order_by(ListenerStats.timestamp.desc()).limit(1).scalar()
-        if lls is not None:
-            c = lls.count
+        stats = stream.statistic.get(start=start, stop=stop)
+        for stat in stats:
+            ret['data'][str(stream.mount)].append((int(stat.timestamp.strftime("%s"))*1000,int(stat.value)))
+    
+    streams = Stream.query.all()
+    for stream in streams:
+        stats = stream.statistic.get(stop=stop, num=1, reverse=True)
+        for stat in stats:
+            c = stat.value
         else:
             c = 0
         ret['data'][str(stream.mount)].append((int(stop.strftime("%s"))*1000,int(c)))

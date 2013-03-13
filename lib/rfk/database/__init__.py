@@ -26,6 +26,7 @@ import base
 import show
 import streaming
 import track
+import stats
 
 def init_db(db_uri, debug=False):
     global session, engine

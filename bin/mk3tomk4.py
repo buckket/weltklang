@@ -11,6 +11,7 @@ from sqlalchemy import *
 from sqlalchemy.orm import relationship, backref,sessionmaker, exc
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql.expression import between
+import time
 
 Base = declarative_base()
 
@@ -29,6 +30,7 @@ class Show(Base):
     streamer = relationship('Streamer', backref='shows')
     songs = relationship('Song', backref='shows')
     name = Column(String)
+    type = Column(String)
     description = Column(String)
     begin = Column(DateTime)
     end = Column(DateTime)
@@ -78,7 +80,7 @@ class Listener(Base):
     mount = relationship('Mount', backref='listenerhistory')
     relay_id = Column('relay', Integer(unsigned=True), ForeignKey('relays.relay'))
     relay = relationship('Relay', backref='listenerhistory')
-    #ip = Column(rfk.INetAddress)
+    ip = Column(Integer)
     useragent = Column(String)
     connected = Column(DateTime)
     disconnected = Column(DateTime)
@@ -94,7 +96,6 @@ class News(Base):
     text = Column(Text)
     
 current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-print current_dir
 rfk.init(current_dir)
 
 old_engine = create_engine("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('olddatabase', 'engine'),
@@ -102,6 +103,7 @@ old_engine = create_engine("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('ol
                                                               rfk.CONFIG.get('olddatabase', 'password'),
                                                               rfk.CONFIG.get('olddatabase', 'host'),
                                                               rfk.CONFIG.get('olddatabase', 'database')))
+
 rfk.database.init_db("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
                                                               rfk.CONFIG.get('database', 'username'),
                                                               rfk.CONFIG.get('database', 'password'),
@@ -122,6 +124,7 @@ def copy_users():
         if User.get_user(olduser.username) is None:
             user = User.add_user(olduser.username, olduser.password)
             rfk.database.session.add(user)
+            rfk.database.session.flush()
     rfk.database.session.commit()
     
 
@@ -136,8 +139,13 @@ def copy_shows():
     for oldshow in shows:
         if oldshow.streamer != None:
             user = User.get_user(username=oldshow.streamer.username)
-            show = NShow(name=oldshow.name,
+            if oldshow.type == 'UNPLANNED':
+                flag = NShow.FLAGS.UNPLANNED
+            elif oldshow.type == 'PLANNED':
+                flag = NShow.FLAGS.PLANNED
+            show = NShow(name=oldshow.name[:50],
                         description=oldshow.description,
+                        flags=flag,
                         begin=local.normalize(local.localize(oldshow.begin).astimezone(pytz.utc)),
                         end=local.normalize(local.localize(oldshow.end).astimezone(pytz.utc)))
             rfk.database.session.add(show)
@@ -159,6 +167,7 @@ def copy_shows():
             #    rfk.database.session.commit()
 
 import rfk.database.streaming
+import rfk.database.stats
 
 def copy_mounts():
     relays = oldsession.query(Relay).yield_per(50)
@@ -189,32 +198,73 @@ def copy_mounts():
                 stream = rfk.database.streaming.Stream.get_stream(mount=mount.path)
             except exc.NoResultFound:
                 stream = rfk.database.streaming.Stream(mount=mount.path)
-            #@todo: finish
-            rfk.database.session.add(stream)
+                stat = rfk.database.stats.Statistic(name="Listener %s" % (mount.name), identifier="lst-%s" % (mount.path,))
+                rfk.database.session.add(stat)
+                stream.statistic = stat
+                rfk.database.session.add(stream)
             rfk.database.session.flush()
             relay.add_stream(stream)
             rfk.database.session.flush()
         rfk.database.session.commit()
 
+import struct, socket
+int2ip = lambda n: socket.inet_ntoa(struct.pack('!I', n))
+
 def copy_listener():
-    listeners = oldsession.query(Listener).filter(Listener.listenerhistory >= 400000).yield_per(250)
+    listeners = oldsession.query(Listener).yield_per(250)
     local = pytz.timezone('Europe/Berlin')
     c = 0
+    cache = {}
+    totallistener = rfk.database.stats.Statistic.query.filter(rfk.database.stats.Statistic.identifier == 'lst-total').one()
     for oldlistener in listeners:
-        #relay = rfk.database.streaming.Relay.get_relay(address=oldlistener.relay.hostname[0:15], port=oldlistener.relay.port)
-        stream = rfk.database.streaming.Stream.get_stream(mount=oldlistener.mount.path)
-        #sr = relay.get_stream_relay(stream)
-        c1 = oldsession.query(func.count('*')).select_from(Listener).filter(Listener.mount == oldlistener.mount, oldlistener.connected >= Listener.connected,oldlistener.connected < Listener.disconnected).scalar()
-        c2 = oldsession.query(func.count('*')).select_from(Listener).filter(Listener.mount == oldlistener.mount, oldlistener.disconnected >= Listener.connected, oldlistener.disconnected < Listener.disconnected).scalar()
+        if oldlistener.relay.hostname[0:15] not in cache:
+            cache[oldlistener.relay.hostname[0:15]] = {}
         
-        rfk.database.streaming.ListenerStats.set(stream, local.normalize(local.localize(oldlistener.connected).astimezone(pytz.utc)), c1)
+        if oldlistener.mount.path not in cache[oldlistener.relay.hostname[0:15]]:
+            relay = rfk.database.streaming.Relay.get_relay(address=oldlistener.relay.hostname[0:15], port=oldlistener.relay.port)
+            stream = rfk.database.streaming.Stream.get_stream(mount=oldlistener.mount.path)
+            try:
+                sr = relay.get_stream_relay(stream)
+            except sqlalchemy.orm.exc.NoResultFound as e:
+                sr = relay.add_stream(stream)
+            cache[oldlistener.relay.hostname[0:15]][oldlistener.mount.path] = sr
+        
+        t = time.time()
+        listener = rfk.database.streaming.Listener.create(int2ip(oldlistener.ip),
+                                                          oldlistener.client,
+                                                          oldlistener.useragent[:255],
+                                                          cache[oldlistener.relay.hostname[0:15]][oldlistener.mount.path])
+        listener.connect = local.normalize(local.localize(oldlistener.connected)).astimezone(pytz.utc)
+        listener.disconnect = local.normalize(local.localize(oldlistener.disconnected)).astimezone(pytz.utc)
         rfk.database.session.flush()
-        rfk.database.streaming.ListenerStats.set(stream, local.normalize(local.localize(oldlistener.disconnected).astimezone(pytz.utc)), c2)
         rfk.database.session.commit()
-        print  c, c1,c2
-        c+=1
-    session.commit()
 
+def calc_stats():
+    """This is slow as fuck
+    """
+    totallistener = rfk.database.stats.Statistic.query.filter(rfk.database.stats.Statistic.identifier == 'lst-total').one()
+    listeners = rfk.database.streaming.Listener.query.order_by(rfk.database.streaming.Listener.listener.desc()).yield_per(500)
+    c = 0
+    for listener in listeners:
+        c += 1
+        c1 = rfk.database.streaming.Listener.query.join(rfk.database.streaming.StreamRelay).filter(rfk.database.streaming.StreamRelay.stream == listener.stream_relay.stream,
+                                                          listener.connect >= rfk.database.streaming.Listener.connect,
+                                                          listener.connect < rfk.database.streaming.Listener.disconnect).count()
+        c2 = rfk.database.streaming.Listener.query.join(rfk.database.streaming.StreamRelay).filter(rfk.database.streaming.StreamRelay.stream == listener.stream_relay.stream,
+                                                          listener.disconnect >= rfk.database.streaming.Listener.connect,
+                                                          listener.disconnect < rfk.database.streaming.Listener.disconnect).count()
+        ct1 = rfk.database.streaming.Listener.query.filter(listener.connect >= rfk.database.streaming.Listener.connect,
+                                                          listener.connect < rfk.database.streaming.Listener.disconnect).count()
+        ct2 = rfk.database.streaming.Listener.query.filter(listener.disconnect >= rfk.database.streaming.Listener.connect,
+                                                          listener.disconnect < rfk.database.streaming.Listener.disconnect).count()
+        listener.stream_relay.stream.statistic.set(listener.connect,c1)
+        listener.stream_relay.stream.statistic.set(listener.disconnect,c2)
+        totallistener.set(listener.connect, ct1)
+        totallistener.set(listener.disconnect, ct2)
+        print c, c1, c2, ct1, ct2
+        rfk.database.session.flush()
+        rfk.database.session.commit()
+    
 def copy_news():
     news = oldsession.query(News).yield_per(50)
     print news
@@ -224,11 +274,18 @@ def copy_news():
         session.add(news)
         session.commit()
 
+def add_misc():
+    stat = rfk.database.stats.Statistic(name="Overall Listener", identifier="lst-total")
+    rfk.database.session.add(stat)
+    rfk.database.session.commit()
+
 if __name__ == '__main__':
-    copy_users()
-    copy_shows()
-    copy_mounts()
-    copy_listener()
+    #add_misc()
+    #copy_users()
+    #copy_shows()
+    #copy_mounts()
+    #copy_listener()
+    calc_stats()
     #copy_news()
         
         

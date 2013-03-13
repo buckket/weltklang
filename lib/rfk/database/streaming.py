@@ -1,17 +1,16 @@
 from sqlalchemy import *
 from sqlalchemy.orm import relationship, backref, exc
 from sqlalchemy.dialects.mysql import INTEGER as Integer
-
 from datetime import datetime
+import netaddr
+import pygeoip
 
 from rfk.database import Base, UTCDateTime
 from rfk.types import ENUM, SET
 from rfk import CONFIG
+from rfk.helper import now, get_location
 import rfk.database
 import rfk.icecast
-import netaddr
-
-from rfk.helper import now
 
 
 class Listener(Base):
@@ -20,7 +19,8 @@ class Listener(Base):
     listener = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     connect = Column(UTCDateTime)
     disconnect = Column(UTCDateTime)
-    location = Column(String(10))
+    country = Column(String(3))
+    city = Column(String(50))
     address = Column(Integer(unsigned=True))
     client = Column(Integer(unsigned=True))
     useragent = Column(String(255))
@@ -50,9 +50,15 @@ class Listener(Base):
         if rfk.CONFIG.getboolean('icecast', 'log_ip'):
             listener.address = int(netaddr.IPAddress(address))
         listener.client = client
+        loc = get_location(address)
+        if 'city' in loc:
+            listener.city = loc['city'].decode('latin-1') #FICK DICH MAXMIND
+        if 'country_code' in loc:
+            listener.country = loc['country_code']
         listener.useragent = useragent
         listener.connect = now()
         listener.stream_relay = stream_relay
+        rfk.database.session.add(listener)
         return listener
     
     def set_disconnected(self):
@@ -68,6 +74,10 @@ class Stream(Base):
     name = Column(String(25))
     type = Column(Integer(unsigned=True))
     quality = Column(Integer)
+    statistic_id = Column("statistic", Integer(unsigned=True), ForeignKey('statistics.statistic',
+                                                                          onupdate="CASCADE",
+                                                                          ondelete="RESTRICT"))
+    statistic = relationship("Statistic")
     TYPES = ENUM(['UNKNOWN', 'MP3', 'AACP', 'OGG', 'OPUS'])
     
     @staticmethod
@@ -106,7 +116,10 @@ class Relay(Base):
     relay_password = Column(String(50)) 
     type = Column(Integer(unsigned=True))
     status = Column(Integer(unsigned=True))
-    
+    statistic_id = Column("statistic", Integer(unsigned=True), ForeignKey('statistics.statistic',
+                                                                          onupdate="CASCADE",
+                                                                          ondelete="RESTRICT"))
+    statistic = relationship("Statistic")
     STATUS = ENUM(['UNKNOWN', 'DISABLED', 'OFFLINE', 'ONLINE'])
     TYPE = ENUM(['MASTER', 'RELAY'])
     
@@ -188,7 +201,10 @@ class StreamRelay(Base):
                                       ondelete="RESTRICT"))
     relay = relationship("Relay", backref=backref('streams'))
     status = Column(Integer(unsigned=True))
-    
+    statistic_id = Column("statistic", Integer(unsigned=True), ForeignKey('statistics.statistic',
+                                                                          onupdate="CASCADE",
+                                                                          ondelete="RESTRICT"))
+    statistic = relationship("Statistic")
     STATUS = ENUM(['UNKNOWN', 'DISABLED', 'OFFLINE', 'ONLINE'])
     
     def __init__(self, relay=None, stream=None):
@@ -203,33 +219,3 @@ class StreamRelay(Base):
                                                     Listener.disconnect == None).all()
         for listener in connected_listeners:
             listener.disconnect = now()
-            
-class ListenerStats(Base):
-    __tablename__ = 'listenerstats'
-    listenerstat = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    stream_id = Column("stream", Integer(unsigned=True), ForeignKey('streams.stream',
-                                                 onupdate="CASCADE",
-                                                 ondelete="RESTRICT"))
-    stream = relationship("Stream")
-    timestamp = Column(UTCDateTime())
-    count = Column(Integer(unsigned=True))
-    
-    @staticmethod
-    def set(stream, timestamp, count):
-        try:
-            ls = ListenerStats.query.filter(ListenerStats.timestamp == timestamp, ListenerStats.stream == stream).one()
-            ls.count = count
-        except exc.NoResultFound:
-            ls = ListenerStats(stream=stream, timestamp=timestamp, count=count)
-            rfk.database.session.add(ls)
-            
-    @staticmethod        
-    def get(start=None, stop=None, stream_relay=None, num=None):
-        clauses = []
-        if start is not None:
-            clauses.append(ListenerStats.timestamp >= start)
-        if stop is not None:
-            clauses.append(ListenerStats.timestamp <= stop)
-        if stream_relay is not None:
-            clauses.append(ListenerStats.stream_relay == stream_relay)
-        return ListenerStats.query.filter(*clauses).order_by(ListenerStats.timestamp.asc(),ListenerStats.stream_id.desc() ).yield_per(100)
