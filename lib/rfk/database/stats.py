@@ -9,7 +9,7 @@ from sqlalchemy.dialects.mysql import INTEGER as Integer
 
 from rfk.database import Base, UTCDateTime
 import rfk.database
-
+from rfk.helper import now
 
 class Statistic(Base):
     __tablename__ = 'statistics'
@@ -42,6 +42,12 @@ class Statistic(Base):
             qry = qry.limit(num)
         return qry.yield_per(100)
         
+    def current_value(self):
+        ret = self.get(stop=now(), num=1, reverse=True)
+        if len(ret) == 1:
+            return ret[0]
+        else:
+            return None
 
 
 class StatsistcsData(Base):
