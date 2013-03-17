@@ -1,5 +1,7 @@
 from flask import jsonify, request, g
+from flaskext.babel import to_user_timezone
 from sqlalchemy.sql.expression import between
+from sqlalchemy import or_
 import pytz
 import parsedatetime.parsedatetime as pdt
 from time import mktime
@@ -9,12 +11,14 @@ import os
 
 from rfk.api import api, check_auth, wrapper
 from rfk.database.streaming import Stream
-from rfk.database.show import Show
+from rfk.database.show import Show, Series
 from rfk.liquidsoap.daemon import LiquidDaemonClient
 from rfk.liquidsoap import LiquidInterface
+from rfk.site.helper import permission_required
 from rfk.site import app
 
 @api.route("/site/admin/liquidsoap/endpoint/<string:action>")
+@permission_required(permission='liq-endpointctrl')
 def endpoint_action(action):
     if request.args.get('endpoint') is None:
         return jsonify({'error':'no endpoint supplied!'})
@@ -30,6 +34,7 @@ def endpoint_action(action):
         return jsonify({'error': str(e)})
 
 @api.route("/site/admin/liquidsoap/status")
+@permission_required(permission='liq-restart')
 def liquidsoap_status():
     try:
         ret = {}
@@ -55,11 +60,13 @@ def liquidsoap_status():
         return jsonify({'error': str(e)})
 
 @api.route("/site/admin/liquidsoap/start")
+@permission_required(permission='liq-restart')
 def liquidsoap_start():
     returncode = call([os.path.join(app.config['BASEDIR'], 'bin','run-liquid.py')])
     return jsonify({'status': returncode})
 
 @api.route("/site/admin/liquidsoap/shutdown")
+@permission_required(permission='liq-restart')
 def liquidsoap_shutdown():
     try:
         client = LiquidDaemonClient()
@@ -71,6 +78,7 @@ def liquidsoap_shutdown():
         return jsonify({'error': str(e)})
 
 @api.route("/site/admin/liquidsoap/log")
+@permission_required(permission='liq-restart')
 def liquidsoap_log():
     try:
         client = LiquidDaemonClient()
@@ -115,14 +123,14 @@ def listenerdata(start,stop):
             c = stat.value
         else:
             c = 0
-        ret['data'][str(stream.mount)].append((int(start.strftime("%s"))*1000,int(c)))
+        ret['data'][str(stream.mount)].append((int(to_user_timezone(start).strftime("%s"))*1000,int(c)))
     
     #fill in the actual datapoints
     streams = Stream.query.all()
     for stream in streams:
         stats = stream.statistic.get(start=start, stop=stop)
         for stat in stats:
-            ret['data'][str(stream.mount)].append((int(stat.timestamp.strftime("%s"))*1000,int(stat.value)))
+            ret['data'][str(stream.mount)].append((int(to_user_timezone(stat.timestamp).strftime("%s"))*1000,int(stat.value)))
     
     streams = Stream.query.all()
     for stream in streams:
@@ -131,13 +139,28 @@ def listenerdata(start,stop):
             c = stat.value
         else:
             c = 0
-        ret['data'][str(stream.mount)].append((int(stop.strftime("%s"))*1000,int(c)))
+        ret['data'][str(stream.mount)].append((int(to_user_timezone(stop).strftime("%s"))*1000,int(c)))
         
     #get the shows for the graph
     shows = Show.query.filter(between(Show.begin, start, stop)\
                             | between(Show.end, start, stop)).order_by(Show.begin.asc()).all()
     for show in shows:
         ret['shows'].append({'name': show.name,
-                             'b':int(show.begin.strftime("%s")),
-                             'e':int(show.end.strftime("%s")),})
+                             'b':int(to_user_timezone(show.begin).strftime("%s")),
+                             'e':int(to_user_timezone(show.end).strftime("%s")),})
     return jsonify(ret)
+
+@api.route('/site/series/query')
+def series_query():
+    series = Series.query.filter(Series.name.like('%%%s%%'%request.args.get('query')),or_(Series.public == True)).limit(10)
+    ret = [];
+    for s in series:
+        ret.append({'id':s.series, 'name':s.name})
+        
+    return jsonify({'success':True, 'data':ret})
+
+@api.route('/site/show/add', methods=['POST'])
+def show_add():
+    from rfk.site import app
+    app.logger.warn(request.form)
+    return jsonify({'success':False, 'data':None})

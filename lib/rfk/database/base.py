@@ -28,6 +28,9 @@ class Anonymous(AnonymousUser):
     
     def get_timezone(self):
         return self.timezone
+    
+    def has_permission(self,code=None, permission=None):
+        return False
 
 class User(Base):
     __tablename__ = 'users'

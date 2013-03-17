@@ -9,6 +9,8 @@ import postmarkup
 import datetime
 from flaskext.babel import format_time
 from flask import request
+from functools import wraps, partial
+from flask.ext.login import current_user
 
 def nowPlaying():
     track = Track.current_track()
@@ -44,3 +46,13 @@ def timedelta(value):
                                                                                          seconds=seconds)
 
     return format_time((datetime.datetime.min + value).time())
+
+def permission_required(f=None, permission=None):
+    if f is None:
+        return partial(permission_required, permission=permission)
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.has_permission(permission):
+            return 'insufficient permissions'
+        return f(*args, **kwargs)
+    return decorated_function

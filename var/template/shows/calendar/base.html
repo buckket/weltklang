@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<div id="showform" class="modal hide fade fuelux" tabindex="-1" role="dialog" aria-labelledby="showform-label" aria-hidden="true">
+</div>
+{% endblock content %}
+
+{% block js %}
+<script>
+<!--
+function add_show() {
+	$.get('/show/new',{ inline: true }, function(data) {
+		$('#showform').html(data);
+		$('#showform').modal('show');
+    });
+}
+//-->
+</script>
+{% endblock js %}

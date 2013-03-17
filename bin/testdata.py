@@ -4,7 +4,7 @@ from pprint import pprint
 import datetime
 import rfk
 import rfk.database
-from rfk.database.base import User, News, ApiKey, Setting
+from rfk.database.base import User, News, ApiKey, Setting, Permission
 from rfk.database.show import Show, Tag
 from rfk.database.track import Track
 from rfk.database.streaming import Stream, Relay
@@ -132,12 +132,34 @@ def add_settings():
     settings.append(Setting.add_setting('show_def_name', 'Default Name for new Shows', Setting.TYPES.STR))
     settings.append(Setting.add_setting('show_def_desc', 'Default Description for new Shows', Setting.TYPES.STR))
     settings.append(Setting.add_setting('show_def_tags', 'Default Tags for new Shows', Setting.TYPES.STR))
+    settings.append(Setting.add_setting('show_def_logo', 'Default Logo for Shows', Setting.TYPES.STR))
     settings.append(Setting.add_setting('locale', 'Locale', Setting.TYPES.STR))
     settings.append(Setting.add_setting('timezone', 'Timezone', Setting.TYPES.STR))
     for setting in settings:
         rfk.database.session.add(setting)
     rfk.database.session.commit()    
+
+def add_permissions():
+    permissions = []
+    permissions.append(Permission.add_permission('liq-restart', 'Restart Liquidsoap'))
+    permissions.append(Permission.add_permission('liq-endpointctrl', 'Manage Liquidsoap Endpoints'))
+    permissions.append(Permission.add_permission('manage-relays', 'Manage Relays'))
+    permissions.append(Permission.add_permission('admin', 'Admin'))
+    for permission in permissions:
+        rfk.database.session.add(permission)
+    rfk.database.session.commit()
+
+def add_series():
+    series = []
+    series.append(Series(name='Albumnacht', public=True))
+    series.append(Series(name=u'Teddy Stroemt', public=False))
+    series.append(Series(name='Irgendwas', public=True))
+    series.append(Series(name='Irgendwas Anderes', public=True))
     
+    for s in series:
+        rfk.database.session.add(s)
+    rfk.database.session.commit()
+
 if __name__ == '__main__':
     current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     rfk.init(current_dir)
@@ -147,11 +169,15 @@ if __name__ == '__main__':
                                                             rfk.CONFIG.get('database', 'host'),
                                                             rfk.CONFIG.get('database', 'database')))
     add_settings()
-    add_users()
-    add_shows()
-    add_tracks()
-    add_streams()
-    add_relays()
-    add_news()
-    add_apikey()
-    
+    add_permissions()
+    add_series()
+    #add_users()
+    #add_shows()
+    #add_tracks()
+    #add_streams()
+    #add_relays()
+    #add_news()
+    #add_apikey()
+    #user = User.get_user(username='teddydestodes')
+    #user.password = User.make_password('ohlol')
+    #rfk.database.session.commit()

@@ -7,6 +7,7 @@ from flask import Blueprint, render_template
 import rfk
 from datetime import datetime
 from rfk.database.base import User
+from flask.ext.login import login_required, current_user
 user = Blueprint('user',__name__)
 
 @user.route('/', methods=['get'])
@@ -14,6 +15,12 @@ def list():
     users = User.query.all()
     return render_template('user/list.html', users=users)
 
+@user.route('/settings/', methods=['get', 'post'])
+@login_required
+def settings():
+    
+    pass
+    
 @user.route('/<user>')
 def info(user):
     user = User.get_user(username=user)

@@ -8,6 +8,7 @@ from flask import Blueprint, render_template, url_for, request, redirect
 from rfk.database.show import Show, Series
 import rfk.database
 from rfk import CONFIG
+from rfk.site import get_datetime_format
 from rfk.site.forms.show import new_series_form
 from flask.ext.login import login_required, current_user
 from flaskext.babel import to_user_timezone, to_utc
@@ -91,6 +92,14 @@ def calendar_week_spec(year, week):
                            next_week=url_for('.calendar_week_spec', year=next_week.strftime('%Y'), week=int(next_week.strftime('%W'))+1 ),
                            prev_week=url_for('.calendar_week_spec', year=prev_week.strftime('%Y'), week=int(prev_week.strftime('%W'))+1 )
                            )
+@show.route('/show/new')
+def new_show_form():
+    if request.args.get('inline'):
+        template = '/shows/showform-inline.html'
+    else:
+        template = '/shows/showform.html'
+    return render_template(template,
+                           format=get_datetime_format())
 
 def _get_shows(begin, end):
     shows = Show.query.filter(Show.end > begin , Show.begin < end).all()

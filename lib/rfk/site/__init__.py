@@ -17,8 +17,14 @@ app.config['BABEL_DEFAULT_LOCALE'] = 'de'
 app.config['BABEL_LOCALE_PATH'] = 'de'
 app.secret_key = 'PENISPENISPENISPENISPENIS'
 
-locales = {'de': {'name':'Bernd','img':'/static/img/cb/de.png'},
-           'en': {'name':'English','img':'/static/img/cb/gb.png'}}
+locales = {'de': {'name':'Bernd','img':'/static/img/cb/de.png', 'datetime_format': 'dd.MM.yyyy hh:mm'},
+           'en': {'name':'English','img':'/static/img/cb/gb.png', 'datetime_format': 'MM/dd/yyyy hh:mm'}}
+
+def get_datetime_format():
+    try:
+        return locales[str(get_locale())]['datetime_format']
+    except KeyError:
+        return locales['de']['datetime_format']
 
 
 app.jinja_env.filters.update(bbcode=helper.bbcode,

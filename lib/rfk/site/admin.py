@@ -6,21 +6,14 @@ Created on Aug 11, 2012
 from flask import Blueprint, render_template, url_for
 from functools import wraps
 import rfk
+from rfk.site.helper import permission_required
 from flask.ext.login import login_required, current_user
 
 admin = Blueprint('admin',__name__)
 
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not current_user.has_permission('admin'):
-            return 'you need to be an admin'
-        return f(*args, **kwargs)
-    return decorated_function
-
 @admin.route('/')
 @login_required
-@admin_required
+@permission_required(permission='admin')
 def index():
     return render_template('admin/index.html')
 
@@ -36,9 +29,12 @@ def liquidsoap():
 
 
 def create_menu(endpoint):
+    if not current_user.has_permission(code='admin'):
+        return False
     menu = {'name': 'Admin', 'submenu': [], 'active': False}
-    entries = [['admin.liquidsoap', 'Liquidsoap', 'admin'],
-               ]
+    entries = []
+    if current_user.has_permission(code='liq-restart'):
+        entries.append(['admin.liquidsoap', 'Liquidsoap', 'admin'])
     for entry in entries:
         active = endpoint == entry[0]
         menu['submenu'].append({'name': entry[1],

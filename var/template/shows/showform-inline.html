@@ -1,0 +1,170 @@
+<div class="modal-header">
+   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+   <h3 id="showform-label">{% trans %}Add a new Show{% endtrans %}</h3>
+</div>
+<div class="modal-body">
+<div class="alert" id="statusbar" style="display:none;"></div>
+<div class="row-fluid">
+<div class="span3">{% trans %}Begin{% endtrans %}</div>
+<div class="span9">
+    <div id="show-date" class="input-append date">
+		<input data-format="{{ format }}" type="text" />
+	    <span class="add-on btn">
+	    	<i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+	  	</span>
+ 	</div>
+</div>
+</div>
+<div class="row-fluid">
+<div class="span3">{% trans %}Length{% endtrans %}</div>
+<div class="span9">
+    <div id="show-length" class="input-append input-prepend">
+    	<span class="add-on btn">
+	    	<i class="icon-minus"></i>
+	  	</span>
+		<input type="text" class="input-mini"/>
+	    <span class="add-on btn">
+	    	<i class="icon-plus"></i>
+	  	</span>
+		{% trans %}Hours{% endtrans %}
+ 	</div>
+</div>
+</div>
+<div class="row-fluid">
+	<div class="span3">{% trans %}Title{% endtrans %}</div>
+	<div class="span6">
+		<input id="title" type="text" class="span12"/>
+	</div>
+	<div class="span3">
+		<input id="series" type="hidden" class="span12" data-placeholder="Series" />
+	</div>
+</div>
+<div class="row-fluid">
+	<div class="span3">{% trans %}Description{% endtrans %}</div>
+	<div class="span9">
+		<textarea id="description" class="span12"></textarea>
+	</div>
+</div>
+<div class="row-fluid">
+	<div class="span3">{% trans %}Tags{% endtrans %}</div>
+	<div class="span9">
+		<input type='hidden' id="tags" data-placeholder="Tags" class="span12"/>
+	</div>
+</div>
+
+</div>
+<div class="modal-footer">
+	<button class="btn" data-dismiss="modal" aria-hidden="true">{% trans %}Close{% endtrans %}</button>
+	<button class="btn btn-primary" onclick="submit_show()" id="submit-button">{% trans %}Add Show{% endtrans %}</button>
+</div>
+<script>
+
+var length_elem;
+var min_length = 30;
+var max_length = 1440;
+var length_step = 5;
+var length = min_length;
+
+function submit_show() {
+	$('#submit-button').attr("disabled", "disabled");
+	$('#statusbar').removeClass('alert-error');
+	$('#statusbar').html('<i class="icon-spinner icon-spin"></i> {% trans %}Please wait...{% endtrans %}');
+	$('#statusbar').addClass('alert-info');
+	$('#statusbar').show();
+	picker = $('#show-date').data('datetimepicker');
+	$.post('/api/site/show/add',
+		   {begin: Math.floor(picker.getLocalDate().getTime()/1000),
+		    duration: length,
+		    title: $("#title").val(),
+		    description: $("#description").val(),
+		    series: $("#series").val(),
+		    tags: $("#tags").val(),
+		   });
+}
+
+$(function() {
+    $('#show-date').datetimepicker({
+      language: '{{ request.current_locale }}',
+      pickSeconds: false
+    });
+    $("#tags").select2({width:'resolve',tags:[],tokenSeparators: [",", " "]});
+    var updateSeriesTimeout = null;
+    var lastSeriesQuery = null;
+    function updateSeriesSelect() {
+        updateMaterialTimeout = null;
+        $.getJSON("/api/site/series/query",
+          		  {query: lastSeriesQuery.term},
+                  function (resultdata) {
+                     var data = {results: []}
+                     $.each(resultdata.data, function(index, value){
+                                 data.results.push({id: value.id, text: value.name});
+                            }
+                           )
+            lastSeriesQuery.callback(data);
+        });
+    }
+    $("#series").select2({
+           allowClear: true,
+           width: 'resolve',
+           query: function (query) {
+                    clearTimeout(updateSeriesTimeout);
+                    updateSeriesTimeout = setTimeout(updateSeriesSelect, 200);
+                    lastSeriesQuery = query;
+           } 
+    });
+    
+    init_length('#show-length');
+    
+    function pad (str, max) {
+   	  return str.length < max ? pad("0" + str, max) : str;
+   	}
+    
+    function decrease_length() {
+    	if (length-length_step <= min_length) {
+    		length = min_length;
+    	} else {
+    		length -= length_step;
+    	}
+    	set_length_input();
+    }
+    
+	function increase_length() {
+    	if (length+length_step >= max_length) {
+    		length = max_length;
+    	} else {
+    		length += length_step;
+    	}
+    	set_length_input();
+    }
+	
+	function set_length_input() {
+		var hours = Math.floor(length/60);
+		var minutes = length%60;
+		length_elem.find('input').val(pad(hours.toString(), 2)+":"+pad(minutes.toString(), 2));
+	}
+	
+	function parse_length() {
+		var parts = length_elem.find('input').val().split(':');
+		if (parts.length == 1) {
+			length = parseInt(parts[0],10);
+		} else {
+			length = (parseInt(parts[0],10)*60)+parseInt(parts[1],10);
+		}
+		if (length <= min_length) {
+    		length = min_length;
+    	} else if (length >= max_length) {
+    		length = max_length;
+    	}
+		set_length_input();
+	}
+    
+    function init_length(identifier) {
+    	length_elem = $(identifier);
+    	length_elem.find(".add-on").first().click(decrease_length);
+    	length_elem.find(".add-on").last().click(increase_length);
+    	length_elem.find("input").change(parse_length);
+    	set_length_input();
+    }
+    
+  });
+</script>

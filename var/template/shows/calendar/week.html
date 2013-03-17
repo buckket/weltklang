@@ -1,212 +1,19 @@
 {% set sidebar=True %}
 {% from "_helpers.html" import weekday %}
-{% extends 'base.html' %}
+{% extends '/shows/calendar/base.html' %}
 
 {% block content %}
-<style>
-
-.day {
-    width: 14.28571428571428571428%;
-    float: left;
-    border-bottom: 1px solid #CDCDCD;
-}
-
-@media (min-width: 1200px) {
-	.day {
-	    width: 14.28571428571428571428%;
-	}
-}
-@media (min-width: 768px) and (max-width: 979px) {
-    .day {
-        width: 100%;
-        margin-bottom:5px;
-        -webkit-box-sizing: border-box;
-           -moz-box-sizing: border-box;
-                box-sizing: border-box;
-    }
-}
-@media (max-width: 767px) {
-    .day {
-	    width: 100%;
-	    margin-bottom:5px;
-	    -webkit-box-sizing: border-box;
-	       -moz-box-sizing: border-box;
-	            box-sizing: border-box;
-    }
-}
-
-.week .heading {
-    border-top: 1px solid #CDCDCD;
-    border-left: 1px solid #CDCDCD;
-    border-right: 1px solid #CDCDCD;
-    font-weight: bold;
-    font-size: 18px;
-    line-height: 20px;
-    text-align: center;
-}
-.day .hour {
-    height: 20px;
-    border-top: 1px solid #CDCDCD;
-    border-left: 1px solid #CDCDCD;
-    border-right: 1px solid #CDCDCD;
-    font-size: 1.5em;
-    font-weight: bold;
-    color: #CDCDCD;
-    padding-top: 9px;
-    padding-bottom: 10px;
-    padding-left: 2px;
-}
-.day .hour:nth-child(odd) {
-    background-color: #f9f9f9;
-}
-.day .hour:hover {
-    background-color: #f5f5f5;
-}
-.day:hover .hour {
-    background-color: #f5f5f5;
-}
-
-.day .hours {
-    position:relative;
-}
-.day .hours .entry {
-    position: absolute;
-    right:0px;
-    left: 1.9em;
-    margin-top: -1px;
-    border: 1px solid #CDCDCD;
-    overflow: hidden;
-    background-color: #EAEAEA;
-    -webkit-border-radius: 2px;
-    -moz-border-radius: 2px;
-    border-radius: 2px;
-}
-.day .hours .entry .header {
-    font-weight: bold;
-    font-size: 14px;
-    text-align: center;
-    border-bottom: 1px dotted #CDCDCD;
-    background-color: #EFEFEF;
-    height: 1.5em;
-    background-image: -moz-linear-gradient(center top , #FDFDFD 0%, #EAEAEA 100%);
-    overflow:hidden;
-    padding-left: 2px;
-    top:0px;
-    width:100%;
-    position:absolute;
-}
-.day .hours .entry .content {
-    margin-top:1.5em;
-}
-.day .hours .entry .footer {
-    border-top: 1px dotted #CDCDCD;
-    background-color: #EFEFEF;
-    bottom:0px;
-    position:absolute;
-    width: 100%;
-    padding-left: 2px;
-    height: 1.5em;
-    background-image: -moz-linear-gradient(center top ,#EAEAEA 0%, #FDFDFD 100%);
-}
-
-.day .entry:hover {
-    z-index: 10;
-}
-
-.day .hours .entry-unplanned {
-    position: absolute;
-    right:0px;
-    width: 1.5em;
-    border-top: 1px solid #A0A0A0;
-    border-left: 1px solid #A0A0A0;
-    border-bottom: 1px solid #A0A0A0;
-    overflow: hidden;
-    background-color: #EAEAEA;
-    -webkit-border-top-left-radius: 2px;
-	-webkit-border-bottom-left-radius: 2px;
-	-moz-border-radius-topleft: 2px;
-	-moz-border-radius-bottomleft: 2px;
-	border-top-left-radius: 2px;
-	border-bottom-left-radius: 2px;
-	-webkit-box-shadow: -3px 0px 5px #aaa;
-    -moz-box-shadow: -3px 0px 5px #aaa;
-    box-shadow: -3px 0px 5px #aaa;
-}
-.day .hours .entry-unplanned span {
-    display: block;
-    font-weight: bold;
-    font-size: 14px;
-    text-align: center;
-    padding: 2px;
-    transform:rotate(90deg);
-    -moz-transform:rotate(90deg);
-    -o-transform:rotate(90deg);
-    -webkit-transform:rotate(90deg);
-    -ms-transform:rotate(90deg);
-}
-.calendar-head {
-    -webkit-border-top-left-radius: 2px;
-	-webkit-border-top-right-radius: 2px;
-	-moz-border-radius-topleft: 2px;
-	-moz-border-radius-topright: 2px;
-	border-top-left-radius: 2px;
-	border-top-right-radius: 2px;
-}
-.calendar-head div{
-    border-top: 1px solid #CDCDCD;
-    text-align: center;
-    font-weight: bold;
-    font-size: 20px;
-    -webkit-border-top-left-radius: 5px;
-    -moz-border-radius-topleft: 5px;
-    border-top-left-radius: 2px;
-    -webkit-border-top-right-radius: 5px;
-    -moz-border-radius-topright: 5px;
-    border-top-right-radius: 5px;
-}
-
-.calendar-head a.next,
-.calendar-head a.prev {
-    border-top: 1px solid #CDCDCD;
-    height:100%;
-    font-size: 28px;
-    font-weight: bold;
-    text-decoration: none;
-    color: #333333;
-}
-.calendar-head a.next:hover {
-    background-image: -moz-linear-gradient(center right ,#EAEAEA 0%, #FDFDFD 100%);
-}
-.calendar-head a.prev:hover {
-    background-image: -moz-linear-gradient(center left ,#EAEAEA 0%, #FDFDFD 100%);
-}
-
-.calendar-head a.next {
-    float:right;
-    border-right: 1px solid #CDCDCD;
-    padding-left: 20px;
-    padding-right: 15px;
-    -webkit-border-top-right-radius: 5px;
-    -moz-border-radius-topright: 5px;
-    border-top-right-radius: 5px;
-}
-
-.calendar-head a.prev {
-    float:left;
-    border-left: 1px solid #CDCDCD;
-    padding-left: 15px;
-    padding-right: 20px;
-    -webkit-border-top-left-radius: 5px;
-    -moz-border-radius-topleft: 5px;
-    border-top-left-radius: 2px;
-}
-</style>
+<div class="row-fluid">
+<div class="span12">
+<a href="#" class="btn" onclick="add_show(); return false;">add show</a>
+</div>
+</div>
 <div class="row-fluid calendar-head">
 <a href="{{ prev_week }}" class="prev"><i class="icon-angle-left"></i></a>
 <a href="{{ next_week }}" class="next"><i class="icon-angle-right"></i></a>
-<div>{{ year }} W{{ week }} ({{ monday }} - {{ sunday }})</div>
+<div>{{ monday | dateformat('long') }} - {{ sunday | dateformat('long') }}</div>
 </div>
-<div class="row-fluid week">
+<div class="row-fluid calendar week">
     {% for d in range(7) %}
     <div class="day">
         <div class="heading">{{ weekday(d) }}</div>
@@ -225,73 +32,14 @@
               <div class="header">{{ show.name }}</div>
             </div>
 		    {% endfor %}
-		    <!-- <div class="entry" style="top:120px;height:20px;">
-		      
-		      beschreibung
-		      <div class="footer">
-		          <i class="icon-comment"></i>
-		          <i class="icon-comment"></i>
-		          <i class="icon-comment"></i>
-		          <i class="icon-comment"></i>
-		          <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-		      </div>
-		      <div class="header">show1</div>
-		    </div>
-		    <div class="entry" style="top:200px;height:80px;">
-              <div class="header">show3</div>
-              beschreibung
-              <div class="footer">
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-              </div>
+		    {% for show in shows[d][1] %}
+		    <div class="entry-unplanned" style="top:{{ (show.offset/3600)*40 }}px;height:{{ (show.duration/3600)*40 }}px;">
+                <span>{{ show.name }}</span>
             </div>
-            <div class="entry" style="top:320px;height:200px;">
-              <div class="header">Uebermaessig langer Name der nicht in den Titel passt</div>
-              beschreibung
-              <div class="footer">
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-                  <i class="icon-comment"></i>
-              </div>
-            </div>
-		    
-            <div class="entry-unplanned" style="top:20px;height:120px;">
-                <span>Ungeplante-show1</span>
-            </div>
-            <div class="entry-unplanned" style="top:120px;height:90px;">
-                <span>Ungeplante-show2</span>
-            </div>
-            <div class="entry-unplanned" style="top:300px;height:400px;">
-                <span>Ungeplante-show3</span>
-            </div> -->
+		    {% endfor %}
 	    </div>
     </div>
     {% endfor %}
 </div>
+{{ super() }}
 {% endblock content %}

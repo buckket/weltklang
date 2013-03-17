@@ -1,0 +1,17 @@
+<div id="show-date" class="input-append date">
+  <input data-format="{{ format }}" type="text"></input>
+  <span class="add-on">
+    <i data-time-icon="icon-time" data-date-icon="icon-calendar">
+    </i>
+  </span>
+</div>
+<script>
+$(function() {
+    $('#show-date').datetimepicker({
+      language: '{{ request.current_locale }}'
+    });
+    $('#show-date').on('changeDate', function(e) {
+    	  console.log(e.localDate.getTime());
+    	});
+  });
+</script>

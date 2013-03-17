@@ -53,3 +53,200 @@
     border-bottom: 1px solid #CDCDCD;
     padding: 12px 15px;
 }
+
+.calendar .day {
+    width: 14.28571428571428571428%;
+    float: left;
+    border-bottom: 1px solid #CDCDCD;
+}
+
+@media (min-width: 1200px) {
+    .calendar .day {
+        width: 14.28571428571428571428%;
+    }
+}
+@media (min-width: 768px) and (max-width: 979px) {
+    .calendar .day {
+        width: 100%;
+        margin-bottom:5px;
+        -webkit-box-sizing: border-box;
+           -moz-box-sizing: border-box;
+                box-sizing: border-box;
+    }
+}
+@media (max-width: 767px) {
+    .calendar .day {
+        width: 100%;
+        margin-bottom:5px;
+        -webkit-box-sizing: border-box;
+           -moz-box-sizing: border-box;
+                box-sizing: border-box;
+    }
+}
+
+.week .heading {
+    border-top: 1px solid #CDCDCD;
+    border-left: 1px solid #CDCDCD;
+    border-right: 1px solid #CDCDCD;
+    font-weight: bold;
+    font-size: 18px;
+    line-height: 20px;
+    text-align: center;
+}
+.calendar .day .hour {
+    height: 20px;
+    border-top: 1px solid #CDCDCD;
+    border-left: 1px solid #CDCDCD;
+    border-right: 1px solid #CDCDCD;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #CDCDCD;
+    padding-top: 9px;
+    padding-bottom: 10px;
+    padding-left: 2px;
+}
+.calendar .day .hour:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+.calendar .day .hour:hover {
+    background-color: #f5f5f5;
+}
+.calendar .day:hover .hour {
+    background-color: #f5f5f5;
+}
+
+.calendar .day .hours {
+    position:relative;
+}
+.calendar .day .hours .entry {
+    position: absolute;
+    right:0px;
+    left: 1.9em;
+    margin-top: -1px;
+    border: 1px solid #CDCDCD;
+    overflow: hidden;
+    background-color: #EAEAEA;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+}
+.calendar .day .hours .entry .header {
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+    border-bottom: 1px dotted #CDCDCD;
+    background-color: #EFEFEF;
+    height: 1.5em;
+    background-image: -moz-linear-gradient(center top , #FDFDFD 0%, #EAEAEA 100%);
+    overflow:hidden;
+    padding-left: 2px;
+    top:0px;
+    width:100%;
+    position:absolute;
+}
+.calendar .day .hours .entry .content {
+    margin-top:1.5em;
+}
+.calendar .day .hours .entry .footer {
+    border-top: 1px dotted #CDCDCD;
+    background-color: #EFEFEF;
+    bottom:0px;
+    position:absolute;
+    width: 100%;
+    padding-left: 2px;
+    height: 1.5em;
+    background-image: -moz-linear-gradient(center top ,#EAEAEA 0%, #FDFDFD 100%);
+}
+
+.calendar .day .entry:hover {
+    z-index: 10;
+}
+
+.calendar .day .hours .entry-unplanned {
+    position: absolute;
+    right:0px;
+    width: 1.5em;
+    border-top: 1px solid #A0A0A0;
+    border-left: 1px solid #A0A0A0;
+    border-bottom: 1px solid #A0A0A0;
+    overflow: hidden;
+    background-color: #EAEAEA;
+    -webkit-border-top-left-radius: 2px;
+    -webkit-border-bottom-left-radius: 2px;
+    -moz-border-radius-topleft: 2px;
+    -moz-border-radius-bottomleft: 2px;
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+    -webkit-box-shadow: -3px 0px 5px #aaa;
+    -moz-box-shadow: -3px 0px 5px #aaa;
+    box-shadow: -3px 0px 5px #aaa;
+}
+.calendar .day .hours .entry-unplanned span {
+    display: block;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+    padding: 2px;
+    transform:rotate(90deg);
+    -moz-transform:rotate(90deg);
+    -o-transform:rotate(90deg);
+    -webkit-transform:rotate(90deg);
+    -ms-transform:rotate(90deg);
+}
+.calendar-head {
+    -webkit-border-top-left-radius: 2px;
+    -webkit-border-top-right-radius: 2px;
+    -moz-border-radius-topleft: 2px;
+    -moz-border-radius-topright: 2px;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+}
+.calendar-head div{
+    border-top: 1px solid #CDCDCD;
+    text-align: center;
+    font-weight: bold;
+    font-size: 22px;
+    padding-top:2px;
+    -webkit-border-top-left-radius: 5px;
+    -moz-border-radius-topleft: 5px;
+    border-top-left-radius: 2px;
+    -webkit-border-top-right-radius: 5px;
+    -moz-border-radius-topright: 5px;
+    border-top-right-radius: 5px;
+}
+
+.calendar-head a.next,
+.calendar-head a.prev {
+    border-top: 1px solid #CDCDCD;
+    height:100%;
+    font-size: 28px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #333333;
+}
+.calendar-head a.next:hover {
+    background-image: -moz-linear-gradient(center right ,#EAEAEA 0%, #FDFDFD 100%);
+}
+.calendar-head a.prev:hover {
+    background-image: -moz-linear-gradient(center left ,#EAEAEA 0%, #FDFDFD 100%);
+}
+
+.calendar-head a.next {
+    float:right;
+    border-right: 1px solid #CDCDCD;
+    padding-left: 20px;
+    padding-right: 15px;
+    -webkit-border-top-right-radius: 5px;
+    -moz-border-radius-topright: 5px;
+    border-top-right-radius: 5px;
+}
+
+.calendar-head a.prev {
+    float:left;
+    border-left: 1px solid #CDCDCD;
+    padding-left: 15px;
+    padding-right: 20px;
+    -webkit-border-top-left-radius: 5px;
+    -moz-border-radius-topleft: 5px;
+    border-top-left-radius: 2px;
+}
