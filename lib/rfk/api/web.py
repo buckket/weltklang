@@ -326,12 +326,27 @@ def listeners():
     result = Listener.query.filter(*clauses).all()
     
     data = {'listeners': {'listeners': []}}
+    temp = {'per_stream': {}, 'per_country': {}, 'total_count': len(result)}
+    
     if result:
-        pass
+        
+        for listener in result:
+            
+            stream = listener.stream_relay.stream
+            try: 
+                temp['per_stream'][stream.code]['count'] += 1
+            except KeyError:
+                temp['per_stream'][stream.code] = {'count': 1, 'name': stream.name}
+                
+            country = listener.country
+            try: 
+                temp['per_country'][country]['count'] += 1
+            except KeyError:
+                temp['per_country'][country] = {'count': 1}
+            
+        data['listeners'] = temp
+        
     else:
         data = {'listeners': None}
     return jsonify(wrapper(data))
-        
-    
-    
     

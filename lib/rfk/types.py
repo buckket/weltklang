@@ -82,3 +82,4 @@ class ENUM(Set):
         if name in self:
             return self.index(name)
         raise AttributeError
+    

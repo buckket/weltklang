@@ -1,8 +1,3 @@
-'''
-Created on Feb 17, 2013
-
-@author: teddydestodes
-'''
 from sqlalchemy import *
 from sqlalchemy.orm import relationship, backref, exc
 from sqlalchemy.dialects.mysql import INTEGER as Integer
