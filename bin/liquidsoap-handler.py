@@ -45,6 +45,7 @@ def kick():
     liquidsoap = LiquidInterface()
     liquidsoap.connect()
     liquidsoap.kick_harbor()
+    liquidsoap.close()
     
 def doAuth(username, password):
     """authenticates the user

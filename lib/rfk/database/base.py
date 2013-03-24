@@ -40,6 +40,9 @@ class User(Base):
     mail = Column(String(255))
     country = Column(String(3))
     
+    register_date = Column(UTCDateTime, default=now())
+    last_login = Column(UTCDateTime, default=None)
+    
     def get_id(self):
         return unicode(self.user)
     
