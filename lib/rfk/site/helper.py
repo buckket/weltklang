@@ -52,7 +52,9 @@ def permission_required(f=None, permission=None):
         return partial(permission_required, permission=permission)
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.has_permission(permission):
+        if not current_user.is_authenticated():
+            return 'not logged in'
+        if permission is not None and not current_user.has_permission(permission):
             return 'insufficient permissions'
         return f(*args, **kwargs)
     return decorated_function

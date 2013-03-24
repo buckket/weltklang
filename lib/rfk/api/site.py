@@ -1,21 +1,25 @@
 from flask import jsonify, request, g
-from flaskext.babel import to_user_timezone
+from flaskext.babel import to_user_timezone, to_utc
+from flask_login import current_user
 from sqlalchemy.sql.expression import between
 from sqlalchemy import or_
 import pytz
 import parsedatetime.parsedatetime as pdt
 from time import mktime
-from datetime import datetime
+from datetime import datetime, timedelta
 from subprocess import call
 import os
 
 from rfk.api import api, check_auth, wrapper
+import rfk.database
 from rfk.database.streaming import Stream
-from rfk.database.show import Show, Series
+from rfk.database.show import Show, Series, Tag
 from rfk.liquidsoap.daemon import LiquidDaemonClient
 from rfk.liquidsoap import LiquidInterface
+from rfk.helper import now
 from rfk.site.helper import permission_required
 from rfk.site import app
+
 
 @api.route("/site/admin/liquidsoap/endpoint/<string:action>")
 @permission_required(permission='liq-endpointctrl')
@@ -160,7 +164,45 @@ def series_query():
     return jsonify({'success':True, 'data':ret})
 
 @api.route('/site/show/add', methods=['POST'])
+@permission_required
 def show_add():
     from rfk.site import app
     app.logger.warn(request.form)
-    return jsonify({'success':False, 'data':None})
+    if 'begin' in request.form and\
+       'description' in request.form and\
+       'duration' in request.form and\
+       'title' in request.form:
+        if int(request.form['duration']) < 30:
+            return jsonify({'success':False, 'error':'Duration to short'})
+        if int(request.form['duration']) > 1440:
+            return jsonify({'success':False, 'error':'Duration to long'})
+        if len(request.form['title']) < 3:
+            return jsonify({'success':False, 'error':'Title to short'})
+        if len(request.form['description']) == 0:
+            return jsonify({'success':False, 'error':'Description is empty'})
+        begin = to_utc(datetime.fromtimestamp(int(request.form['begin'])))
+        begin = begin.replace(second=0)
+        if begin < now():
+            return jsonify({'success':False, 'error':'You cannot enter a past date!'})
+        end = begin+timedelta(minutes=int(request.form['duration']))
+        if Show.query.filter(Show.end > begin , Show.begin < end).count() > 0:
+            return jsonify({'success':False, 'error':'Your show collides with other shows'})
+        show = Show(begin=begin,
+                    end=end,
+                    name=request.form['title'],
+                    description=request.form['description'],
+                    flags=Show.FLAGS.PLANNED)
+        rfk.database.session.add(show)
+        show.add_user(current_user)
+        rfk.database.session.flush()
+        if 'series' in request.form and int(request.form['series']) > 0:
+            show.series_id = int(request.form['series'])
+        if 'tags' in request.form and len(request.form['tags']) > 0:
+            tags = Tag.parse_tags(request.form['tags'].replace(',',' '))
+            show.add_tags(tags)
+        rfk.database.session.commit()
+        
+    return jsonify({'success':True, 'data':None})
+
+def _check_shows(begin, end):
+    return Show.query.filter(Show.begin < end, Show.end > begin).all()

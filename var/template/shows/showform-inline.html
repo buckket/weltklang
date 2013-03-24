@@ -79,6 +79,13 @@ function submit_show() {
 		    description: $("#description").val(),
 		    series: $("#series").val(),
 		    tags: $("#tags").val(),
+		   },function(data){
+			   if (!data.success) {
+				   $('#statusbar').removeClass('alert-info');
+				   $('#statusbar').addClass('alert-error');
+				   $('#statusbar').html('<i class="icon-warning-sign"></i> '+data.error);
+			   }
+			   $('#submit-button').removeAttr("disabled");
 		   });
 }
 
