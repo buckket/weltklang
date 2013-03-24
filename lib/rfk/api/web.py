@@ -354,10 +354,10 @@ def last_tracks():
     return jsonify(wrapper(data))
 
 
-@api.route('/web/listeners')
+@api.route('/web/listener')
 @check_auth
 ## DONE ##
-def listeners():
+def listener():
     """Return current listener count
     
     Keyword arguments:
@@ -369,7 +369,7 @@ def listeners():
     
     result = Listener.query.filter(*clauses).all()
     
-    data = {'listeners': {'listeners': []}}
+    data = {'listener': {'listener': []}}
     temp = {'per_stream': {}, 'per_country': {}, 'total_count': len(result)}
     
     if result:
@@ -388,9 +388,6 @@ def listeners():
             except KeyError:
                 temp['per_country'][country] = {'count': 1}
             
-        data['listeners'] = temp
-        
-    else:
-        data = {'listeners': None}
+    data['listener'] = temp
     return jsonify(wrapper(data))
     

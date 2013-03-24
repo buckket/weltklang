@@ -1,8 +1,3 @@
-'''
-Created on Feb 15, 2013
-
-@author: teddydestodes
-'''
 from wtforms import Form, SubmitField, BooleanField, TextField, SelectField,\
                     PasswordField, IntegerField, FieldList, FormField, validators
 
