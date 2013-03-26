@@ -1,6 +1,7 @@
 from functools import wraps, partial
 
 from rfk.api import api
+from rfk import exc as rexc
 from flask import jsonify, request, g
 
 import rfk.database
@@ -160,10 +161,15 @@ def current_show():
             begin = show.begin.isoformat()
             if show.end:
                 end = show.end.isoformat()
+            else:
+                end = None
             
             dj = []
+            connected = False
             for usershow in show.users:
                 dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status })
+                if usershow.status == UserShow.STATUS.STREAMING:
+                    connected = True
                 
             if (show.flags & Show.FLAGS.UNPLANNED and len(result) == 2) or len(result) == 1:
                 target = 'running_show'
@@ -175,6 +181,7 @@ def current_show():
                 'show_name': show.name,
                 'show_description': show.description,
                 'show_flags': show.flags,
+                'show_connected': connected,
                 'show_begin': begin,
                 'show_end': end,
                 'dj': dj
@@ -324,6 +331,7 @@ def last_tracks():
     dj_id = request.args.get('dj_id', None)
     dj_name = request.args.get('dj_name', None)
     limit = request.args.get('limit', 5)
+    limit = limit if limit <= 50 else 50
     
     clauses = []
     clauses.append(Track.end < datetime.utcnow())

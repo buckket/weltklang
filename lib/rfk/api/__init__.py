@@ -2,7 +2,6 @@ from flask import Blueprint, g, request, jsonify
 
 import rfk.database
 from rfk.database.base import ApiKey
-from rfk import exc as rexc
 
 api = Blueprint('api', __name__)
 
