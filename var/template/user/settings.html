@@ -1,0 +1,52 @@
+{% from "_helpers.html" import render_field_horizontal %}
+{% extends "base.html" %}
+{% block content %}
+
+<h1>{% trans %}Settings{% endtrans %}</h1>
+<div class="row-fluid">
+	<div class="span12">
+	
+		<form class="form-horizontal" method="post">
+		<fieldset>
+		
+			<div id="legend">
+	     		<legend class="">{% trans %}Customize your very own {{ username }}{% endtrans %}</legend>
+	    	</div>
+			
+			<div class="row-fluid">
+				<div class="span6">
+					<h4>{% trans %}User settings{% endtrans %}</h4>
+					{{ render_field_horizontal(form.email) }}
+					{{ render_field_horizontal(form.new_password) }}
+					{{ render_field_horizontal(form.new_password_retype) }}
+				</div>
+				
+				<div class="span6">
+					<h4>{% trans %}Default show settings{% endtrans %}</h4>
+					{{ render_field_horizontal(form.show_def_name) }}
+					{{ render_field_horizontal(form.show_def_desc) }}
+					{{ render_field_horizontal(form.show_def_tags) }}
+					{{ render_field_horizontal(form.show_def_logo) }}
+				</div>
+			</div>
+			
+			<div class="row-fluid">
+				<div class="span12">
+					<h4>{% trans %}Misc settings{% endtrans %}</h4>
+					{{ render_field_horizontal(form.use_icy) }}
+					
+					<div class="form-actions">
+					    <button type="submit" class="btn btn-primary">{% trans %}Save changes{% endtrans %}</button>
+					    <button type="reset" class="btn">{% trans %}Cancel{% endtrans %}</button>
+					</div>
+				
+				</div>
+			</div>
+
+		</fieldset>
+		</form>
+	</div>
+</div>
+
+{% endblock %}
+
