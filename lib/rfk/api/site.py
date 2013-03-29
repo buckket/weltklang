@@ -1,5 +1,5 @@
 from flask import jsonify, request, g
-from flaskext.babel import to_user_timezone, to_utc
+from flaskext.babel import to_user_timezone, to_utc, format_datetime, format_timedelta
 from flask_login import current_user
 from sqlalchemy.sql.expression import between
 from sqlalchemy import or_
@@ -163,6 +163,24 @@ def series_query():
         
     return jsonify({'success':True, 'data':ret})
 
+@api.route('/site/show/info')
+def show_info():
+    show = request.args.get('show')
+    if show is None:
+        return jsonify({'success':False, 'error':'no show set!'})
+    
+    show = Show.query.get(int(show))
+    if show is None:
+        return jsonify({'success':False, 'error':'no show found!'})
+    ret = {'name': show.name, 'description': show.description,
+           'begin': format_datetime(show.begin),
+           #'duration': format_timedelta(show.end - show.begin,granularity='minute'),
+           'users': []}
+    for ushow in show.users:
+        ret['users'].append({'username': ushow.user.username,
+                             'status': ushow.status})
+    return jsonify({'success':True, 'data':ret})
+
 @api.route('/site/show/add', methods=['POST'])
 @permission_required
 def show_add():
@@ -195,9 +213,12 @@ def show_add():
         rfk.database.session.add(show)
         show.add_user(current_user)
         rfk.database.session.flush()
-        if 'series' in request.form and int(request.form['series']) > 0:
+        if 'series' in request.form and\
+           len(request.form['series']) > 0 and\
+           int(request.form['series']) > 0:
             show.series_id = int(request.form['series'])
-        if 'tags' in request.form and len(request.form['tags']) > 0:
+        if 'tags' in request.form and\
+           len(request.form['tags']) > 0:
             tags = Tag.parse_tags(request.form['tags'].replace(',',' '))
             show.add_tags(tags)
         rfk.database.session.commit()

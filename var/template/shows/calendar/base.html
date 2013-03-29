@@ -15,6 +15,23 @@ function add_show() {
 		$('#showform').modal('show');
     });
 }
+function view_show(showid) {
+	$.get('/show/'+showid,{ inline: true }, function(data) {
+        $('#showform').html(data);
+        $('#showform').modal('show');
+    });
+}
+function edit_show(showid) {
+    $.get('/show/'+showid+'/edit',{ inline: true }, function(data) {
+        $('#showform').html(data);
+        $('#showform').modal('show');
+    });
+}
+$(function() {
+	$('.calendar .entry').click(function(event) {
+		view_show(event.currentTarget.dataset.show);
+	});
+});
 //-->
 </script>
 {% endblock js %}

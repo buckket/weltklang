@@ -1,0 +1,58 @@
+{% set sidebar=True %}
+
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+.series {
+
+}
+.series-logo {
+    min-height: 50px !important;
+    -webkit-background-size: cover; /*for webKit*/
+    -moz-background-size: cover; /*Mozilla*/
+    -o-background-size: cover; /*opera*/
+    background-size: cover; /*generic*/
+    padding-left: 8px;
+}
+
+.outline {
+    color: #dedede;
+    text-shadow:  1px  1px 1px black,
+                  1px -1px 1px black,
+                 -1px  1px 1px black,
+                 -1px -1px 1px black;
+}
+
+.series {
+    margin-bottom: 5px;
+    border: 1px solid #dddddd;
+    -webkit-border-top-left-radius: 5px;
+    -webkit-border-bottom-left-radius: 5px;
+    -moz-border-radius-topleft: 5px;
+    -moz-border-radius-bottomleft: 5px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+</style>
+{% for s in series %}
+<div class="row-fluid series">
+    <div class="span3 series-logo outline"  style="background-image: url('{{s.logo}}');">
+        <h4>{{ s.name }}</h4>
+    </div>
+    <div class="span9">
+        <div class="row-fluid">
+            <div class="span12">
+                {{ s.description }}
+            </div>
+        </div>
+        <div class="row-fluid">
+            <div class="span3">
+                <b>Upcomming</b>
+            </div>
+            <div class="span9">Show, show, show,show</div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock content %}

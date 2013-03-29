@@ -68,6 +68,12 @@ class Show(Base):
             query = query.filter(UserShow.user == user)
         return query.first()
     
+    def get_logo(self):
+        if self.logo is not None:
+            return self.logo
+        elif self.series is not None:
+            return self.series.logo
+    
     def __repr__(self):
         return "<rfk.database.show.Show id=%d>" % (self.show,)
         

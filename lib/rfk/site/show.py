@@ -1,13 +1,9 @@
-'''
-Created on 16.05.2012
-
-@author: teddydestodes
-'''
 
 from flask import Blueprint, render_template, url_for, request, redirect
 from rfk.database.show import Show, Series
 import rfk.database
 from rfk import CONFIG
+from rfk.helper import natural_join
 from rfk.site import get_datetime_format
 from rfk.site.forms.show import new_series_form
 from flask.ext.login import login_required, current_user
@@ -25,21 +21,14 @@ def upcoming(page):
     shows = Show.query.filter(Show.end > datetime.datetime.today()).all()
     return render_template('shows/upcoming.html', shows=shows)
 
-@show.route('/show/<int:show>')
-def view_show():
-    return 'miep'
-
 @show.route('/show/last')
 def last():
     return 'blah'
 
-@show.route('/check', methods=['POST'])
-def check():
-    pass
-
 @show.route('/series')
 def list_series():
-    return 'null'
+    series = Series.query.all()
+    return render_template('shows/series.html', series=series)
 
 @show.route('/series/new', methods=["GET", "POST"])
 @login_required
@@ -56,10 +45,6 @@ def new_series():
         return redirect(url_for('.list_series'))
     return render_template('shows/seriesform.html',form=form, imgur={'client': CONFIG.get('site', 'imgur-client'),
                                                            'secret': CONFIG.get('site', 'imgur-secret')})
-
-@show.route('/series/<int:page>')
-def view_series(series):
-    return 'blah'
 
 @show.route('/calendar/week')
 def calendar_week():
@@ -101,6 +86,58 @@ def new_show_form():
     return render_template(template,
                            format=get_datetime_format())
 
+@show.route('/show/<int:show>')
+def show_view(show):
+    s = Show.query.get(show)
+    if s is None:
+        return 'no show found'
+    if request.args.get('inline'):
+        template = '/shows/show-inline.html'
+    else:
+        template = '/shows/show.html'
+        
+    link_users = []
+    users = []
+    for ushow in s.users:
+        link_users.append(_make_user_link(ushow.user))
+        users.append(ushow.user)
+    return render_template(template,
+                           show={'name': s.name,
+                                 'description': s.description,
+                                 'series': s.series,
+                                 'users': natural_join(link_users),
+                                 'tags': s.tags,
+                                 'begin': s.begin,
+                                 'logo': s.get_logo(),
+                                 'user': users,
+                                 'show': s.show,
+                                 'duration': (s.end - s.begin).total_seconds()})
+
+def _make_user_link(user):
+    return '<a href="%s" title="%s">%s</a>' % ('#',user.username,user.username);
+
+@show.route('/show/<int:show>/edit')
+def show_edit(show):
+    s = Show.query.get(show)
+    if s is None:
+        return 'no show found'
+    if request.args.get('inline'):
+        template = '/shows/showform-inline.html'
+    else:
+        template = '/shows/showform.html'
+    return render_template(template,
+                           show={'name': s.name,
+                                 'description': s.description,
+                                 'series': s.series,
+                                 'users': s.users,
+                                 'tags': s.tags,
+                                 'begin': to_user_timezone(s.begin).strftime('%s'),
+                                 'logo': s.logo,
+                                 'show': s.show,
+                                 'duration': (s.end - s.begin).total_seconds()/60},
+                           format=get_datetime_format())
+
+
 def _get_shows(begin, end):
     shows = Show.query.filter(Show.end > begin , Show.begin < end).all()
     planned = []
@@ -112,7 +149,8 @@ def _get_shows(begin, end):
             b = begin
         if e > end:
             e = end
-        t = {'offset': (b-begin).total_seconds(),
+        t = {'show': show.show,
+             'offset': (b-begin).total_seconds(),
              'duration': (e-b).total_seconds(),
              'name': show.name,
              'description': show.description,
@@ -132,7 +170,8 @@ def _get_shows(begin, end):
 def create_menu(endpoint):
     menu = {'name': 'Programme', 'submenu': [], 'active': False}
     entries = [['show.upcoming', 'Upcomming Shows'],
-               ['show.list_series', 'Series']]
+               ['show.list_series', 'Series'],
+               ['show.calendar_week', 'Calendar']]
     for entry in entries:
         active = endpoint == entry[0]
         menu['submenu'].append({'name': entry[1],
