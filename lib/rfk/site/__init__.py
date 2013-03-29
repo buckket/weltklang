@@ -7,6 +7,7 @@ import datetime
 from rfk.database import session
 from rfk.database.base import User, Anonymous, News
 from rfk.site.forms.login import login_form, register_form
+from rfk.site.forms.settings import SettingsForm
 from rfk.exc.base import UserNameTakenException
 from . import helper
 
@@ -188,6 +189,35 @@ def register():
             form.username.errors.append('Username already taken!')
             
     return render_template("register.html", form=form)
+
+
+@app.route('/settings', methods=['get', 'post'])
+@login_required
+def settings():
+    
+    form = SettingsForm(request.form,
+                        username=current_user.username,
+                        email=current_user.mail,
+                        show_def_name=current_user.get_setting(code='show_def_name'),
+                        show_def_desc=current_user.get_setting(code='show_def_desc'),
+                        show_def_tags=current_user.get_setting(code='show_def_tags'),
+                        show_def_logo=current_user.get_setting(code='show_def_logo'),
+                        use_icy=current_user.get_setting(code='use_icy'))
+    
+    if request.method == "POST" and form.validate():
+        current_user.mail = form.email.data
+        current_user.password = User.make_password(form.new_password.data)
+        current_user.set_setting(code='show_def_name', value=form.show_def_name.data)
+        current_user.set_setting(code='show_def_desc', value=form.show_def_desc.data)
+        current_user.set_setting(code='show_def_tags', value=form.show_def_tags.data)
+        current_user.set_setting(code='show_def_logo', value=form.show_def_logo.data)
+        current_user.set_setting(code='use_icy', value=form.use_icy.data)
+        session.commit()
+        flash('Settings successfully updated')
+        return redirect('settings')
+
+    return render_template('settings.html', form=form, username=current_user.username, TITLE='Settings')
+
 
 @app.route('/listeners')
 def listeners():
