@@ -27,10 +27,10 @@
         <ul class="nav pull-right">
         {% if current_user.username %}
 	        <li>
-	            <a>{{ current_user.username }}</a>
+	            <a href="/settings">{{ current_user.username }} <i class="icon-cogs"></i></a>
 	        </li>
 	        <li>
-	        <a href="/logout">logout</a>
+	        <a href="/logout"><i class="icon-signout"></i></a>
 	        </li>
 	        {% else %}
 	        
