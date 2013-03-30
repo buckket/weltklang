@@ -1,4 +1,4 @@
-from flask import Flask, session, g, render_template, flash, redirect, url_for, request, jsonify
+from flask import Flask, session, g, render_template, flash, redirect, url_for, request, jsonify, abort
 from flask.ext.login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flaskext.babel import Babel, get_locale, get_timezone, refresh
 import pytz
@@ -6,6 +6,7 @@ import datetime
 
 from rfk.database import session
 from rfk.database.base import User, Anonymous, News
+from rfk.database.donations import Donation
 from rfk.site.forms.login import login_form, register_form
 from rfk.site.forms.settings import SettingsForm
 from rfk.exc.base import UserNameTakenException
@@ -228,6 +229,15 @@ def settings():
             form.old_password.errors.append('Wrong password.')
 
     return render_template('settings.html', form=form, username=current_user.username, TITLE='Settings')
+
+
+@app.route('/donations')
+def donations():
+    donations = Donation.query.all()
+    if donations:
+        return render_template('donations.html', donations=donations)
+    else:
+        abort(500)
 
 
 @app.route('/listeners')

@@ -1,0 +1,18 @@
+from sqlalchemy import *
+from sqlalchemy.orm import relationship, backref, exc
+from sqlalchemy.dialects.mysql import INTEGER as Integer
+
+import rfk.database
+from rfk.database import Base, UTCDateTime
+from rfk.helper import now
+
+class Donation(Base):
+    __tablename__ = 'donations'
+    donation = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
+    in_value = Column(Integer(unsigned=True))
+    out_value = Column(Integer(unsigned=True))
+    in_currency = Column(String(10))
+    out_currency = Column(String(10))
+    date = Column(UTCDateTime, default=now())
+    method = Column(String(20))
+    country = Column(String(3))

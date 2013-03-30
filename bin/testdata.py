@@ -8,6 +8,7 @@ from rfk.database.base import User, News, ApiKey, Setting, Permission
 from rfk.database.show import Show, Tag
 from rfk.database.track import Track
 from rfk.database.streaming import Stream, Relay
+from rfk.database.donations import Donation
 
 
 def add_users():
@@ -159,6 +160,17 @@ def add_series():
     for s in series:
         rfk.database.session.add(s)
     rfk.database.session.commit()
+    
+def add_donations():
+    donations = []
+    donations.append(Donation(in_value=1000, out_value=1000, in_currency='EUR', out_currency='EUR', country='de', method='Goldjude'))
+    donations.append(Donation(in_value=2000, out_value=2000, in_currency='EUR', out_currency='EUR', country='de', method='Goldjude'))
+    donations.append(Donation(in_value=15, out_value=15, in_currency='EUR', out_currency='EUR', country='de', method='Goldjude'))
+    donations.append(Donation(in_value=10, out_value=10, in_currency='EUR', out_currency='EUR', country='de', method='Goldjude'))
+    donations.append(Donation(in_value=1000, out_value=1000, in_currency='EUR', out_currency='EUR', country='de', method='Goldjude'))
+    for d in donations:
+        rfk.database.session.add(d)
+    rfk.database.session.commit()
 
 if __name__ == '__main__':
     current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -168,9 +180,9 @@ if __name__ == '__main__':
                                                             rfk.CONFIG.get('database', 'password'),
                                                             rfk.CONFIG.get('database', 'host'),
                                                             rfk.CONFIG.get('database', 'database')))
-    add_settings()
-    add_permissions()
-    add_series()
+    #add_settings()
+    #add_permissions()
+    #add_series()
     #add_users()
     #add_shows()
     #add_tracks()
@@ -178,6 +190,7 @@ if __name__ == '__main__':
     #add_relays()
     #add_news()
     #add_apikey()
+    add_donations()
     #user = User.get_user(username='teddydestodes')
     #user.password = User.make_password('ohlol')
     #rfk.database.session.commit()
