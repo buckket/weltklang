@@ -138,11 +138,18 @@ def make_menu():
         except AttributeError:
             pass
 
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('error/404.html'), 404
+
+
 @app.route('/')
 def index():
     news = News.query.all()
     #print app.template_folder
     return render_template('index.html', news=news)
+
 
 @app.route('/shutdown')
 def shutdown():

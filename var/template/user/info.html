@@ -1,16 +1,18 @@
 {% extends "base.html" %}
-{% block content %}<h1>{{ username }}</h1>
-<h2>Info</h2>
-<div class="panel">
-	{{ username }} streamed for {{ info.totaltime | timedelta }}
-</div>
-<h2>Shows</h2>
-<div class="panel">
-	<h3>Upcomming</h3>
+{% block content %}
+
+<h1>User::{{ username }}</h1>
+<div class="row-fluid">
+	<div class="span12">
+
+	{{ username }} streamed for 12 hours
+
+	<h3>Shows</h3>
+	<h4>Upcomming</h4>
 	{% for show in shows.upcomming%}
 	   {{ show.name }}<br />
 	{% endfor %}
-	<h3>Last</h3>
+	<h4>Last</h4>
 	{% for show in shows.last%}
        {{ show.name }} - {{ show.description | bbcode }}<br />
     {% endfor %}

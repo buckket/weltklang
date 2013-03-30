@@ -61,6 +61,13 @@ def check_auth(f=None, required_permissions=None):
     return decorated_function
 
 
+@api.route('/web/<path:path>')
+def page_not_found(path):
+    response = jsonify(wrapper(None, 404, "'%s' not found" % (path)))
+    response.status_code = 404
+    return response
+
+
 @api.route('/web/dj')
 @check_auth()
 ## DONE

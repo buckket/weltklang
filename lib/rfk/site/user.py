@@ -1,4 +1,4 @@
-from flask import Blueprint, Flask, session, g, render_template, flash, redirect, url_for, request, jsonify
+from flask import Blueprint, Flask, session, g, render_template, flash, redirect, url_for, request, jsonify, abort
 
 
 import rfk
@@ -18,4 +18,4 @@ def info(user):
     if user:
         return render_template('user/info.html', username=user.username, shows={'upcoming': [], 'last':[]})
     else:
-        return render_template('user/info.html', undefined=True)
+        abort(404)
