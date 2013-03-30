@@ -24,3 +24,58 @@ $(function() {
 	}
 	
 });
+
+/**
+ * Imgur Uploader
+ * 
+ * USAGE:
+ * $('#imguruploader').imgurUploader({'clientid':'{{ imgur.client | safe }}',
+                                   'target':'#image'})
+ * 
+ */
+
+(function( $ ){
+
+  $.fn.imgurUploader = function( options ) {  
+    var settings = $.extend( {
+      'clientid' : false,
+      'target' : false,
+    }, options);
+
+    function open_file(context) {
+    	context.data.find('input').click();
+        return false;
+    }
+    
+    function upload(context) {
+        file = context.target.files[0];
+        if (!file || !file.type.match(/image.*/)) return;
+
+        var fd = new FormData();
+        fd.append("image", file);
+        fd.append("type", 'file');
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "https://api.imgur.com/3/image");
+        xhr.setRequestHeader("Authorization", "Client-ID " + settings.clientid);
+        xhr.onload = function() {
+            var img_url = $.parseJSON(xhr.responseText).data.link;
+            context.data.find('.preview').attr("src", img_url);
+            context.data.find('.status').hide();
+            $(settings.target).val(img_url)
+        }
+        context.data.find('.status').show();
+        xhr.send(fd);
+    }
+    function empty() {
+    	$(settings.target).val('');
+    }
+    
+    return this.each(function() {
+    	var $this = $(this);
+        $this.find('a').first().click($this, open_file);
+        $this.find('a').last().click(empty);
+        $this.find('input').change($this, upload);
+    });
+
+  };
+})( jQuery );
