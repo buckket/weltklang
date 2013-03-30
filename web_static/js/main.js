@@ -66,14 +66,16 @@ $(function() {
         context.data.find('.status').show();
         xhr.send(fd);
     }
-    function empty() {
+    function empty(context) {
     	$(settings.target).val('');
+    	context.data.find('.preview').attr("src", '');
     }
     
     return this.each(function() {
     	var $this = $(this);
         $this.find('a').first().click($this, open_file);
-        $this.find('a').last().click(empty);
+        $this.find('a').last().click($this, empty);
+        $this.find('.preview').attr("src", $(settings.target).val());
         $this.find('input').change($this, upload);
     });
 
