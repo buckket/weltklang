@@ -26,11 +26,14 @@
         </ul>
         <ul class="nav pull-right">
         {% if current_user.username %}
-	        <li>
-	            <a href="/settings">{{ current_user.username }} <i class="icon-cogs"></i></a>
+        	<li>
+	            <a href="/user/{{ current_user.username }}">{{ current_user.username }}</a>
 	        </li>
 	        <li>
-	        <a href="/logout"><i class="icon-signout"></i></a>
+	            <a href="/settings"><i class="icon-cogs"></i></a>
+	        </li>
+	        <li>
+	        	<a href="/logout"><i class="icon-signout"></i></a>
 	        </li>
 	        {% else %}
 	        
