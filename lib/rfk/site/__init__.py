@@ -205,16 +205,20 @@ def settings():
                         use_icy=current_user.get_setting(code='use_icy'))
     
     if request.method == "POST" and form.validate():
-        current_user.mail = form.email.data
-        current_user.password = User.make_password(form.new_password.data)
-        current_user.set_setting(code='show_def_name', value=form.show_def_name.data)
-        current_user.set_setting(code='show_def_desc', value=form.show_def_desc.data)
-        current_user.set_setting(code='show_def_tags', value=form.show_def_tags.data)
-        current_user.set_setting(code='show_def_logo', value=form.show_def_logo.data)
-        current_user.set_setting(code='use_icy', value=form.use_icy.data)
-        session.commit()
-        flash('Settings successfully updated')
-        return redirect('settings')
+        if current_user.check_password(password=form.old_password.data):
+            if form.new_password.data:
+                current_user.password = User.make_password(form.new_password.data)
+            current_user.mail = form.email.data
+            current_user.set_setting(code='show_def_name', value=form.show_def_name.data)
+            current_user.set_setting(code='show_def_desc', value=form.show_def_desc.data)
+            current_user.set_setting(code='show_def_tags', value=form.show_def_tags.data)
+            current_user.set_setting(code='show_def_logo', value=form.show_def_logo.data)
+            current_user.set_setting(code='use_icy', value=form.use_icy.data)
+            session.commit()
+            flash('Settings successfully updated.')
+            return redirect('settings')
+        else:
+            form.old_password.errors.append('Wrong password.')
 
     return render_template('settings.html', form=form, username=current_user.username, TITLE='Settings')
 
