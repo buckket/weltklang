@@ -5,7 +5,7 @@ Complete rewrite aka MK IV
 
 
 Requirements:
-* Python 2.6
+* Python 2.7
 * Flask
  * Flask-Login
 * jinja2
@@ -16,7 +16,8 @@ Requirements:
 * parsedatetime
 * netaddr
 * babel
-* pytz
+ * speaklater
+ * pytz
 
 * Some kind of database (tested with MySQL)
 * liquidsoap
