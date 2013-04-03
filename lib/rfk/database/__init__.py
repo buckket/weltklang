@@ -14,9 +14,9 @@ class UTCDateTime(types.TypeDecorator):
     def process_bind_param(self, value, engine):
         if value is not None:
             if value.tzinfo is None:
-                return pytz.utc.localize(value)
+                return value
             else:
-                return pytz.utc.normalize(value.astimezone(pytz.utc))
+                return pytz.utc.normalize(value.astimezone(pytz.utc)).replace(tzinfo=None)
 
     def process_result_value(self, value, engine):
         if value is not None:
