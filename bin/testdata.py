@@ -163,11 +163,11 @@ def add_series():
     
 def add_donations():
     donations = []
-    donations.append(Donation(in_value=1000, out_value=1000, in_currency='EUR', out_currency='EUR', country='de', method='Goldjude'))
-    donations.append(Donation(in_value=2000, out_value=2000, in_currency='EUR', out_currency='EUR', country='de', method='Goldjude'))
-    donations.append(Donation(in_value=15, out_value=15, in_currency='EUR', out_currency='EUR', country='de', method='Goldjude'))
-    donations.append(Donation(in_value=10, out_value=10, in_currency='EUR', out_currency='EUR', country='de', method='Goldjude'))
-    donations.append(Donation(in_value=1000, out_value=1000, in_currency='EUR', out_currency='EUR', country='de', method='Goldjude'))
+    donations.append(Donation(in_value='1000', out_value='1000', in_currency='EUR', out_currency='EUR', country='de', method='Goldjude'))
+    donations.append(Donation(in_value='2000', out_value='2000', in_currency='EUR', out_currency='EUR', country='de', method='Goldjude'))
+    donations.append(Donation(in_value='15', out_value='15', in_currency='EUR', out_currency='EUR', country='de', method='Goldjude'))
+    donations.append(Donation(in_value='10', out_value='10', in_currency='EUR', out_currency='EUR', country='de', method='Goldjude'))
+    donations.append(Donation(in_value='1000', out_value='1000', in_currency='EUR', out_currency='EUR', country='de', method='Goldjude'))
     for d in donations:
         rfk.database.session.add(d)
     rfk.database.session.commit()
@@ -190,7 +190,5 @@ if __name__ == '__main__':
     #add_relays()
     #add_news()
     #add_apikey()
-    add_donations()
-    #user = User.get_user(username='teddydestodes')
-    #user.password = User.make_password('ohlol')
+    #add_donations()
     #rfk.database.session.commit()
