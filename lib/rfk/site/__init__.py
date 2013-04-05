@@ -4,6 +4,7 @@ from flaskext.babel import Babel, get_locale, get_timezone, refresh
 import pytz
 import datetime
 
+from rfk.helper import now
 from rfk.database import session
 from rfk.database.base import User, Anonymous, News
 from rfk.database.donations import Donation
@@ -167,6 +168,8 @@ def login():
             user.authenticated = True
             remember = form.remember.data
             if login_user(user, remember=remember):
+                user.last_login = now()
+                session.commit()
                 flash("Logged in!")
                 return redirect(request.args.get("next") or url_for("index"))
             else:
@@ -224,7 +227,7 @@ def settings():
             current_user.set_setting(code='use_icy', value=form.use_icy.data)
             session.commit()
             flash('Settings successfully updated.')
-            return redirect('settings')
+            return redirect(url_for('settings'))
         else:
             form.old_password.errors.append('Wrong password.')
 
