@@ -253,8 +253,20 @@
 
 .imageuploader {
     position: relative;
-    width: 310px;
 }
+
+.imageuploader .thumbnail {
+	-webkit-background-size: cover; /*for webKit*/
+    -moz-background-size: cover; /*Mozilla*/
+    -o-background-size: cover; /*opera*/
+    background-size: cover; /*generic*/
+    background-position: center;
+}
+
+.imageuploader .thumbnail span {
+	font-size: 2em;
+}
+
 .imageuploader .actions {
     background-color: #000000;
     border-radius: 5px 5px 5px 5px;
@@ -284,4 +296,20 @@
 
 .imageuploader:hover .actions {
     opacity: 1;
+}
+
+.outline {
+    color: #dedede;
+    text-shadow:  1px  1px 1px black,
+                  1px -1px 1px black,
+                 -1px  1px 1px black,
+                 -1px -1px 1px black;
+}
+
+.outline-white {
+    color: #121212;
+    text-shadow:  1px  1px 1px white,
+                  1px -1px 1px white,
+                 -1px  1px 1px white,
+                 -1px -1px 1px white;
 }

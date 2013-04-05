@@ -1,0 +1,25 @@
+{% set sidebar=True %}
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row-fluid">
+    <div class="hero-unit" style="background-image: url('{{ show.logo }}');background-position:center;">
+    <h1 class="outline">{%if show.series %}{{ show.series.name }} <small>{{ show.name }}</small>{% else %}{{ show.name }}{% endif %}</h1>
+    <h2 class="outline">{{ show.begin | datetimeformat }}</h2>
+    <h3 class="outline">{% trans users=show.users|safe %}by {{ users }}{% endtrans %}</h3>
+    </div>
+</div>
+<div class="row-fluid">
+    <div class="span12">{{show.description | bbcode | safe }}</div>
+</div>
+<div class="row-fluid">
+    <div class="span12" >
+        <p class="muted">
+        {% for tag in show.tags %}
+            <abbr title="{{ tag.tag.description }}">{{ tag.tag.name }}</abbr>
+        {% endfor %}
+        </p>
+    </div>
+</div>
+{% endblock content %}

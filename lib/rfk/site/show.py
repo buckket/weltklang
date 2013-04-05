@@ -43,8 +43,8 @@ def new_series():
         rfk.database.session.add(series)
         rfk.database.session.commit()
         return redirect(url_for('.list_series'))
-    return render_template('shows/seriesform.html',form=form, imgur={'client': CONFIG.get('site', 'imgur-client'),
-                                                           'secret': CONFIG.get('site', 'imgur-secret')})
+    return render_template('shows/seriesform.html',form=form,
+                                                   imgur={'client': CONFIG.get('site', 'imgur-client')})
 
 @show.route('/calendar/week')
 def calendar_week():
@@ -84,6 +84,7 @@ def new_show_form():
     else:
         template = '/shows/showform.html'
     return render_template(template,
+                           imgur={'client': CONFIG.get('site', 'imgur-client')},
                            format=get_datetime_format())
 
 @show.route('/show/<int:show>')
@@ -111,7 +112,8 @@ def show_view(show):
                                  'logo': s.get_logo(),
                                  'user': users,
                                  'show': s.show,
-                                 'duration': (s.end - s.begin).total_seconds()})
+                                 'duration': (s.end - s.begin).total_seconds(),
+                                 'link': url_for('.show_view', show=s.show)})
 
 def _make_user_link(user):
     return '<a href="%s" title="%s">%s</a>' % ('#',user.username,user.username);
@@ -125,16 +127,22 @@ def show_edit(show):
         template = '/shows/showform-inline.html'
     else:
         template = '/shows/showform.html'
+    
+    tags = []
+    for tag in s.tags:
+        tags.append(tag.tag.name)
+    
     return render_template(template,
                            show={'name': s.name,
                                  'description': s.description,
                                  'series': s.series,
                                  'users': s.users,
-                                 'tags': s.tags,
+                                 'tags': " ".join(tags),
                                  'begin': to_user_timezone(s.begin).strftime('%s'),
                                  'logo': s.logo,
                                  'show': s.show,
                                  'duration': (s.end - s.begin).total_seconds()/60},
+                           imgur={'client': CONFIG.get('site', 'imgur-client')},
                            format=get_datetime_format())
 
 

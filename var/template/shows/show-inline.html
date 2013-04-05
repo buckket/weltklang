@@ -8,28 +8,13 @@
     background-position: center;
 }
 
-.outline {
-    color: #dedede;
-    text-shadow:  1px  1px 1px black,
-                  1px -1px 1px black,
-                 -1px  1px 1px black,
-                 -1px -1px 1px black;
-}
-
-.outline-white {
-    color: #121212;
-    text-shadow:  1px  1px 1px white,
-                  1px -1px 1px white,
-                 -1px  1px 1px white,
-                 -1px -1px 1px white;
-}
 .show-inline-header h4,
 .show-inline-header h6{
     margin: 0px 0px;
 }
 -->
 </style>
-<div class="modal-header show-inline-header" style="background-image: url('{{show.logo}}');">
+<div class="modal-header show-inline-header" {% if show.logo %}style="background-image: url('{{show.logo}}');"{% endif %}>
    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
    <h2 class="outline">{%if show.series %}{{ show.series.name }} <small>{{ show.name }}</small>{% else %}{{ show.name }}{% endif %}</h2>
    <h4 class="outline">{{ show.begin | datetimeformat }}</h4>
@@ -47,6 +32,7 @@
 </div>
 </div>
 <div class="modal-footer">
+    <a class="pull-left" href="{{ show.link }}">permalink</a>
     {% if current_user in show.user %}<button class="btn" onclick="edit_show({{show.show}})">{% trans %}Edit{% endtrans %}</button>{% endif %}
     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans %}Close{% endtrans %}</button>
 </div>

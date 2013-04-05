@@ -30,7 +30,9 @@ $(function() {
  * 
  * USAGE:
  * $('#imguruploader').imgurUploader({'clientid':'{{ imgur.client | safe }}',
-                                   'target':'#image'})
+ *                                  'target':'#image'})
+ *                                  
+ * 
  * 
  */
 
@@ -59,7 +61,7 @@ $(function() {
         xhr.setRequestHeader("Authorization", "Client-ID " + settings.clientid);
         xhr.onload = function() {
             var img_url = $.parseJSON(xhr.responseText).data.link;
-            context.data.find('.preview').attr("src", img_url);
+            context.data.find('.thumbnail').css("background-image", "url('"+img_url+"')");
             context.data.find('.status').hide();
             $(settings.target).val(img_url)
         }
@@ -68,14 +70,14 @@ $(function() {
     }
     function empty(context) {
     	$(settings.target).val('');
-    	context.data.find('.preview').attr("src", '');
+    	context.data.find('.thumbnail').css("background-image", "");
     }
     
     return this.each(function() {
     	var $this = $(this);
         $this.find('a').first().click($this, open_file);
         $this.find('a').last().click($this, empty);
-        $this.find('.preview').attr("src", $(settings.target).val());
+        $this.find('.thumbnail').css("background-image", "url('"+$(settings.target).val()+"')");
         $this.find('input').change($this, upload);
     });
 
