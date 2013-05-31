@@ -19,6 +19,9 @@ import os
 import sys
 import base64
 from datetime import datetime
+basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(basedir,'lib'))
+
 import rfk.database 
 from rfk.database.base import User, Log
 from rfk.database.show import Show, Tag, UserShow
@@ -27,6 +30,7 @@ from rfk.liquidsoap import LiquidInterface
 from rfk import exc as rexc
 
 username_delimiter = '|'
+
 
 def log(message):
     """shorthand method for writing log to database
@@ -163,7 +167,7 @@ def doDisconnect(userid):
 
 def doPlaylist():
     #item = rfk.Playlist.getCurrentItem(session)
-    print os.path.join(current_dir, 'var', 'music', 'loop.mp3')
+    print os.path.join(basedir, 'var', 'music', 'loop.mp3')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyRfK Interface for liquidsoap',
@@ -185,8 +189,8 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
     
-    current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    rfk.init(current_dir)
+    
+    rfk.init(basedir)
     rfk.database.init_db("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
                                                               rfk.CONFIG.get('database', 'username'),
                                                               rfk.CONFIG.get('database', 'password'),
