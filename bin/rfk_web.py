@@ -7,6 +7,19 @@ Created on 30.04.2012
 import os
 import sys
 
+#monkeypatch "broken" babel lib
+import flaskext.babel
+import pytz
+def to_utc(datetime):
+    """Convert a datetime object to UTC and drop tzinfo.  This is the
+    opposite operation to :func:`to_user_timezone`.
+    """
+    if datetime.tzinfo is None:
+        datetime = flaskext.babel.get_timezone().localize(datetime)
+    return datetime.astimezone(pytz.utc).replace(tzinfo=pytz.UTC)
+
+flaskext.babel.to_utc = to_utc
+
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(basedir,'lib'))
 
