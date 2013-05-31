@@ -1,0 +1,38 @@
+{% from "_helpers.html" import render_field_horizontal %}
+{% set sidebar=True %}
+{% extends "base.html" %}
+{% block sidebar %}
+{% include "admin/sidebar.html" %}
+{% endblock %}
+
+{% block content %}
+{% if stream %}
+<h2>{% trans %}Edit Stream{% endtrans %}</h2>
+{% else %}
+<h2>{% trans %}Add Stream{% endtrans %}</h2>
+{% endif %}
+<div class="row-fluid">
+<div class="span12">
+
+
+<form class="form-horizontal" method="POST">
+{{ render_field_horizontal(form.name) }}
+{{ render_field_horizontal(form.code) }}
+{{ render_field_horizontal(form.mount) }}
+{{ render_field_horizontal(form.type) }}
+{{ render_field_horizontal(form.quality) }}
+<div class="control-group">
+  <div class="controls">
+    <button type="submit" class="btn btn-primary">
+{% if stream %}
+{% trans %}Save{% endtrans %}
+{% else %}
+{% trans %}Add{% endtrans %}
+{% endif %}
+	</button>
+  </div>
+</div>
+</form>
+</div>
+
+{% endblock content%}

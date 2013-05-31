@@ -1,0 +1,44 @@
+{% set sidebar=True %}
+{% extends "base.html" %}
+{% block sidebar %}
+{% include "admin/sidebar.html" %}
+{% endblock %}
+
+{% block content %}
+<h2>Streams</h2>
+<div class="row-fluid">
+	<div class="span12">
+		<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>Address</th>
+				<th>Type</th>
+				<th>Bandwidth</th>
+				<th>Usage</th>
+				<th>Status</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for relay in relays %}
+			<tr>
+				<td>{{ relay.address }}:{{ relay.port }}</td>
+				<td>{{ relay.TYPE.indexof(relay.type) }}</td>
+				<td>{{ relay.bandwidth }}</td>
+				<td>{{ relay.usage }}</td>
+				<td>{{ relay.STATUS.indexof(relay.status) }}</td>
+			</tr>
+			{% else %}
+			<tr>
+				<td colspan="5">No Relays Configured</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		</table>
+	</div>
+</div>
+<div class="row-fluid">
+	<div class="span12">
+	<a class="btn" href="/admin/stream/add">{% trans %}Add Relay{% endtrans %}</a>
+	</div>
+</div>
+{% endblock content%}

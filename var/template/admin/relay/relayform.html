@@ -1,0 +1,43 @@
+{% from "_helpers.html" import render_field_horizontal %}
+{% set sidebar=True %}
+{% extends "base.html" %}
+{% block sidebar %}
+{% include "admin/sidebar.html" %}
+{% endblock %}
+
+{% block content %}
+{% if relay %}
+<h2>{% trans %}Edit Relay{% endtrans %}</h2>
+{% else %}
+<h2>{% trans %}Add Relay{% endtrans %}</h2>
+{% endif %}
+<div class="row-fluid">
+<div class="span12">
+
+
+<form class="form-horizontal" method="POST">
+{{ render_field_horizontal(form.address) }}
+{{ render_field_horizontal(form.port) }}
+{{ render_field_horizontal(form.bandwidth) }}
+{{ render_field_horizontal(form.type) }}
+{{ render_field_horizontal(form.admin_username) }}
+{{ render_field_horizontal(form.admin_password) }}
+{{ render_field_horizontal(form.auth_username) }}
+{{ render_field_horizontal(form.auth_password) }}
+{{ render_field_horizontal(form.relay_username) }}
+{{ render_field_horizontal(form.relay_password) }}
+<div class="control-group">
+  <div class="controls">
+    <button type="submit" class="btn btn-primary">
+{% if relay %}
+{% trans %}Save{% endtrans %}
+{% else %}
+{% trans %}Add{% endtrans %}
+{% endif %}
+	</button>
+  </div>
+</div>
+</form>
+</div>
+
+{% endblock content%}

@@ -83,3 +83,14 @@ class ENUM(Set):
             return self.index(name)
         raise AttributeError
     
+    def tuples(self):
+        ret = []
+        for name in self:
+            ret.append( (self.index(name),name) )
+        return ret
+    
+    def indexof(self, index):
+        for name in self:
+            if self.index(name) == index:
+                return name
+    

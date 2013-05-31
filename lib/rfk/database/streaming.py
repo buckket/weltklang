@@ -4,6 +4,7 @@ from sqlalchemy.dialects.mysql import INTEGER as Integer
 from datetime import datetime
 import netaddr
 import pygeoip
+import re
 
 from rfk.database import Base, UTCDateTime
 from rfk.types import ENUM, SET
@@ -11,6 +12,7 @@ from rfk import CONFIG
 from rfk.helper import now, get_location
 import rfk.database
 import rfk.icecast
+from rfk.exc.streaming import *
 
 
 class Listener(Base):
@@ -79,6 +81,28 @@ class Stream(Base):
                                                                           ondelete="RESTRICT"))
     statistic = relationship("Statistic")
     TYPES = ENUM(['UNKNOWN', 'MP3', 'AACP', 'OGG', 'OPUS'])
+    code_pattern = re.compile('^[0-9A-Za-z_-]+$')
+    
+    @staticmethod
+    def add_stream(code, name, mount, type, quality):
+        try:
+            Stream.query.filter(Stream.mount == mount).one()
+            raise MountpointTakenException()
+        except exc.NoResultFound:
+            pass
+        try:
+            Stream.query.filter(Stream.code == code).one()
+            raise CodeTakenException()
+        except exc.NoResultFound:
+            pass
+        if not Stream.code_pattern.match(code):
+            raise InvalidCodeException()
+        
+        stream = Stream(code=code, name=name, mount=mount, type=type, quality=quality)
+        rfk.database.session.add(stream)
+        rfk.database.session.flush()
+        return stream
+        
     
     @staticmethod
     def get_stream(id=None, mount=None):
@@ -103,10 +127,10 @@ class Relay(Base):
     """database representation of a RelayServer"""
     __tablename__ = 'relays'
     relay = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    address = Column(String(15))
+    address = Column(String(50))
     port = Column(Integer(unsigned=True))
     flag = Column(Integer(unsigned=True))
-    bandwith = Column(Integer(unsigned=True))
+    bandwidth = Column(Integer(unsigned=True))
     usage = Column(Integer(unsigned=True))
     admin_username = Column(String(50))
     admin_password = Column(String(50))
@@ -115,7 +139,7 @@ class Relay(Base):
     relay_username = Column(String(50))
     relay_password = Column(String(50)) 
     type = Column(Integer(unsigned=True))
-    status = Column(Integer(unsigned=True))
+    status = Column(Integer(unsigned=True), default=0)
     statistic_id = Column("statistic", Integer(unsigned=True), ForeignKey('statistics.statistic',
                                                                           onupdate="CASCADE",
                                                                           ondelete="RESTRICT"))
@@ -123,6 +147,20 @@ class Relay(Base):
     STATUS = ENUM(['UNKNOWN', 'DISABLED', 'OFFLINE', 'ONLINE'])
     TYPE = ENUM(['MASTER', 'RELAY'])
     
+    @staticmethod
+    def add_relay(address, port, bandwidth, admin_username, admin_password, auth_username, auth_password, relay_username, relay_password, type):
+        try:
+            Relay.query.filter(Relay.address == address, Relay.port == port).one()
+            raise AddressTakenException()
+        except exc.NoResultFound:
+            pass
+        relay = Relay(address=address, port=port, bandwidth=bandwidth, admin_username=admin_username, admin_password=admin_password,
+                      auth_username=auth_username, auth_password=auth_password, relay_username=relay_username, relay_password=relay_password,
+                      type=type)
+        rfk.database.session.add(relay)
+        rfk.database.session.flush()
+        return relay
+        
     @staticmethod
     def get_master():
         """returns the master server"""
