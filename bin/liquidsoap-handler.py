@@ -12,7 +12,7 @@ Meta: Metadata (ATTENTION: not all clients send metadata!)
 Disconnect: streamingclient disconnects
 
 '''
-import rfk
+
 import argparse
 import json
 import os
@@ -22,6 +22,7 @@ from datetime import datetime
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(basedir,'lib'))
 
+import rfk
 import rfk.database 
 from rfk.database.base import User, Log
 from rfk.database.show import Show, Tag, UserShow
