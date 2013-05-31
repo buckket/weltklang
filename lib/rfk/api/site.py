@@ -22,7 +22,7 @@ from rfk.site import app
 
 
 @api.route("/site/admin/liquidsoap/endpoint/<string:action>")
-@permission_required(permission='liq-endpointctrl')
+@permission_required(permission='manage-liquidsoap')
 def endpoint_action(action):
     if request.args.get('endpoint') is None:
         return jsonify({'error':'no endpoint supplied!'})
@@ -38,7 +38,7 @@ def endpoint_action(action):
         return jsonify({'error': str(e)})
 
 @api.route("/site/admin/liquidsoap/status")
-@permission_required(permission='liq-restart')
+@permission_required(permission='manage-liquidsoap')
 def liquidsoap_status():
     try:
         ret = {}
@@ -64,7 +64,7 @@ def liquidsoap_status():
         return jsonify({'error': str(e)})
 
 @api.route("/site/admin/liquidsoap/start")
-@permission_required(permission='liq-restart')
+@permission_required(permission='manage-liquidsoap')
 def liquidsoap_start():
     returncode = call([os.path.join(app.config['BASEDIR'], 'bin','run-liquid.py')])
     return jsonify({'status': returncode})
@@ -82,7 +82,7 @@ def liquidsoap_shutdown():
         return jsonify({'error': str(e)})
 
 @api.route("/site/admin/liquidsoap/log")
-@permission_required(permission='liq-restart')
+@permission_required(permission='manage-liquidsoap')
 def liquidsoap_log():
     try:
         client = LiquidDaemonClient()
