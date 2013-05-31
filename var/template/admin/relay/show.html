@@ -1,0 +1,22 @@
+{% set sidebar=True %}
+{% extends "base.html" %}
+{% block sidebar %}
+{% include "admin/sidebar.html" %}
+{% endblock %}
+
+{% block content %}
+<h2>Icecast Config</h2>
+<div class="row-fluid">
+<div class="span12">
+<pre class="prettyprint linenums languague-xml">
+{{ relay.get_icecast_config(True) }}
+</pre>
+</div>
+</div>
+{% endblock %}
+{% block js %}
+<script src="/static/js/vendor/prettify.js"></script>
+<script>
+prettyPrint();
+</script>
+{% endblock js %}

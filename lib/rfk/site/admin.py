@@ -79,6 +79,13 @@ def relay_list():
     relays = Relay.query.all()
     return render_template('admin/relay/list.html', relays=relays)
 
+@admin.route('/relay/<int:relay>')
+@login_required
+@permission_required(permission='manage-liquidsoap')
+def relay(relay):
+    relay = Relay.query.get(relay)
+    return render_template('admin/relay/show.html', relay=relay)
+
 @admin.route('/relay/add', methods=['GET', 'POST'])
 @login_required
 @permission_required(permission='manage-liquidsoap')
