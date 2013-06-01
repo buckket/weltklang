@@ -63,7 +63,7 @@ class Show(Base):
     @staticmethod
     def get_current_show(user=None):
         """returns the current show"""
-        query = Show.query.join(UserShow).filter((between(datetime.utcnow(), Show.begin, Show.end)) | (Show.end == None))
+        query = Show.query.join(UserShow).filter((between(now(), Show.begin, Show.end)) | (Show.end == None))
         if user:
             query = query.filter(UserShow.user == user)
         return query.first()
