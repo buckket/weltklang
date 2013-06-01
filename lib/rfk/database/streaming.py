@@ -7,6 +7,7 @@ import pygeoip
 import re
 
 from rfk.database import Base, UTCDateTime
+from rfk.database.stats import Statistic
 from rfk.types import ENUM, SET
 from rfk import CONFIG
 from rfk.helper import now, get_location
@@ -123,6 +124,22 @@ class Stream(Base):
             self.relays.append(StreamRelay(relay=relay))
             return True
     
+    def get_statistic(self):
+        if self.statistic is None:
+            stat = Statistic(name='Listeners on %s' % (self.code), identifier='lst-%s' % (self.code))
+            rfk.database.session.add(stat)
+            self.statistic = stat
+            rfk.database.session.flush()
+        return self.statistic
+    
+    def get_current_listeners(self):
+        return Listener.query.join(StreamRelay).filter(StreamRelay.stream == self, Listener.disconnect == None).count()
+    
+    def update_statistic(self):
+        stat = self.get_statistic()
+        stat.set(now(), self.get_current_listeners())
+    
+    
 class Relay(Base):
     """database representation of a RelayServer"""
     __tablename__ = 'relays'
@@ -220,12 +237,25 @@ class Relay(Base):
         except exc.NoResultFound:
             return self.streams.append(StreamRelay(stream=stream))
             
-    
     def get_stream_relay(self, stream):
         """returns the StreamRelay combination for the given Stream and this Relay"""
         return StreamRelay.query.filter(StreamRelay.relay == self,
                                         StreamRelay.stream == stream).one()
+    def get_statistic(self):
+        if self.statistic is None:
+            stat = Statistic(name='Listeners on %s:%s' % (self.address,self.port), identifier='lst-%s:%s' % (self.address,self.port))
+            rfk.database.session.add(stat)
+            self.statistic = stat
+            rfk.database.session.flush()
+        return self.statistic
     
+    def get_current_listeners(self):
+        return Listener.query.join(StreamRelay).filter(StreamRelay.relay == self, Listener.disconnect == None).count()
+    
+    def update_statistic(self):
+        stat = self.get_statistic()
+        stat.set(now(), self.get_current_listeners())
+            
 class StreamRelay(Base):
     __tablename__ = 'stream_relays'
     stream_relay = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
@@ -257,3 +287,18 @@ class StreamRelay(Base):
                                                     Listener.disconnect == None).all()
         for listener in connected_listeners:
             listener.disconnect = now()
+            
+    def get_statistic(self):
+        if self.statistic is None:
+            stat = Statistic(name='Listeners on SR %s' % (self.stream_relay), identifier='lst-sr-%s' % (self.stream_relay))
+            rfk.database.session.add(stat)
+            self.statistic = stat
+            rfk.database.session.flush()
+        return self.statistic
+    
+    def get_current_listeners(self):
+        return Listener.query.filter(Listener.stream_relay == self, Listener.disconnect == None).count()
+    
+    def update_statistic(self):
+        stat = self.get_statistic()
+        stat.set(now(), self.get_current_listeners())
