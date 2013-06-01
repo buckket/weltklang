@@ -14,7 +14,7 @@ sys.setdefaultencoding('utf-8')
 import flaskext.babel
 import pytz
 def to_utc(datetime):
-    """Convert a datetime object to UTC and drop tzinfo.  This is the
+    """Convert a datetime object to UTC [s]and drop tzinfo[/s].  This is the
     opposite operation to :func:`to_user_timezone`.
     """
     if datetime.tzinfo is None:
