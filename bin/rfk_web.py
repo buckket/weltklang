@@ -7,6 +7,9 @@ Created on 30.04.2012
 import os
 import sys
 
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 #monkeypatch "broken" babel lib
 import flaskext.babel
 import pytz
