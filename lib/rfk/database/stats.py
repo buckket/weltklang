@@ -17,9 +17,11 @@ class Statistic(Base):
             ls = StatsistcsData.query.filter(StatsistcsData.timestamp == timestamp,
                                              StatsistcsData.statistic == self).one()
             ls.value = value
+            rfk.database.session.flush()
         except exc.NoResultFound:
             ls = StatsistcsData(statistic=self, timestamp=timestamp, value=value)
             rfk.database.session.add(ls)
+            rfk.database.session.flush()
             
     def get(self, start=None, stop=None, num=None, reverse=False):
         clauses = []
