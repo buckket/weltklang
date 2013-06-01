@@ -45,12 +45,19 @@ def log(message):
     rfk.database.session.commit()
 
 def kick():
-    """shorthand method for kicking the currently connected user  
+    """shorthand method for kicking the currently connected user
+    
+    returns True if someone was kicked  
     """
     liquidsoap = LiquidInterface()
     liquidsoap.connect()
-    liquidsoap.kick_harbor()
+    kicked = False
+    for source in liquidsoap.get_sources():
+        if source.status() != 'no source client connected':
+            source.kick()
+            kicked = True
     liquidsoap.close()
+    return kicked
     
 def doAuth(username, password):
     """authenticates the user
@@ -70,13 +77,13 @@ def doAuth(username, password):
     try:
         user = User.authenticate(username, password)
         show = Show.get_current_show(user)
-        if show is not None:
-            kick()
-            log('kicked user')
-            sys.stdout.write('false')
-        else:
-            log('accepted auth for %s' %(username,))
-            sys.stdout.write('true')
+        if show is not None and show.flags & Show.FLAGS.PLANNED:
+            if kick():
+                log('kicked user')
+                sys.stdout.write('false')
+                return
+        log('accepted auth for %s' %(username,))
+        sys.stdout.write('true')
         return
     except rexc.base.InvalidPasswordException, rexc.base.UserNotFoundException:
         pass
