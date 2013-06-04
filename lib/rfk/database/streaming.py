@@ -64,6 +64,10 @@ class Listener(Base):
         rfk.database.session.add(listener)
         return listener
     
+    @staticmethod
+    def get_total_listener():
+        return Listener.query.filter(Listener.disconnect == None).count()
+    
     def set_disconnected(self):
         """updates the listener to disconnected state"""
         self.disconnect = now()

@@ -27,6 +27,7 @@ import rfk.database
 from rfk.database.base import User, Log
 from rfk.database.show import Show, Tag, UserShow
 from rfk.database.track import Track
+from rfk.database.streaming import Listener
 from rfk.liquidsoap import LiquidInterface
 from rfk import exc as rexc
 
@@ -177,6 +178,10 @@ def doPlaylist():
     #item = rfk.Playlist.getCurrentItem(session)
     print os.path.join(basedir, 'var', 'music', 'loop.mp3')
 
+def doListener():
+    lc = Listener.get_total_listener()
+    sys.stdout.write("<icestats><source mount=\"/live.ogg\"><listeners>%d</listeners></source></icestats>" % (lc,))
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyRfK Interface for liquidsoap',
                                      epilog='Anyways this should normally not called manually')
@@ -194,6 +199,7 @@ if __name__ == '__main__':
     disconnectparser = subparsers.add_parser('disconnect', help='a help')
     disconnectparser.add_argument('data', metavar='data', help='mostly some json encoded string from liquidsoap')
     playlistparser = subparsers.add_parser('playlist', help='a help')
+    playlistparser = subparsers.add_parser('listenercount', help='prints total listenercount')
     
     args = parser.parse_args()
     
@@ -217,4 +223,6 @@ if __name__ == '__main__':
         doDisconnect(data)
     elif args.command == 'playlist':
         doPlaylist()
+    elif args.command == 'listenercount':
+        doListenerCount()
     #session.remove()

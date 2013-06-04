@@ -60,7 +60,20 @@ def get_playlist_item() =
   request.create(result)
 end
 
-live = input.harbor(port= $port,on_connect = live_start, on_disconnect = live_stop, buffer=0., max = 10., auth = auth, "/live.ogg")
+def get_listener(~protocol,~data,~headers,uri) =
+   http_response(
+     protocol=protocol,
+     code=200,
+     data=get_process_output("$script listenercount")
+   )
+end
+
+
+live = input.harbor(port = $port,on_connect = live_start, on_disconnect = live_stop, buffer=0., max = 10., auth = auth, "/live.ogg")
+
+harbor.http.register(port=$port,method="GET",
+                     "^/admin/listclients",
+                     get_listener)
 
 playlist = request.dynamic(get_playlist_item)
 playlist = drop_metadata(playlist)
