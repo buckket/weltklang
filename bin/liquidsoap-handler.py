@@ -178,7 +178,7 @@ def doPlaylist():
     #item = rfk.Playlist.getCurrentItem(session)
     print os.path.join(basedir, 'var', 'music', 'loop.mp3')
 
-def doListener():
+def doListenerCount():
     lc = Listener.get_total_listener()
     sys.stdout.write("<icestats><source mount=\"/live.ogg\"><listeners>%d</listeners></source></icestats>" % (lc,))
 
