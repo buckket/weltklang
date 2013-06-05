@@ -52,6 +52,10 @@ def icecast_remove_mount():
         stream.add_relay(relay)
         stream_relay = relay.get_stream_relay(stream)
         stream_relay.set_offline()
+        session.flush()
+        relay.update_statistic()
+        stream.update_statistic()
+        relay.get_stream_relay(stream).update_statistic()
         session.commit()
         return make_response('ok', 200, {'icecast-auth-user': '1'})
     else:
