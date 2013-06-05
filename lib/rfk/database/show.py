@@ -5,6 +5,7 @@ from sqlalchemy.dialects.mysql import INTEGER as Integer
 
 from datetime import datetime
 from rfk.database import Base, UTCDateTime
+import rfk.database
 from rfk.types import ENUM, SET
 
 from rfk.helper import now
@@ -26,8 +27,16 @@ class Show(Base):
     flags = Column(Integer(unsigned=True), default=0)
     FLAGS = SET(['DELETED', 'PLANNED', 'UNPLANNED', 'RECORD'])
 
+    def end_show(self):
+        """ends the Show
+           raises exception if the show is planned since it doesn't need to be ended"""
+        if self.flags & Show.FLAGS.PLANNED:
+            raise Exception
+        self.end = now()
+        rfk.database.session.flush()
+        
     def add_tags(self, tags):
-        """ads a list of Tags to the Show"""
+        """adds a list of Tags to the Show"""
         for tag in tags:
             self.add_tag(tag=tag)
             
@@ -52,13 +61,23 @@ class Show(Base):
                                        UserShow.show == self).one()
             if us.role != role:
                 us.role = role
+            rfk.database.session.flush()
             return us
         except exc.NoResultFound:
-            return UserShow(show=self, user=user, role=role)
+            us = UserShow(show=self, user=user, role=role)
+            rfk.database.session.add(us)
+            rfk.database.session.flush()
+            return us
             
     def remove_user(self, user):
+        """removes the association to user"""
         UserShow.query.filter(UserShow.user == user,
                               UserShow.show == self).delete()
+    
+    def get_usershow(self, user):
+        return UserShow.query.filter(UserShow.user == user,
+                                     UserShow.show == self).one()
+        
     
     @staticmethod
     def get_current_show(user=None):
@@ -69,6 +88,8 @@ class Show(Base):
         return query.first()
     
     def get_logo(self):
+        """return the logourl for this show
+           falls back to serieslogo if set"""
         if self.logo is not None:
             return self.logo
         elif self.series is not None:
@@ -152,7 +173,10 @@ class Role(Base):
         try:
             return Role.query.filter(Role.name == name).one()
         except exc.NoResultFound:
-            return Role(name=name)
+            role = Role(name=name)
+            rfk.database.session.add(role)
+            rfk.database.session.flush()
+            return role
     
     
 class Series(Base):

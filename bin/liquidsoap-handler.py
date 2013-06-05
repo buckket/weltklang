@@ -60,6 +60,33 @@ def kick():
     liquidsoap.close()
     return kicked
     
+def init_show(user, name="", description="", tags=""):
+    """inititalizes a show
+        it either takes a planned show or an unplanned show if it's still running
+        if non of them is found a new unplanned show is added and initialized
+        if a new show was initialized the old one will be ended and the streamer staus will be resettet
+    """
+    show = Show.get_current_show(user)
+    if show is None:
+        show = Show()
+        show.add_tags(Tag.parse_tags(tags))
+        show.description = description
+        show.name = name
+        show.flags = Show.FLAGS.UNPLANNED
+        show.add_user(user)
+    us = show.get_usershow(user)
+    us.status = UserShow.STATUS.STREAMING
+    rfk.database.session.flush()
+    unfinished_shows = UserShow.query.filter(UserShow.status == UserShow.STATUS.STREAMING,
+                                             UserShow.show != show).all()
+    for us in unfinished_shows:
+        if us.show.flags & Show.FLAGS.UNPLANNED:
+            us.show.end_show()
+        if us.status == UserShow.STATUS.STREAMING:
+           us.status = UserShow.STATUS.STREAMED
+        rfk.database.flush() 
+    return show
+        
 def doAuth(username, password):
     """authenticates the user
     this function will also disconnect the current user
@@ -108,7 +135,18 @@ def doMetaData(data):
             artist = song[0]
         if ('title' not in data) or (len(data['title'].strip()) == 0):
             title = song[1]
-    show = Show.get_current_show(user)
+    if user.get_setting(code='use_icy'):
+        if 'ice-genre' in data:
+            tags = data['ice-genre']
+        if 'ice-name' in data:
+            name = data['ice-name']
+        if 'ice-description' in data:
+            description = data['ice-decription']
+    else:
+        tags = user.get_setting(code='show_def_tags')
+        description = user.get_setting(code='show_def_desc')
+        name = user.get_setting(code='show_def_name')
+    show = init_show(user, name=name, description=description, tags=tags)
     track = Track.new_track(show, artist, title)
     rfk.database.session.add(track)
     rfk.database.session.commit()
@@ -133,24 +171,19 @@ def doConnect(data):
         return 
     try:
         user = User.authenticate(username, password)
-        show = Show.get_current_show(user)
-        if show is None:
-            show = Show()
-            if user.get_setting(code='use_icy'):
-                if 'ice-genre' in data:
-                    show.add_tags(Tag.parse_tags(data['ice-genre']))
-                if 'ice-name' in data:
-                    show.name = data['ice-name']
-                if 'ice-description' in data:
-                    show.description = data['ice-decription']
-            else:
-                show.add_tags(Tag.parse_tags(user.get_setting(code='show_def_tags')))
-                show.description = user.get_setting(code='show_def_desc')
-                show.name = user.get_setting(code='show_def_name')
-            show.flags = Show.FLAGS.UNPLANNED
-            us = show.add_user(user)
-            us.status = UserShow.STATUS.STREAMING
-            rfk.database.session.commit()
+        if user.get_setting(code='use_icy'):
+            if 'ice-genre' in data:
+                tags = data['ice-genre']
+            if 'ice-name' in data:
+                name = data['ice-name']
+            if 'ice-description' in data:
+                description = data['ice-decription']
+        else:
+            tags = user.get_setting(code='show_def_tags')
+            description = user.get_setting(code='show_def_desc')
+            name = user.get_setting(code='show_def_name')
+        show = init_show(user, name=name, description=description, tags=tags)
+        rfk.database.session.commit()
         log('accepted auth for %s' %(user.username,))
         print user.user
     except rexc.base.InvalidPasswordException, rexc.base.UserNotFoundException:
@@ -168,8 +201,8 @@ def doDisconnect(userid):
                                           UserShow.status == UserShow.STATUS.STREAMING).all()
         for usershow in usershows:
             usershow.status = UserShow.STATUS.STREAMED
-            if usershow.show.end is None:
-                usershow.show.end = datetime.utcnow()
+            if usershow.show.flags & Show.FLAGS.UNPLANNED:
+                usershow.show.end_show()
         rfk.database.session.commit()
     else:
         print "no user found"
@@ -203,7 +236,6 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
     
-    
     rfk.init(basedir)
     rfk.database.init_db("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
                                                               rfk.CONFIG.get('database', 'username'),
@@ -225,4 +257,4 @@ if __name__ == '__main__':
         doPlaylist()
     elif args.command == 'listenercount':
         doListenerCount()
-    #session.remove()
+    rfk.database.session.remove()
