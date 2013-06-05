@@ -40,3 +40,8 @@ def setup_default_user(username, password):
         user.add_permission(code='admin')
         print "[users] Added %s" % user.username
     rfk.database.session.commit()
+    
+def setup_statistics():
+    stat = rfk.database.stats.Statistic(name="Overall Listener", identifier="lst-total")
+    rfk.database.session.add(stat)
+    rfk.database.session.commit()
