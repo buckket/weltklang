@@ -19,6 +19,7 @@ from rfk.liquidsoap import LiquidInterface
 from rfk.helper import now
 from rfk.site.helper import permission_required
 from rfk.site import app
+from rfk.database.track import Track
 
 
 @api.route("/site/admin/liquidsoap/endpoint/<string:action>")
@@ -70,7 +71,7 @@ def liquidsoap_start():
     return jsonify({'status': returncode})
 
 @api.route("/site/admin/liquidsoap/shutdown")
-@permission_required(permission='liq-restart')
+@permission_required(permission='manage-liquidsoap')
 def liquidsoap_shutdown():
     try:
         client = LiquidDaemonClient()
@@ -229,7 +230,6 @@ def show_add():
     return jsonify({'success':True, 'data':None})
 
 @api.route('/site/show/<int:show>/edit', methods=['POST'])
-@permission_required
 def show_edit(show):
     #from rfk.site import app
     #app.logger.warn(request.form)
@@ -270,3 +270,12 @@ def show_edit(show):
 
 def _check_shows(begin, end):
     return Show.query.filter(Show.begin < end, Show.end > begin).all()
+
+@api.route('/site/nowplaying')
+def now_playing():
+    try:
+        track = Track.current_track()
+        
+    except:
+        return jsonify({'success':False, 'data':None})
+    
