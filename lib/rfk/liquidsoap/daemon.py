@@ -35,6 +35,8 @@ def read(_socket):
 
 class LiquidsoapDaemon(object):
     
+    telnet_ignore_pattern = re.compile('(New client: localhost)|(Client localhost)')
+    
     def __init__(self, basedir,socket='/tmp/liquiddaemon.sock', workdir=None, autostart=True):
         if os.path.exists(socket):
             raise
@@ -121,10 +123,7 @@ class LiquidsoapDaemon(object):
                 
                     
                 line = re.sub(r'^\d{4}/d{2}/d{2} d{2}:d{2}:d{2} ', '', self.process.stdout.readline()) 
-                if not (self.skip_telnet and\
-                   (line.endswith('New client: localhost.\n') or\
-                    line.endswith('Client localhost disconnected without saying goodbye..!\n') or\
-                    line.endswith('Client localhost disconnected.\n'))):
+                if not (self.skip_telnet and self.telnet_ignore_pattern.search(line) is not None):
                     self.write_log(line)
             finally:
                 self.process.poll()
