@@ -5,6 +5,7 @@ Created on Aug 11, 2012
 '''
 from flask import Blueprint, render_template, url_for, request, redirect
 from functools import wraps
+import math
 import rfk
 import rfk.liquidsoap
 import rfk.site
@@ -14,6 +15,7 @@ from rfk.site.forms.relay import new_relay
 from flask.ext.login import login_required, current_user
 
 import rfk.database
+from rfk.database.base import User
 from rfk.database.streaming import Stream, Relay
 from rfk.exc.streaming import CodeTakenException, InvalidCodeException, MountpointTakenException, MountpointTakenException,\
     AddressTakenException
@@ -101,9 +103,43 @@ def relay_add():
         except AddressTakenException:
             form.address.errors.append('Address already in Database')
             form.port.errors.append('Address already in Database')
-        pass
     return render_template('admin/relay/relayform.html', form=form)
 
+@admin.route('/user', methods=['GET'])
+@login_required
+@permission_required(permission='manage-liquidsoap')
+def user_list():
+    page = int(request.args.get('page') or 0)
+    (users, total_pages) = _paginate(User, page=page)
+    pagination = _pagelinks('.user_list',page ,total_pages)
+    return render_template('admin/user/list.html', users=users, pagination=pagination)
+
+def _paginate(queryclass,page=0,per_page=25):
+    result = queryclass.query.limit(per_page).offset(page*per_page).all()
+    total_pages = int(math.ceil(queryclass.query.count()/per_page))
+    return (result, total_pages)
+
+def _pagelinks(url, page, total_pages, visible_pages=7, param='page'):
+    pagelinks = {'first': None,
+                 'last': None,
+                 'pages': []}
+    if page > 0:
+        pagelinks['first'] = url_for(url, **{param:0})
+    if page < total_pages:
+        pagelinks['last'] = url_for(url, **{param:total_pages})
+    begin = int(page-(visible_pages/2))
+    
+    if begin+visible_pages > total_pages+1:
+        begin = total_pages+1-visible_pages
+    if begin < 0:
+        begin = 0
+    end = min(begin+visible_pages,total_pages+1)
+    for pn in range(begin,end):
+        pagelinks['pages'].append({'name':pn+1,
+                                   'active': pn == page,
+                                   'url': url_for(url, **{param:pn})})
+    return pagelinks
+        
 def create_menu(endpoint):
     if not current_user.has_permission(code='admin'):
         return False

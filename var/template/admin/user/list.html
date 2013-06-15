@@ -1,0 +1,75 @@
+{% set sidebar=True %}
+{% extends "base.html" %}
+{% block sidebar %}
+{% include "admin/sidebar.html" %}
+{% endblock %}
+
+{% block content %}
+<h2>Users</h2>
+<div class="row-fluid">
+    <div class="pagination">
+        <ul>
+            {% if pagination.first %}
+            <li><a href="{{ pagination.first }}">&laquo;</a></li>
+            {% else %}
+            <li class="disabled"><a href="#">&laquo;</a></li>
+            {% endif %}
+            {% for page in pagination.pages %}
+            <li {%if page.active %}class="active"{% endif %}><a href="{{ page.url }}">{{ page.name }}</a></li>
+            {% endfor %}
+            {% if pagination.last %}
+            <li><a href="{{ pagination.last }}">&raquo;</a></li>
+            {% else %}
+            <li class="disabled"><a href="#">&raquo;</a></li>
+            {% endif %}
+    </ul>
+    </div>
+	<div class="span12">
+		<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Joined</th>
+				<th>Last Login</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for user in users %}
+			<tr>
+				<td>{{ user.username }}</td>
+				<td>{{ user.register_date | dateformat('long') }}</td>
+				<td>{{ user.last_login | dateformat('long') }}</td>
+			</tr>
+			{% else %}
+			<tr>
+				<td colspan="5">No Users</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		</table>
+	
+	</div>
+	<div class="pagination">
+        <ul>
+            {% if pagination.first %}
+            <li><a href="{{ pagination.first }}">&laquo;</a></li>
+            {% else %}
+            <li class="disabled"><a href="#">&laquo;</a></li>
+            {% endif %}
+            {% for page in pagination.pages %}
+            <li {%if page.active %}class="active"{% endif %}><a href="{{ page.url }}">{{ page.name }}</a></li>
+            {% endfor %}
+            {% if pagination.last %}
+            <li><a href="{{ pagination.last }}">&raquo;</a></li>
+            {% else %}
+            <li class="disabled"><a href="#">&raquo;</a></li>
+            {% endif %}
+    </ul>
+    </div>
+</div>
+<div class="row-fluid">
+	<div class="span12">
+	<a class="btn" href="/admin/stream/add">{% trans %}Add Stream{% endtrans %}</a>
+	</div>
+</div>
+{% endblock content%}
