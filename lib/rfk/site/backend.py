@@ -36,6 +36,7 @@ def icecast_add_mount():
     if relay and stream:
         stream.add_relay(relay)
         relay.get_stream_relay(stream).status = StreamRelay.STATUS.ONLINE
+        relay.status = Relay.STATUS.ONLINE
         session.commit()
         return make_response('ok', 200, {'icecast-auth-user': '1'})
     else:

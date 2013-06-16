@@ -8,6 +8,7 @@ from rfk.helper import now
 from rfk.database import session
 from rfk.database.base import User, Anonymous, News
 from rfk.database.donations import Donation
+from rfk.database.streaming import Stream
 from rfk.site.forms.login import login_form, register_form
 from rfk.site.forms.settings import SettingsForm
 from rfk.exc.base import UserNameTakenException
@@ -149,8 +150,9 @@ def page_not_found(e):
 @app.route('/')
 def index():
     news = News.query.all()
+    streams = Stream.query.all()
     #print app.template_folder
-    return render_template('index.html', news=news)
+    return render_template('index.html', news=news, streams=streams)
 
 
 @app.route('/shutdown')

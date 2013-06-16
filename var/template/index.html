@@ -58,10 +58,9 @@
 	   <div class="row-fluid">
 	       <div class="span12">
 	       <ul class="nav" style="padding:0 20px;">
-	           <li><i class="icon-play-circle"></i> Listen (MPEG/Layer3)</li>
-	           <li><i class="icon-play-circle"></i> Listen (Ogg/Vorbis)</li>
-	           <li><i class="icon-play-circle"></i> Listen (AAC+)</li>
-	           <li><i class="icon-play-circle"></i> Listen (Opus)</li>
+	       {% for stream in streams %}
+	           <li><a href="/listen/{{ stream.code }}"><i class="icon-play-circle"></i> Listen ({{ stream.name}})</a></li>
+	       {% endfor %}
 	       </ul>
 	       </div>
 	   </div>
