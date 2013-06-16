@@ -1,0 +1,5 @@
+<ul class="nav nav-list">
+{% if current_user.is_authenticated() %}
+<a href="#" class="btn" onclick="add_show(); return false;">Add Show</a>
+{% endif %}
+</ul>
