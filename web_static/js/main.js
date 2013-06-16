@@ -60,10 +60,14 @@ $(function() {
         xhr.open("POST", "https://api.imgur.com/3/image");
         xhr.setRequestHeader("Authorization", "Client-ID " + settings.clientid);
         xhr.onload = function() {
-            var img_url = $.parseJSON(xhr.responseText).data.link;
-            context.data.find('.thumbnail').css("background-image", "url('"+img_url+"')");
-            context.data.find('.status').hide();
-            $(settings.target).val(img_url)
+        	if (xhr.status == 200) {
+        		var img_url = $.parseJSON(xhr.responseText).data.link;
+        		context.data.find('.thumbnail').css("background-image", "url('"+img_url+"')");
+        		context.data.find('.status').hide();
+        		$(settings.target).val(img_url);        		
+        	} else {
+        		alert("Upload failed with: "+xhr.statusText);
+        	}
         }
         context.data.find('.status').show();
         xhr.send(fd);
