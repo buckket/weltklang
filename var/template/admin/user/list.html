@@ -37,8 +37,8 @@
 			{% for user in users %}
 			<tr>
 				<td>{{ user.username }}</td>
-				<td>{{ user.register_date | dateformat('long') }}</td>
-				<td>{{ user.last_login | dateformat('long') }}</td>
+				<td>{{ user.register_date | datetimeformat('short') }}</td>
+				<td>{% if user.last_login %}{{ user.last_login | datetimeformat('short') }}{% else %}Never{% endif %}</td>
 			</tr>
 			{% else %}
 			<tr>
