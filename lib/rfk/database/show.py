@@ -52,6 +52,7 @@ class Show(Base):
             return False
         except exc.NoResultFound:
             self.tags.append(ShowTag(tag))
+            rfk.database.session.flush()
             return True
     
     def add_user(self, user, role=None):
