@@ -1,106 +1,21 @@
 from flask import jsonify, request, g
-from flaskext.babel import to_user_timezone, to_utc, format_datetime, format_timedelta
+from flaskext.babel import to_user_timezone, to_utc, format_datetime
 from flask_login import current_user
 from sqlalchemy.sql.expression import between
 from sqlalchemy import or_
-import pytz
+
 import parsedatetime.parsedatetime as pdt
 from time import mktime
 from datetime import datetime, timedelta
-from subprocess import call
-import os
 
-from rfk.api import api, check_auth, wrapper
+from rfk.api import api
 import rfk.database
 from rfk.database.streaming import Stream
 from rfk.database.show import Show, Series, Tag
-from rfk.liquidsoap.daemon import LiquidDaemonClient
-from rfk.liquidsoap import LiquidInterface
 from rfk.helper import now
 from rfk.site.helper import permission_required
-from rfk.site import app
 from rfk.database.track import Track
 
-
-@api.route("/site/admin/liquidsoap/endpoint/<string:action>")
-@permission_required(permission='manage-liquidsoap')
-def endpoint_action(action):
-    if request.args.get('endpoint') is None:
-        return jsonify({'error':'no endpoint supplied!'})
-    try:
-        ret = {}
-        li = LiquidInterface()
-        li.connect()
-        ret['status'] = li.endpoint_action(request.args.get('endpoint').encode('ascii','ignore'),
-                                           action.encode('ascii','ignore'))
-        li.close()
-        return jsonify(ret)
-    except Exception as e:
-        return jsonify({'error': str(e)})
-
-@api.route("/site/admin/liquidsoap/status")
-@permission_required(permission='manage-liquidsoap')
-def liquidsoap_status():
-    try:
-        ret = {}
-        li = LiquidInterface()
-        li.connect()
-        ret['version'] = li.get_version()
-        ret['uptime'] = li.get_uptime()
-        ret['sources'] = []
-        for source in li.get_sources():
-            ret['sources'].append({'handler': source.handler,
-                                   'type': source.type,
-                                   'status': (source.status() != 'no source client connected'),
-                                   'status_msg':source.status()})
-            
-        ret['sinks'] = []
-        for sink in li.get_sinks():
-            ret['sinks'].append({'handler': sink.handler,
-                                   'type': sink.type,
-                                   'status': (sink.status() == 'on')})
-        li.close()
-        return jsonify(ret)
-    except Exception as e:
-        return jsonify({'error': str(e)})
-
-@api.route("/site/admin/liquidsoap/start")
-@permission_required(permission='manage-liquidsoap')
-def liquidsoap_start():
-    returncode = call([os.path.join(app.config['BASEDIR'], 'bin','run-liquid.py')])
-    return jsonify({'status': returncode})
-
-@api.route("/site/admin/liquidsoap/shutdown")
-@permission_required(permission='manage-liquidsoap')
-def liquidsoap_shutdown():
-    try:
-        client = LiquidDaemonClient()
-        client.connect()
-        client.shutdown_daemon()
-        client.close()
-        return jsonify({'status': 'done'})
-    except Exception as e:
-        return jsonify({'error': str(e)})
-
-@api.route("/site/admin/liquidsoap/log")
-@permission_required(permission='manage-liquidsoap')
-def liquidsoap_log():
-    try:
-        client = LiquidDaemonClient()
-        client.connect()
-        offset = request.args.get('offset')
-        if offset is not None:
-            offset = int(offset)
-        
-        offset, log = client.get_log(offset)
-        client.close()
-        lines = []
-        for line in log:
-            ts = pytz.utc.localize(datetime.utcfromtimestamp(int(line[0])))
-            lines.append((ts.isoformat(), line[1]))
-        return jsonify({'log': lines, 'offset': offset})
-    except Exception as e:
-        return jsonify({'error': str(e)})
 
 def parse_datetimestring(datestring):
     cal = pdt.Calendar()
@@ -112,7 +27,6 @@ def listenerdata(start,stop):
     from rfk.site import app
     app.logger.warn(start)
     app.logger.warn(stop)
-    #detemine a starting point, wont be needed in productive code
     stop = parse_datetimestring(stop)
     start = parse_datetimestring(start)
     app.logger.warn(start)
@@ -275,7 +189,23 @@ def _check_shows(begin, end):
 def now_playing():
     try:
         track = Track.current_track()
-        
-    except:
-        return jsonify({'success':False, 'data':None})
+        show = Show.get_active_show()
+        ret = {}
+        if show:
+            user = show.get_active_user()
+            ret['show'] = {'name': show.name,
+                           'start': int(to_user_timezone(show.begin).strftime("%s"))*1000,
+                           'end': int(to_user_timezone(show.end).strftime("%s"))*1000,
+                           'logo': show.get_logo(),
+                           'type': Show.FLAGS.name(show.flags)
+                           }
+            ret['user'] = {'username': user.username,
+                           'url': None}
+        if track:
+            ret['track'] = {'title': None,
+                            'artist': None,
+                            }
+        return jsonify({'success':True, 'data':ret})
+    except Exception as e:
+        return jsonify({'success':False, 'data':e})
     

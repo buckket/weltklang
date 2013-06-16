@@ -4,11 +4,11 @@ Created on Mar 10, 2013
 @author: teddydestodes
 '''
 
-from flask import jsonify, request, g, render_template
+from flask import jsonify, render_template
 import pytz
 
-from rfk.api import api, check_auth, wrapper
-from rfk.site import app, locales
+from rfk.api import api
+from rfk.site import locales
 
 @api.route("/site/timezoneselector")
 def timezoneselector():
