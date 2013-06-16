@@ -222,7 +222,7 @@ def now_playing():
         if nextshow:
             ret['nextshow'] = {'name': nextshow.name,
                                'begin': int(to_user_timezone(nextshow.begin).strftime("%s"))*1000,
-                               'logo': show.get_logo()}
+                               'logo': nextshow.get_logo()}
             if nextshow.series:
                 ret['nextshow']['series'] = nextshow.series.name
         return jsonify({'success':True, 'data':ret})
