@@ -214,7 +214,7 @@ def now_playing():
             ret['track'] = {'title': None,
                             'artist': None,
                             }
-        if show:
+        if show and show.end:
             filter_begin = show.end
         else:
             filter_begin = now()
@@ -227,7 +227,8 @@ def now_playing():
                 ret['nextshow']['series'] = nextshow.series.name
         return jsonify({'success':True, 'data':ret})
     except Exception as e:
-        return jsonify({'success':False, 'data':e})
+        raise e
+        return jsonify({'success':False, 'data':unicode(e)})
 
 def _make_user_link(user):
     return '<a href="%s" title="%s">%s</a>' % ('#',user.username,user.username);
