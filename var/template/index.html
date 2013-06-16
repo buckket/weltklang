@@ -41,6 +41,70 @@
  	min-height: 160px;
  	text-align: center;
 }
+@media (min-width: 1200px) {
+    .nowplaying-banner .on-air {
+	    float: left;
+	    width: 19%;
+	}
+	.nowplaying-banner .current-show {
+        float: left;
+        width: 59%;
+    }
+    .nowplaying-banner .next-show {
+	    float:left;
+	    width: 19%;
+    }
+}
+@media (min-width: 768px) and (max-width: 979px) {
+    .nowplaying-banner .on-air {
+        width: 100%;
+        float: none;
+        -webkit-box-sizing: border-box;
+           -moz-box-sizing: border-box;
+                box-sizing: border-box;
+    }
+    .nowplaying-banner .on-air .nav li{
+        display: inline;
+        list-style-type: none;
+        padding-right: 20px;
+    }
+    .nowplaying-banner .on-air .nav li a{
+        display: inline !important;
+    }
+    .nowplaying-banner .current-show {
+        float:left;
+        width: 75%;
+    }
+    .nowplaying-banner .next-show {
+        float:left;
+        width: 22%;
+    }
+}
+@media (max-width: 767px) {
+    .nowplaying-banner .on-air {
+        width: 100%;
+        float: none;
+        -webkit-box-sizing: border-box;
+           -moz-box-sizing: border-box;
+                box-sizing: border-box;
+    }
+    .nowplaying-banner .on-air .nav li{
+        display: inline;
+        list-style-type: none;
+        padding-right: 20px;
+    }
+    .nowplaying-banner .on-air .nav li a{
+        display: inline !important;
+    }
+    .nowplaying-banner .current-show {
+        float:left;
+        width: 74%;
+    }
+    .nowplaying-banner .next-show {
+        float:left;
+        width: 21%;
+    }
+}
 
 .nowplaying-banner h4,
 .nowplaying-banner h6{
