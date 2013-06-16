@@ -1,5 +1,84 @@
 {% extends "base.html" %}
 {% block content %}
+<style>
+<!--
+.nowplaying-banner {
+    border-radius: 4px 4px 4px 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) inset;
+    background-color: #F5F5F5;
+    border: 1px solid #E3E3E3;
+}
+
+.nowplaying-banner .on-air {
+    float:left;
+    width: 19%;
+}
+
+.nowplaying-banner.offline .current-show {
+    text-align: center;
+}
+
+.nowplaying-banner .current-show {
+    float:left;
+    width: 59%;
+    padding: 20px 10px;
+    min-height: 120px;
+    -webkit-background-size: cover; /*for webKit*/
+    -moz-background-size: cover; /*Mozilla*/
+    -o-background-size: cover; /*opera*/
+    background-size: cover; /*generic*/
+    background-position: center;
+}
+
+.nowplaying-banner .next-show {
+    float:left;
+    width: 19%;
+    -webkit-background-size: cover; /*for webKit*/
+    -moz-background-size: cover; /*Mozilla*/
+    -o-background-size: cover; /*opera*/
+    background-size: cover; /*generic*/
+    background-position: center;
+    background-image: linear-gradient(left, rgba(243, 243, 243, 0.1) 10%, rgba(243, 243, 243, 1) 100%), url('http://i.imgur.com/yQBHaP7.jpg');
+	background-image: -o-linear-gradient(left, rgba(243, 243, 243, 0.1) 10%, rgba(243, 243, 243, 1) 100%), url('http://i.imgur.com/yQBHaP7.jpg');
+	background-image: -moz-linear-gradient(left, rgba(243, 243, 243, 0.1) 10%, rgba(243, 243, 243, 1) 100%), url('http://i.imgur.com/yQBHaP7.jpg');
+	background-image: -webkit-linear-gradient(left, rgba(243, 243, 243, 0.1) 10%, rgba(243, 243, 243, 1) 100%), url('http://i.imgur.com/yQBHaP7.jpg');
+	background-image: -ms-linear-gradient(left, rgba(243, 243, 243, 0.1) 10%, rgba(243, 243, 243, 1) 100%), url('http://i.imgur.com/yQBHaP7.jpg');
+ 	min-height: 160px;
+ 	text-align: center;
+}
+
+.nowplaying-banner h4,
+.nowplaying-banner h6{
+    margin: 0px 0px;
+    
+}
+.nowplaying-banner .progress {
+	position: relative;
+}
+-->
+</style>
+<div class="nowplaying-banner clearfix offline">
+	<div class="on-air">
+	   <h1 style="padding:0 10px;"><i class="icon-music"></i> ON AIR</h1>
+	   <div class="row-fluid">
+	       <div class="span12">
+	       <ul class="nav" style="padding:0 20px;">
+	           <li><i class="icon-play-circle"></i> Listen (MPEG/Layer3)</li>
+	           <li><i class="icon-play-circle"></i> Listen (Ogg/Vorbis)</li>
+	           <li><i class="icon-play-circle"></i> Listen (AAC+)</li>
+	           <li><i class="icon-play-circle"></i> Listen (Opus)</li>
+	       </ul>
+	       </div>
+	   </div>
+	</div>
+	<div class="current-show" style="background-image:url('http://i.imgur.com/HbEqICh.jpg');">
+	   <h1 class="outline">...silence...</h1><h4 class="outline">(more or less)</h4>
+	</div>
+	<div class="next-show">
+	   <h1 style="vertical-align:middle;color:#333333;" class="outline-white" ><i class="icon-chevron-right icon-2x" style="vertical-align:middle;"></i> Next</h1>
+	   <h4 class="outline">NextSeriesNameherpderp <small>NextShowName</small></h4>
+	</div>
+</div>
 <div class="row-fluid">
 <h1>{% trans %}Radio Freies Krautchan{% endtrans %}</h1>
 </div>

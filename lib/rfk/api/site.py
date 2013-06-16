@@ -12,7 +12,7 @@ from rfk.api import api
 import rfk.database
 from rfk.database.streaming import Stream
 from rfk.database.show import Show, Series, Tag
-from rfk.helper import now
+from rfk.helper import now, natural_join
 from rfk.site.helper import permission_required
 from rfk.database.track import Track
 
@@ -194,13 +194,18 @@ def now_playing():
         if show:
             user = show.get_active_user()
             ret['show'] = {'name': show.name,
-                           'start': int(to_user_timezone(show.begin).strftime("%s"))*1000,
+                           'begin': int(to_user_timezone(show.begin).strftime("%s"))*1000,
+                           'now': int(to_user_timezone(now()).strftime("%s"))*1000,
                            'end': int(to_user_timezone(show.end).strftime("%s"))*1000,
                            'logo': show.get_logo(),
                            'type': Show.FLAGS.name(show.flags)
                            }
-            ret['user'] = {'username': user.username,
-                           'url': None}
+            if show.series:
+                ret['series'] = {'name': show.series.name}
+            link_users = []
+            for ushow in show.users:
+                link_users.append(_make_user_link(ushow.user))
+            ret['users'] = {'links': natural_join(link_users)}
         if track:
             ret['track'] = {'title': None,
                             'artist': None,
@@ -208,4 +213,6 @@ def now_playing():
         return jsonify({'success':True, 'data':ret})
     except Exception as e:
         return jsonify({'success':False, 'data':e})
-    
+
+def _make_user_link(user):
+    return '<a href="%s" title="%s">%s</a>' % ('#',user.username,user.username);
