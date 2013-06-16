@@ -193,10 +193,14 @@ def now_playing():
         ret = {}
         if show:
             user = show.get_active_user()
+            if show.end:
+                end = int(to_user_timezone(show.end).strftime("%s"))*1000
+            else:
+                end = None
             ret['show'] = {'name': show.name,
                            'begin': int(to_user_timezone(show.begin).strftime("%s"))*1000,
                            'now': int(to_user_timezone(now()).strftime("%s"))*1000,
-                           'end': int(to_user_timezone(show.end).strftime("%s"))*1000,
+                           'end': end,
                            'logo': show.get_logo(),
                            'type': Show.FLAGS.name(show.flags)
                            }
@@ -210,6 +214,17 @@ def now_playing():
             ret['track'] = {'title': None,
                             'artist': None,
                             }
+        if show:
+            filter_begin = show.end
+        else:
+            filter_begin = now()
+        nextshow = Show.query.filter(Show.begin >= filter_begin).order_by(Show.begin.asc()).first();
+        if nextshow:
+            ret['nextshow'] = {'name': nextshow.name,
+                               'begin': int(to_user_timezone(nextshow.begin).strftime("%s"))*1000,
+                               'logo': show.get_logo()}
+            if nextshow.series:
+                ret['nextshow']['series'] = nextshow.series.name
         return jsonify({'success':True, 'data':ret})
     except Exception as e:
         return jsonify({'success':False, 'data':e})

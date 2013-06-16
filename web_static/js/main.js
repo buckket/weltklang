@@ -74,9 +74,6 @@ function update_np(force) {
 					} else {
 						cshow.css('background-image', "");
 					}
-					
-					
-					
 				} else {
 					if (!bannerdiv.hasClass('offline')) {
 						bannerdiv.addClass('offline');
@@ -84,6 +81,28 @@ function update_np(force) {
 						cshow.html('<h1 class="outline">...silence...</h1><h4 class="outline">(more or less)</h4>');
 						cshow.css('background-image', "url('http://i.imgur.com/HbEqICh.jpg')");
 					}
+				}
+				var nshow = bannerdiv.find('div.next-show');
+				if (data.data.nextshow) {
+					var showtitle = '';
+					if (data.data.nextshow.series) {
+						showtitle = data.data.nextshow.series+' <small>'+data.data.nextshow.name+'</small>';
+					} else {
+						showtitle = data.data.nextshow.name;
+					}
+					nshow.find('#ns-showtitle').html(showtitle);
+					if (data.data.nextshow.logo) {
+						nshow.attr('style',"background-image: linear-gradient(left, rgba(243, 243, 243, 0.1) 10%, rgba(243, 243, 243, 1) 100%), url('"+data.data.nextshow.logo+"');"+
+										   "background-image: -o-linear-gradient(left, rgba(243, 243, 243, 0.1) 10%, rgba(243, 243, 243, 1) 100%), url('"+data.data.nextshow.logo+"');"+
+										   "background-image: -moz-linear-gradient(left, rgba(243, 243, 243, 0.1) 10%, rgba(243, 243, 243, 1) 100%), url('"+data.data.nextshow.logo+"');"+
+										   "background-image: -webkit-linear-gradient(left, rgba(243, 243, 243, 0.1) 10%, rgba(243, 243, 243, 1) 100%), url('"+data.data.nextshow.logo+"');"+
+										   "background-image: -ms-linear-gradient(left, rgba(243, 243, 243, 0.1) 10%, rgba(243, 243, 243, 1) 100%), url('"+data.data.nextshow.logo+"');");
+					} else {
+						nshow.attr('style',"");
+					}
+				} else {
+					nshow.find('#ns-showtitle').html('NOTHING ;_;');
+					nshow.attr('style',"");
 				}
 			}
 		}
