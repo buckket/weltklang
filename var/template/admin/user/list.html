@@ -7,7 +7,8 @@
 {% block content %}
 <h2>Users</h2>
 <div class="row-fluid">
-    <div class="pagination">
+	<div class="span12">
+	<div class="pagination">
         <ul>
             {% if pagination.first %}
             <li><a href="{{ pagination.first }}">&laquo;</a></li>
@@ -24,7 +25,6 @@
             {% endif %}
     </ul>
     </div>
-	<div class="span12">
 		<table class="table table-striped">
 		<thead>
 			<tr>
@@ -47,8 +47,6 @@
 			{% endfor %}
 		</tbody>
 		</table>
-	
-	</div>
 	<div class="pagination">
         <ul>
             {% if pagination.first %}
@@ -66,6 +64,8 @@
             {% endif %}
     </ul>
     </div>
+	</div>
+	
 </div>
 <div class="row-fluid">
 	<div class="span12">
