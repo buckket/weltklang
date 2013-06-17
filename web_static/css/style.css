@@ -1,59 +1,6 @@
-.widget-box {
-    background: none repeat scroll 0 0 #F9F9F9;
-    border-left: 1px solid #CDCDCD;
-    border-right: 1px solid #CDCDCD;
-    border-top: 1px solid #CDCDCD;
-    clear: both;
-    margin-bottom: 16px;
-    margin-top: 16px;
-    position: relative;
-}
-
-.widget-title {
-    background-color: #EFEFEF;
-    background-image: url('http://i.imgur.com/Rtz6mZe.gif');
-    border-bottom: 1px solid #CDCDCD;
-    height: 150px;
-    -webkit-background-size: cover; /*for webKit*/
-    -moz-background-size: cover; /*Mozilla*/
-    -o-background-size: cover; /*opera*/
-    background-size: cover; /*generic*/
-}
-
-.widget-title h3 {
-    margin-top: 0px !important;
-    padding-left: 10px;
-    color: #dedede;
-    text-shadow: 1px 1px 0 #000,
-    -1px 1px 0 #000,
-    1px -1px 0 #000,
-    -1px -1px 0 #000,
-    0px 1px 0 #000,
-    0px -1px 0 #000,
-    -1px 0px 0 #000,
-    1px 0px 0 #000,
-    2px 2px 0 #000,
-    -2px 2px 0 #000,
-    2px -2px 0 #000,
-    -2px -2px 0 #000,
-    0px 2px 0 #000,
-    0px -2px 0 #000,
-    -2px 0px 0 #000,
-    2px 0px 0 #000,
-    1px 2px 0 #000,
-    -1px 2px 0 #000,
-    1px -2px 0 #000,
-    -1px -2px 0 #000,
-    2px 1px 0 #000,
-    -2px 1px 0 #000,
-    2px -1px 0 #000,
-    -2px -1px 0 #000;
-}
-.widget-content {
-    border-bottom: 1px solid #CDCDCD;
-    padding: 12px 15px;
-}
-
+/*
+Calendar
+*/
 .calendar .day {
     width: 14.28571428571428571428%;
     float: left;
@@ -251,6 +198,13 @@
     border-top-left-radius: 2px;
 }
 
+/*
+END Calendar
+*/
+
+/*
+Imgur Uploader
+*/
 .imageuploader {
     position: relative;
 }
@@ -297,6 +251,139 @@
 .imageuploader:hover .actions {
     opacity: 1;
 }
+/*
+ END Imgur Uploader
+*/
+
+/*
+nowplaying Banner
+*/
+
+.nowplaying-banner {
+    border-radius: 4px 4px 4px 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) inset;
+    background-color: #F5F5F5;
+    border: 1px solid #E3E3E3;
+}
+
+.nowplaying-banner .on-air {
+    float:left;
+    width: 19%;
+}
+
+.nowplaying-banner.offline .current-show {
+    text-align: center;
+}
+
+.nowplaying-banner .current-show {
+    float:left;
+    width: 59%;
+    padding: 20px 10px;
+    min-height: 120px;
+    -webkit-background-size: cover; /*for webKit*/
+    -moz-background-size: cover; /*Mozilla*/
+    -o-background-size: cover; /*opera*/
+    background-size: cover; /*generic*/
+    background-position: center;
+}
+
+.nowplaying-banner .next-show {
+    float:left;
+    width: 19%;
+    -webkit-background-size: cover; /*for webKit*/
+    -moz-background-size: cover; /*Mozilla*/
+    -o-background-size: cover; /*opera*/
+    background-size: cover; /*generic*/
+    background-position: center;
+    min-height: 160px;
+    text-align: center;
+}
+@media (min-width: 1200px) {
+    .nowplaying-banner .on-air {
+        float: left;
+        width: 19%;
+    }
+    .nowplaying-banner .current-show {
+        float: left;
+        width: 59%;
+    }
+    .nowplaying-banner .next-show {
+        float:left;
+        width: 19%;
+    }
+}
+@media (min-width: 768px) and (max-width: 979px) {
+    .nowplaying-banner .on-air {
+        width: 100%;
+        float: none;
+        -webkit-box-sizing: border-box;
+           -moz-box-sizing: border-box;
+                box-sizing: border-box;
+    }
+    .nowplaying-banner .on-air .nav li{
+        display: inline;
+        list-style-type: none;
+        padding-right: 20px;
+    }
+    .nowplaying-banner .on-air .nav li a{
+        display: inline !important;
+    }
+    .nowplaying-banner .current-show {
+        float:left;
+        width: 75%;
+    }
+    .nowplaying-banner .next-show {
+        float:left;
+        width: 22%;
+    }
+}
+@media (max-width: 767px) {
+    .nowplaying-banner .on-air {
+        display: none;
+        width: 100%;
+        float: none;
+        -webkit-box-sizing: border-box;
+           -moz-box-sizing: border-box;
+                box-sizing: border-box;
+    }
+    
+    .nowplaying-banner .on-air .nav li{
+        display: inline;
+        list-style-type: none;
+        padding-right: 20px;
+    }
+    
+    .nowplaying-banner .current-show {
+        width: 100%;
+        float: none;
+        -webkit-box-sizing: border-box;
+           -moz-box-sizing: border-box;
+                box-sizing: border-box;
+    }
+    
+    .nowplaying-banner .current-show .progress{
+        display: none;
+    }
+    
+    .nowplaying-banner .next-show {
+        display: none;
+        float:left;
+        width: 21%;
+    }
+}
+
+.nowplaying-banner h4,
+.nowplaying-banner h6{
+    margin: 0px 0px;
+    
+}
+.nowplaying-banner .progress {
+    position: relative;
+}
+
+/*
+END nowplaying Banner
+*/
 
 .outline {
     color: #dedede;
