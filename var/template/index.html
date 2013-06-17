@@ -1,10 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<style>
-<!--
 
--->
-</style>
 <div class="nowplaying-banner clearfix offline">
 	<div class="on-air">
 	   <h1 style="padding:0 10px;"><i class="icon-music"></i> ON AIR</h1>
@@ -29,154 +25,20 @@
 <div class="row-fluid">
 <h1>{% trans %}Radio Freies Krautchan{% endtrans %}</h1>
 </div>
-<div class="row-fluid">
-    <div class="span3">
-       <div class="widget-box">
-           <div class="widget-title">
-               <h3>irgendwas</h3>
-           </div>
-           <div class="widget-content">
-            text
-           </div>
-       </div>
-       
-    </div>
-    <div class="span3">
-       <div class="widget-box">
-           <div class="widget-title">
-               <h3>irgendwas</h3>
-           </div>
-           <div class="widget-content">
-            text
-           </div>
-       </div>
-       
-    </div>
-    <div class="span3">
-       <div class="widget-box">
-           <div class="widget-title">
-           <h3>irgendwas</h3>
-           </div>
-           
-       <div class="widget-content">
-        text
-       </div>
-       </div>
-    </div>
-    <div class="span3">
-       <div class="widget-box">
-           <div class="widget-title">
-           <h3>irgendwas</h3>
-           </div>
-           
-       <div class="widget-content">
-        text
-       </div>
-       </div>
-    </div>
-</div>
-<div class="row-fluid">
-    <div class="span3">
-       <div class="widget-box">
-           <div class="widget-title">
-               <h3>irgendwas</h3>
-           </div>
-           <div class="widget-content">
-            text
-           </div>
-       </div>
-       
-    </div>
-    <div class="span3">
-       <div class="widget-box">
-           <div class="widget-title">
-               <h3>irgendwas</h3>
-           </div>
-           <div class="widget-content">
-            text
-           </div>
-       </div>
-       
-    </div>
-    <div class="span3">
-       <div class="widget-box">
-           <div class="widget-title">
-           <h3>irgendwas</h3>
-           </div>
-           
-       <div class="widget-content">
-        text
-       </div>
-       </div>
-    </div>
-    <div class="span3">
-       <div class="widget-box">
-           <div class="widget-title">
-           <h3>irgendwas</h3>
-           </div>
-           
-       <div class="widget-content">
-        text
-       </div>
-       </div>
-    </div>
-</div>
-<div class="row-fluid">
-    <div class="span3">
-       <div class="widget-box">
-           <div class="widget-title">
-               <h3>irgendwas</h3>
-           </div>
-           <div class="widget-content">
-            text
-           </div>
-       </div>
-       
-    </div>
-    <div class="span3">
-       <div class="widget-box">
-           <div class="widget-title">
-               <h3>irgendwas</h3>
-           </div>
-           <div class="widget-content">
-            text
-           </div>
-       </div>
-       
-    </div>
-    <div class="span3">
-       <div class="widget-box">
-           <div class="widget-title">
-           <h3>irgendwas</h3>
-           </div>
-           
-       <div class="widget-content">
-        text
-       </div>
-       </div>
-    </div>
-    <div class="span3">
-       <div class="widget-box">
-           <div class="widget-title">
-           <h3>irgendwas</h3>
-           </div>
-           
-       <div class="widget-content">
-        text
-       </div>
-       </div>
-    </div>
-</div>
-{% for n in news %}
-<div class="newscontainer">
-    <div class="newsheader">
-        <div class="date">
-            {{ n.time | datetimeformat }}
-        </div>
-        <span>{{ n.title }}</span>
-    </div>
-    {{ n.content |bbcode|safe }}
-</div>
 
+{% for n in news %}
+<div class="row-fluid">
+    <h2><small>{{ n.time | datetimeformat }}</small>{{ n.title }}</h2>
+    <div class="span12">
+        {{ n.content |bbcode|safe }}
+    </div>
+</div>
+{% else %}
+<div class="row-fluid">
+    <h2>No News</h2>
+    <div class="span12">
+        ;_;
+    </div>
+</div>
 {% endfor %}
 {% endblock %}
