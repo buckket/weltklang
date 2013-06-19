@@ -1,6 +1,8 @@
 from sqlalchemy import *
 from sqlalchemy.orm import relationship, backref, sessionmaker, scoped_session, exc
 from sqlalchemy.dialects.mysql import INTEGER as Integer 
+from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
+from sqlalchemy.sql.expression import case
 
 from passlib.hash import bcrypt
 from flask.ext.login import AnonymousUser
@@ -10,6 +12,7 @@ from datetime import datetime, timedelta
 import time
 import hashlib
 import re
+import os
 
 from rfk.database import Base, UTCDateTime
 import rfk.database
@@ -164,7 +167,10 @@ class User(Base):
         if setting is None:
             setting = Setting.get_setting(code)
         UserSetting.set_value(self, setting, value)
-
+    
+    def get_total_streamtime(self):
+        pass
+    
 class Setting(Base):
     __tablename__ = 'settings'
     setting = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
@@ -320,3 +326,43 @@ class Log(Base):
     timestamp = Column(UTCDateTime, default=now())
     message = Column(Text)
     
+class Loop(Base):
+    __tablename__ = 'loops'
+    loop = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
+    begin = Column(Integer(unsigned=True), default=0)
+    end = Column(Integer(unsigned=True), default=1440)
+    filename = Column(String(50))
+    
+    @hybrid_property
+    def length(self):
+        if (self.end >= self.begin):
+            return abs(self.end - self.begin)
+        else:
+            return abs((self.end+2400) - self.begin)
+
+    @length.expression
+    def length(cls):
+        return func.abs(cast(case([(cls.begin <= cls.end, cls.end),
+                     (cls.begin >= cls.end, cls.end+2400)]), Integer) - cast(cls.begin, Integer))
+    
+    @hybrid_method
+    def contains(self,point):
+        return case([(self.begin <= self.end, (self.begin <= point) & (self.end >= point)),
+                     (self.begin >= self.end, (self.begin <= point) | (self.end >= point))])
+
+    @hybrid_property
+    def file_exists(self):
+        if self.filename is None:
+            return False
+        from rfk.site import app
+        app.logger.warn((app.config['BASEDIR'],'var','music',self.filename))
+        return os.path.exists(os.path.join(app.config['BASEDIR'],'var','music',self.filename))
+        
+    @staticmethod
+    def get_current_loop():
+        """
+            returns the current loop to be scheduled
+            @todo broken ;_;
+        """
+        n = now()
+        return Loop.query.filter(Loop.contains(int(n.hour*100+(n.minute/60.)*100))).order_by(Loop.length.asc()).first()

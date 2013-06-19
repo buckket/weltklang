@@ -15,10 +15,11 @@ from rfk.site.forms.relay import new_relay
 from flask.ext.login import login_required, current_user
 
 import rfk.database
-from rfk.database.base import User
+from rfk.database.base import User, Loop
 from rfk.database.streaming import Stream, Relay
 from rfk.exc.streaming import CodeTakenException, InvalidCodeException, MountpointTakenException, MountpointTakenException,\
     AddressTakenException
+from flask.helpers import flash
 
 admin = Blueprint('admin',__name__)
 
@@ -113,6 +114,43 @@ def user_list():
     (users, total_pages) = _paginate(User, page=page)
     pagination = _pagelinks('.user_list',page ,total_pages)
     return render_template('admin/user/list.html', users=users, pagination=pagination)
+
+@admin.route('/liquidsoap/loops', methods=['GET','POST'])
+@login_required
+@permission_required(permission='manage-liquidsoap')
+def loop_list():
+    if request.method == 'POST':
+        if request.form.get('action') == 'add':
+            try:
+                spl = request.form.get('begin').split(':')
+                begin = int(int(spl[0])*100+(int(spl[1])/60.)*100)
+                spl = request.form.get('end').split(':')
+                end = int(int(spl[0])*100+(int(spl[1])/60.)*100)
+                loop = Loop(begin=begin, end=end, filename=request.form.get('filename'))
+                rfk.database.session.add(loop)
+                rfk.database.session.commit()
+            except Exception as e:
+                flash('error while inserting Loop')
+        elif request.form.get('action') == 'delete':
+            try:
+                rfk.database.session.delete(Loop.query.get(request.form.get('loopid')))
+                rfk.database.session.commit()
+            except Exception as e:
+                flash('error while inserting Loop')
+    page = int(request.args.get('page') or 0)
+    (result, total_pages) = _paginate(Loop, page=page)
+    current_loop = Loop.get_current_loop()
+    loops = []
+    for loop in result:
+        loops.append({'loop': loop.loop,
+                      'begin': '%02d:%02d' % (int(loop.begin/100), int(((loop.begin%100)/100.)*60)),
+                      'end': '%02d:%02d' % (int(loop.end/100), int(((loop.end%100)/100.)*60)),
+                      'current': loop == current_loop,
+                      'filename': loop.filename,
+                      'file_missing': not(loop.file_exists)})
+    pagination = _pagelinks('.loop_list',page ,total_pages)
+    return render_template('admin/loops/list.html', loops=loops, pagination=pagination)
+
 
 def _paginate(queryclass,page=0,per_page=25):
     result = queryclass.query.limit(per_page).offset(page*per_page).all()

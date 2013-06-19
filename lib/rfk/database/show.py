@@ -1,4 +1,5 @@
 from sqlalchemy import *
+from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm import relationship, backref, exc
 from sqlalchemy.sql.expression import between
 from sqlalchemy.dialects.mysql import INTEGER as Integer 
@@ -28,6 +29,18 @@ class Show(Base):
     flags = Column(Integer(unsigned=True), default=0)
     FLAGS = SET(['DELETED', 'PLANNED', 'UNPLANNED', 'RECORD'])
 
+    @hybrid_property
+    def length(self):
+        return self.end - self.begin
+
+    @hybrid_method
+    def contains(self,point):
+        return (self.begin <= point) & (point < self.end)
+
+    @hybrid_method
+    def intersects(self, other):
+        return self.contains(other.begin) | self.contains(other.end)
+    
     def end_show(self):
         """ends the Show
            raises exception if the show is planned since it doesn't need to be ended"""

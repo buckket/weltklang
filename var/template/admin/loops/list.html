@@ -1,0 +1,116 @@
+{% set sidebar=True %}
+{% extends "base.html" %}
+{% block sidebar %}
+{% include "admin/sidebar.html" %}
+{% endblock %}
+
+{% block content %}
+<h2>{% trans %}Idle Loops{% endtrans %}</h2>
+<div class="row-fluid">
+	<div class="span12">
+	<div class="pagination">
+        <ul>
+            {% if pagination.first %}
+            <li><a href="{{ pagination.first }}">&laquo;</a></li>
+            {% else %}
+            <li class="disabled"><a href="#">&laquo;</a></li>
+            {% endif %}
+            {% for page in pagination.pages %}
+            <li {%if page.active %}class="active"{% endif %}><a href="{{ page.url }}">{{ page.name }}</a></li>
+            {% endfor %}
+            {% if pagination.last %}
+            <li><a href="{{ pagination.last }}">&raquo;</a></li>
+            {% else %}
+            <li class="disabled"><a href="#">&raquo;</a></li>
+            {% endif %}
+    </ul>
+    </div>
+    <form class="form-inline" method="POST">
+        <div id="loop-begin" class="input-append date">
+            <input data-format="hh:mm" type="text" name="begin" placeholder="{% trans %}start time{% endtrans %}"/>
+            <span class="add-on btn">
+                <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+            </span>
+        </div>
+        <div id="loop-end" class="input-append date">
+            <input data-format="hh:mm" type="text" name="end" placeholder="{% trans %}end time{% endtrans %}"/>
+            <span class="add-on btn">
+                <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+            </span>
+        </div>
+        <input type="text" placeholder="{% trans %}filename{% endtrans %}" name="filename"/>
+        <input type="hidden" name="action" value="add"/>
+		<button class="btn" type="submit">{% trans %}Add{% endtrans %}</button>
+	</form>
+		<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>Begin</th>
+				<th>End</th>
+				<th>Filename</th>
+				<th> </th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for l in loops %}
+			<tr class="{% if l.current %}success{% endif %}{% if l.file_missing %} error{% endif %}">
+				<td>{{ l.begin }}</td>
+				<td>{{ l.end }}</td>
+				<td>{{ l.filename }}</td>
+				<td>
+				    <form method="POST" class="form-inline">
+				        <input type="hidden" value="{{ l.loop }}" name="loopid">
+				        <input type="hidden" value="delete" name="action">
+				        <button class="btn">{% trans %}delete{% endtrans %}</button>
+				    </form>
+				</td>
+			</tr>
+			{% else %}
+			<tr>
+				<td colspan="5">No Loops</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		</table>
+	<div class="pagination">
+        <ul>
+            {% if pagination.first %}
+            <li><a href="{{ pagination.first }}">&laquo;</a></li>
+            {% else %}
+            <li class="disabled"><a href="#">&laquo;</a></li>
+            {% endif %}
+            {% for page in pagination.pages %}
+            <li {%if page.active %}class="active"{% endif %}><a href="{{ page.url }}">{{ page.name }}</a></li>
+            {% endfor %}
+            {% if pagination.last %}
+            <li><a href="{{ pagination.last }}">&raquo;</a></li>
+            {% else %}
+            <li class="disabled"><a href="#">&raquo;</a></li>
+            {% endif %}
+    </ul>
+    </div>
+	</div>
+	
+</div>
+<div class="row-fluid">
+	<div class="span12">
+	<a class="btn" href="/admin/stream/add">{% trans %}Add Stream{% endtrans %}</a>
+	</div>
+</div>
+{% endblock content%}
+{% block js %}
+<script>
+$(function() {
+    $('#loop-begin').datetimepicker({
+      language: '{{ request.current_locale }}',
+      pickSeconds: false,
+      pickDate: false
+    });
+    $('#loop-end').datetimepicker({
+      language: '{{ request.current_locale }}',
+      pickSeconds: false,
+      pickDate: false
+    });
+});
+</script>
+{% endblock js %}
