@@ -143,7 +143,9 @@ def show_add():
             return jsonify({'success':True, 'data':None})
         else:
             return jsonify({'success':False, 'error':'what?!'})
-    except:
+    except Exception as e:
+        from rfk.site import app
+        app.logger.error(e)
         return jsonify({'success':False, 'error':'something went horribly wrong'})
     
 
