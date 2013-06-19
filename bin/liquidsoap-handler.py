@@ -24,7 +24,7 @@ sys.path.append(os.path.join(basedir,'lib'))
 
 import rfk
 import rfk.database 
-from rfk.database.base import User, Log
+from rfk.database.base import User, Log, Loop
 from rfk.database.show import Show, Tag, UserShow
 from rfk.database.track import Track
 from rfk.database.streaming import Listener
@@ -208,8 +208,8 @@ def doDisconnect(userid):
         print "no user found"
 
 def doPlaylist():
-    #item = rfk.Playlist.getCurrentItem(session)
-    print os.path.join(basedir, 'var', 'music', 'loop.mp3')
+    loop = Loop.get_current_loop()
+    print os.path.join(basedir, 'var', 'music', loop.filename)
 
 def doListenerCount():
     lc = Listener.get_total_listener()
