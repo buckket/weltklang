@@ -108,6 +108,8 @@ function submit_show() {
 				   $('#statusbar').removeClass('alert-info');
 				   $('#statusbar').addClass('alert-error');
 				   $('#statusbar').html('<i class="icon-warning-sign"></i> '+data.error);
+			   } else {
+				   window.location.reload();
 			   }
 			   $('#submit-button').removeAttr("disabled");
 		   });

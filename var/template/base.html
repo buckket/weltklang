@@ -35,6 +35,8 @@
     <![endif]-->
     <link rel="stylesheet" href="/static/css/bootstrap-datetimepicker.min.css">
     <link rel="stylesheet" href="/static/css/select2.css">
+    <link rel="stylesheet" href="/static/css/jquery.pnotify.default.css">
+    <link rel="stylesheet" href="/static/css/jquery.pnotify.default.icons.css">
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
       <script src="/static/js/html5shiv.js"></script>
@@ -80,9 +82,23 @@
     <script src="/static/js/vendor/jquery.flot.crosshair.js"></script>
     <script src="/static/js/vendor/jquery.maphilight.min.js"></script>
     <script src="/static/js/vendor/jquery.timezone-picker.js"></script>
+    <script src="/static/js/vendor/jquery.pnotify.min.js"></script>
     <script src="/static/js/vendor/bootstrap-datetimepicker.min.js"></script>
-    <script src="/static/js/vendor/yota.js"></script>
-    <script src="/static/js/main.js"></script>    
+    <script src="/static/js/main.js"></script>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+	   {% if messages %}
+	   <script>
+	   $(function(){
+		   {% for category, message in messages %}
+		    $.pnotify({
+		        text: '{{ message }}',
+		        type: '{{ category }}',
+		        });
+		    {% endfor %}
+		});
+	    </script>
+	   {% endif %}
+	{% endwith %}    
     {% block js %}{% endblock %}
   </body>
 </html>

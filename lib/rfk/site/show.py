@@ -1,5 +1,5 @@
 
-from flask import Blueprint, render_template, url_for, request, redirect
+from flask import Blueprint, render_template, url_for, request, redirect, flash
 from rfk.database.show import Show, Series
 import rfk.database
 from rfk import CONFIG
@@ -42,6 +42,7 @@ def new_series():
                         logo=form.image.data)
         rfk.database.session.add(series)
         rfk.database.session.commit()
+        flash('Series added successfully', 'info')
         return redirect(url_for('.list_series'))
     return render_template('shows/seriesform.html',form=form,
                                                    imgur={'client': CONFIG.get('site', 'imgur-client')})
