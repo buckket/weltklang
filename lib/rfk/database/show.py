@@ -59,6 +59,8 @@ class Show(Base):
         assert tag or name
         if tag is None:
             tag = Tag.get_tag(name)
+        if tag in None:
+            return False
         try:
             ShowTag.query.filter(ShowTag.show == self,
                                  ShowTag.tag == tag).one()
@@ -153,7 +155,7 @@ class UserShow(Base):
 class Tag(Base):
     __tablename__ = 'tags'
     tag = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    name = Column(String(25), nullable=False)
+    name = Column(String(25), nullable=False, unique=True)
     icon = Column(String(30))
     description = Column(Text, nullable=False)
     
@@ -164,6 +166,8 @@ class Tag(Base):
             return Tag.query.filter(Tag.name == name).one()
         except exc.NoResultFound:
             return Tag(name=name,description=name)
+        except exc.MultipleResultsFound:
+            return None
     
     @staticmethod
     def parse_tags(tags):
