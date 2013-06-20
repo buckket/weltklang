@@ -58,9 +58,7 @@ $(function() {
             dataType: 'json',
             aysync: true,
             success: function(data) {
-            	console.log(data.datapoints);
             	var sl = elem.sparkline(data.datapoints,{type:'line',width:'150px'});
-            	console.log(sl);
             }
         });
     });
