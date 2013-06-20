@@ -19,7 +19,7 @@ init_db("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
                                                rfk.CONFIG.get('database', 'username'),
                                                rfk.CONFIG.get('database', 'password'),
                                                rfk.CONFIG.get('database', 'host'),
-                                               rfk.CONFIG.get('database', 'database')), debug=True)
+                                               rfk.CONFIG.get('database', 'database')))
 
 def get_stats(relay):
     global basedir
