@@ -17,6 +17,7 @@ import os
 from rfk.database import Base, UTCDateTime
 import rfk.database
 from rfk.helper import now
+from rfk.database.show import UserShow, Show
 
 
 class Anonymous(AnonymousUser):
@@ -169,7 +170,14 @@ class User(Base):
         UserSetting.set_value(self, setting, value)
     
     def get_total_streamtime(self):
-        pass
+        """Returns a timedelta Object with the users total time streamed"""
+        try:
+            total_seconds =  int(rfk.database.session.query(func.sum(func.timestampdiff(text('second'), Show.begin, Show.end)))\
+                                                     .join(UserShow).filter(UserShow.status == UserShow.STATUS.STREAMED,
+                                                                            UserShow.user == self).first()[0])
+        except TypeError:
+            total_seconds = 0
+        return timedelta(seconds=total_seconds)
     
 class Setting(Base):
     __tablename__ = 'settings'

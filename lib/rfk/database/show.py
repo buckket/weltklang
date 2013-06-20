@@ -6,7 +6,6 @@ from sqlalchemy.dialects.mysql import INTEGER as Integer
 
 from datetime import datetime
 from rfk.database import Base, UTCDateTime
-from rfk.database.base import User
 import rfk.database
 from rfk.types import ENUM, SET
 
@@ -113,8 +112,8 @@ class Show(Base):
     
     def get_active_user(self):
         try:
-            return User.query.join(UserShow).filter(UserShow.show == self,
-                                                    UserShow.status == UserShow.STATUS.STREAMING).one()
+            return UserShow.query.filter(UserShow.show == self,
+                                         UserShow.status == UserShow.STATUS.STREAMING).one().user
         except exc.NoResultFound:
             return None
     

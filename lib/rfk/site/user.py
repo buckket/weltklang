@@ -6,7 +6,7 @@ from rfk.database import session
 from rfk.database.base import User
 from flask.ext.login import login_required, current_user
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 user = Blueprint('user',__name__)
 
@@ -14,8 +14,10 @@ user = Blueprint('user',__name__)
 @user.route('/<user>')
 def info(user):
     user = User.get_user(username=user)
-    
     if user:
-        return render_template('user/info.html', username=user.username, shows={'upcoming': [], 'last':[]})
+        return render_template('user/info.html',
+                               username=user.username,
+                               st=user.get_total_streamtime(),
+                               shows={'upcoming': [], 'last':[]})
     else:
         abort(404)
