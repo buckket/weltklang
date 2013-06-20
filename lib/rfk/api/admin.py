@@ -6,7 +6,7 @@ Created on Jun 16, 2013
 
 from subprocess import call
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import jsonify, request
 from flask_login import current_user
@@ -17,6 +17,11 @@ from rfk.liquidsoap import LiquidInterface
 
 from rfk.site.helper import permission_required
 from rfk.site import app
+
+from rfk.database.streaming import Relay
+from rfk.database.stats import RelayStatistic
+
+from rfk.helper import now
 
 from rfk.api import api
 
@@ -99,3 +104,14 @@ def liquidsoap_log():
         return jsonify({'log': lines, 'offset': offset})
     except Exception as e:
         return jsonify({'error': str(e)})
+
+@api.route("/site/admin/feeds/sparkline/relay/<int:relay>/traffic")
+@permission_required(permission='admin')
+def relay_sparkline(relay):
+    relay = Relay.query.get(relay)
+    rs = RelayStatistic.get_relaystatistic(relay, RelayStatistic.TYPE.TRAFFIC)
+    start = now()-timedelta(hours=6)
+    dps = []
+    for dp in rs.statistic.get(start=start, stop=now()):
+        dps.append((int(dp.timestamp.strftime('%s')), dp.value))
+    return jsonify({'datapoints': dps})

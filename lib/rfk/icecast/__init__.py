@@ -11,8 +11,8 @@ class Icecast(object):
         self.password = password
         self.status_xml = None
         
-    def _get_status(self):
-        if self.status_xml is not None:
+    def _get_status(self, reload=False):
+        if self.status_xml is not None and not reload:
             return
         request = urllib2.Request("http://%s:%s/admin/status.xml" % (self.host, self.port))
         base64string = base64.encodestring('%s:%s' % (self.username, self.password)).replace('\n', '')
@@ -21,9 +21,17 @@ class Icecast(object):
         self.status_xml = ET.parse(result)
         result.close()
         
-    def get_traffic(self):
-        self._get_status()
-        return self.status_xml.find('outgoing_kbitrate').text
+    def get_traffic(self, reload=False):
+        self._get_status(reload)
+        total = 0
+        root = self.status_xml.getroot()
+        for source in root.findall('source'):
+            for total_read in source.findall('total_bytes_read'):
+                total += int(total_read.text)
+            for total_send in source.findall('total_bytes_send'):
+                total += int(total_send.text)
+        
+        return total
     
     def get_version(self):
         self._get_status()

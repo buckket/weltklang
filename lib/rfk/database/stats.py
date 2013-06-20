@@ -5,6 +5,7 @@ from sqlalchemy.dialects.mysql import INTEGER as Integer
 from rfk.database import Base, UTCDateTime
 import rfk.database
 from rfk.helper import now
+from rfk.types import ENUM
 
 class Statistic(Base):
     __tablename__ = 'statistics'
@@ -57,4 +58,30 @@ class StatsistcsData(Base):
     timestamp = Column(UTCDateTime(), nullable=False)
     value = Column(Integer(unsigned=True), nullable=False)
     
+
+class RelayStatistic(Base):
+    __tablename__ = 'relay_statistics'
+    relaystat = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
+    statistic_id = Column("statistic", Integer(unsigned=True), ForeignKey('statistics.statistic',
+                                                                          onupdate="CASCADE",
+                                                                          ondelete="RESTRICT"))
+    statistic = relationship("Statistic")
+    relay_id = Column("relay", Integer(unsigned=True), ForeignKey('relays.relay',
+                                                                          onupdate="CASCADE",
+                                                                          ondelete="RESTRICT"))
+    relay = relationship("Relay")    
+    type = Column(Integer(unsigned=True))
+    TYPE = ENUM(['TRAFFIC', 'LISTENERCOUNT'])
     
+    @staticmethod
+    def get_relaystatistic(relay, type):
+        try:
+            return RelayStatistic.query.filter(RelayStatistic.relay == relay, RelayStatistic.type == type).one()
+        except exc.NoResultFound:
+            s = Statistic(name='{0}:{1}-{2}'.format(relay.address, relay.port, type),
+                          identifier='{0}:{1}-{2}'.format(relay.address, relay.port, type))
+            rfk.database.session.add(s)
+            rs = RelayStatistic(relay=relay, type=type, statistic=s)
+            rfk.database.session.add(rs)
+            rfk.database.session.flush()
+            return rs

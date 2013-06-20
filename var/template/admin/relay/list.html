@@ -11,17 +11,19 @@
 		<table class="table table-striped">
 		<thead>
 			<tr>
-				<th>Address</th>
-				<th>Type</th>
-				<th>Bandwidth</th>
-				<th>Usage</th>
-				<th>Status</th>
-				<th>Config</th>
+			    <th>{% trans %}Traffic (kbps){% endtrans %}</td>
+				<th>{% trans %}Address{% endtrans %}</th>
+				<th>{% trans %}Type{% endtrans %}</th>
+				<th>{% trans %}Bandwidth{% endtrans %}</th>
+				<th>{% trans %}Usage{% endtrans %}</th>
+				<th>{% trans %}Status{% endtrans %}</th>
+				<th>{% trans %}Config{% endtrans %}</th>
 			</tr>
 		</thead>
 		<tbody>
 			{% for relay in relays %}
 			<tr>
+			    <td><span class="traffic-sparkline" data-relay="{{relay.relay}}">{% trans %}Loading...{% endtrans %}</span></td>
 				<td>{{ relay.address }}:{{ relay.port }}</td>
 				<td>{{ relay.TYPE.indexof(relay.type) }}</td>
 				<td>{{ relay.bandwidth }}</td>
@@ -44,3 +46,24 @@
 	</div>
 </div>
 {% endblock content%}
+{% block js%}
+<script>
+$(function() {
+	//$('.traffic-sparkline').sparkline();
+    $('.traffic-sparkline').each(function(ind){
+    	var elem = $(this);
+    	$.ajax({
+            type: 'GET',
+            url: '/api/site/admin/feeds/sparkline/relay/'+$(this).attr('data-relay')+'/traffic',
+            dataType: 'json',
+            aysync: true,
+            success: function(data) {
+            	console.log(data.datapoints);
+            	var sl = elem.sparkline(data.datapoints,{type:'line',width:'150px'});
+            	console.log(sl);
+            }
+        });
+    });
+});
+</script>
+{% endblock js%}
