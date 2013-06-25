@@ -5,7 +5,7 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.sql.expression import case
 
 from passlib.hash import bcrypt
-from flask.ext.login import AnonymousUser
+from flask.ext.login import AnonymousUserMixin
 from rfk.types import SET, ENUM
 from rfk import exc as rexc
 from datetime import datetime, timedelta
@@ -20,10 +20,10 @@ from rfk.helper import now
 from rfk.database.show import UserShow, Show
 
 
-class Anonymous(AnonymousUser):
+class Anonymous(AnonymousUserMixin):
     
     def __init__(self):
-        AnonymousUser.__init__(self)
+        AnonymousUserMixin.__init__(self)
         self.locale = 'de'
         self.timezone = 'Europe/Berlin'
         

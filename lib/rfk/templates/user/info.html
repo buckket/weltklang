@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ username }}</h1>
+<div class="row-fluid">
+	<div class="span12">
+    </div>
+	{{ username }} streamed for {{ st }} hours
+</div>
+<div class="row-fluid">
+    <div class="span6">
+        <h3>{% trans %}Past Shows{% endtrans %}</h3>
+        {% for show in shows.last %}
+            <div class="row-fluid show-block">
+                <div class="span6">
+                    <h3 class="outline">{{ show.begin | datetimeformat }}</h3>
+                </div>
+                <div class="span6 logo" {% if show.get_logo() %}style="background-image:url('{{ show.get_logo() }}');"{% endif %}>
+                    <h3 class="outline">{%if show.series %}{{ show.series.name }} <small>{{ show.name }}</small>{% else %}{{ show.name }}{% endif %}</h3>
+                </div>
+            </div>
+        {% else %}
+	        <div class="row-fluid">
+	            <div class="span12">
+	                <h4>{% trans %}No shows{% endtrans %}</h4>
+	            </div>
+	        </div>
+        {% endfor %}
+    </div>
+    <div class="span6">
+        <h3>{% trans %}Next Shows{% endtrans %}</h3>
+        {% for show in shows.upcoming %}
+            <div class="row-fluid show-block">
+                <div class="span6">
+                    <h3 class="outline">{{ show.begin | datetimeformat }}</h3>
+                </div>
+                <div class="span6 logo" {% if show.get_logo() %}style="background-image:url('{{ show.get_logo() }}');"{% endif %}>
+                    <h3 class="outline">{%if show.series %}{{ show.series.name }} <small>{{ show.name }}</small>{% else %}{{ show.name }}{% endif %}</h3>
+                </div>
+            </div>
+        {% else %}
+            <div class="row-fluid">
+                <div class="span12">
+                    <h4>{% trans %}No shows{% endtrans %}</h4>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

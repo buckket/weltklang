@@ -1,0 +1,65 @@
+<form method="post" class="{{ form_class }}" id="{{ id }}" action="{{action}}">
+    {% if g.ajax %}
+    <script type="text/javascript">
+    $(function () {
+        {% if g.piecewise %}
+        window.visited = {};
+        // setup our listeners
+        $("#{{ id }}").find("[data-piecewise]").each(function() {
+            var v = $(this).attr("name");
+            visited[v] = false;
+            var type = $(this).attr("data-piecewise")
+            if (type == "blur") {
+                $(this).blur(function() {
+                    window.visited[v] = true;
+                    $("#{{ id }}").ajaxSubmit(window.yota_ajax_options);
+                });
+            } else {
+                $(this).keyup(function() {
+                    window.visited[v] = true;
+                    $("#{{ id }}").ajaxSubmit(window.yota_ajax_options);
+                });
+            }
+        });
+        var piecewise = true;
+        {% else %}
+        var piecewise = false;
+        {% endif %}
+        ajax_activate("{{ id }}",
+        function (id, error, data) {
+            if (error) {
+                if ($('#' + id).attr('data-error') != "true") {
+                    $('#' + id).tooltip({title: data[0]['message'],
+                                          placement: 'right',
+                                          trigger: 'manual'});
+                    $('#' + id).tooltip('show');
+                    $('#' + id).attr('data-error', "true");
+                }
+            } else {
+                $('#' + id).tooltip('destroy');
+                $('#' + id).attr('data-error', "false");
+            }
+        },
+        function () {
+            $('#{{ id }}_success').show();
+        }, piecewise);
+
+    });
+    </script>
+    <input type="hidden" name="_ajax_" value="True"/>
+    {% endif %}
+    {% if g.piecewise %}
+    <input type="hidden" name="_piecewise_" value="True"/>
+    {% endif %}
+    {% if hidden %}
+    {% for key, val in hidden.iteritems() %}
+    <input type="hidden" name="_arg_{{ key }}" value="{{ val }}" />
+    {% endfor %}
+    {% endif %}
+    <div class="alert alert-success" style="display:none;" id="{{ id }}_success">
+
+        Thank you for your submission!
+    </div>
+    {% if title %}
+    <h2>{{ title }}</h2>
+    {% endif %}

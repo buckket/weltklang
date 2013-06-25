@@ -58,7 +58,7 @@ class Show(Base):
         assert tag or name
         if tag is None:
             tag = Tag.get_tag(name)
-        if tag in None:
+        if tag is None:
             return False
         try:
             ShowTag.query.filter(ShowTag.show == self,
@@ -164,7 +164,9 @@ class Tag(Base):
         try:
             return Tag.query.filter(Tag.name == name).one()
         except exc.NoResultFound:
-            return Tag(name=name,description=name)
+            tag = Tag(name=name,description=name)
+            rfk.database.session.add(tag)
+            rfk.database.session.flush()
         except exc.MultipleResultsFound:
             return None
     
@@ -173,8 +175,10 @@ class Tag(Base):
         """parses a space separated list of tags and returns a list of Tag objects"""
         r = []
         if tags is not None and len(tags) > 0:
-            for tag in tags.split(' '):
-                r.append(Tag.get_tag(tag))
+            for str_tag in tags.split(' '):
+                tag = Tag.get_tag(str_tag)
+                if tag is not None:
+                    r.append(tag)
         return r
 
 class ShowTag(Base):

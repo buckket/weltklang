@@ -14,7 +14,7 @@ from rfk.site.forms.settings import SettingsForm
 from rfk.exc.base import UserNameTakenException
 from . import helper
 
-app = Flask(__name__)
+app = Flask(__name__,instance_relative_config=True)
 app.config['DEBUG'] = True
 app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europe/Berlin'
 app.config['BABEL_DEFAULT_LOCALE'] = 'de'

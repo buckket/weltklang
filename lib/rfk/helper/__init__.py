@@ -2,6 +2,7 @@ import pytz
 import datetime
 import rfk
 from flaskext.babel import lazy_gettext
+from flask import url_for
 
 def now():
     return pytz.utc.localize(datetime.datetime.utcnow())
@@ -16,3 +17,6 @@ def natural_join(lst):
     elif l > 2:
         first =  ', '.join(lst[0:-1])
         return "%s %s %s" % (first, lazy_gettext('and'), lst[-1])
+    
+def make_user_link(user):
+    return '<a href="%s" title="%s">%s</a>' % (url_for('user.info',user=user.username),user.username,user.username);

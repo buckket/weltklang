@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, url_for, request, redirect, flash
 from rfk.database.show import Show, Series
 import rfk.database
 from rfk import CONFIG
-from rfk.helper import natural_join
+from rfk.helper import natural_join, make_user_link
 from rfk.site import get_datetime_format
 from rfk.site.forms.show import new_series_form
 from flask.ext.login import login_required, current_user
@@ -101,7 +101,7 @@ def show_view(show):
     link_users = []
     users = []
     for ushow in s.users:
-        link_users.append(_make_user_link(ushow.user))
+        link_users.append(make_user_link(ushow.user))
         users.append(ushow.user)
     return render_template(template,
                            show={'name': s.name,
@@ -115,9 +115,6 @@ def show_view(show):
                                  'show': s.show,
                                  'duration': (s.end - s.begin).total_seconds(),
                                  'link': url_for('.show_view', show=s.show)})
-
-def _make_user_link(user):
-    return '<a href="%s" title="%s">%s</a>' % ('#',user.username,user.username);
 
 @show.route('/show/<int:show>/edit')
 def show_edit(show):
