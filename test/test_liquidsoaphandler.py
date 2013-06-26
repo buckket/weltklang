@@ -4,10 +4,10 @@ Created on Jun 25, 2013
 @author: teddydestodes
 '''
 import unittest
-import rfk
+
 import rfk.database
 from rfk.database.base import User
-import liquidsoaphandler
+import rfk.liquidsoaphandler
 
 class Test(unittest.TestCase):
 
@@ -19,14 +19,14 @@ class Test(unittest.TestCase):
         pass
 
     def test_do_connect(self):
-        liquidsoaphandler.doConnect([])
+        rfk.liquidsoaphandler.doConnect([])
 
     def test_do_metadata(self):
-        liquidsoaphandler.doMetaData([])
+        rfk.liquidsoaphandler.doMetaData([])
 
     def test_init_show_unplanned(self):
         user = User.get_user(username='test')
-        liquidsoaphandler.init_show(user, 'testshow', 'testdesctiption', 'testtag tag tag')
+        rfk.liquidsoaphandler.init_show(user, 'testshow', 'testdesctiption', 'testtag tag tag')
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
