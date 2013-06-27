@@ -1,8 +1,4 @@
-'''
-Created on May 31, 2013
-
-@author: teddydestodes
-'''
+#!/usr/bin/env python
 
 from rfk.database.base import Permission, Setting, User
 import rfk.database

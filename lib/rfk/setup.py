@@ -1,9 +1,4 @@
-'''
-Created on Jun 25, 2013
-
-@author: teddydestodes
-'''
-
+#!/usr/bin/env python
 
 import os
 import sys
