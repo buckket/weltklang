@@ -1,9 +1,6 @@
-#!/usr/bin/python2.7
+#!/usr/bin/env python
+
 '''
-Created on 06.05.2012
-
-@author: teddydestodes
-
 Flow is like this:
 
 Auth: streamingclient tries to authenticate

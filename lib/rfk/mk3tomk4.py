@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/env python
 
 
 import rfk.database
@@ -10,7 +10,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql.expression import between
 import time
 
+
 Base = declarative_base()
+
 
 class Streamer(Base):
     __tablename__ = 'streamer'

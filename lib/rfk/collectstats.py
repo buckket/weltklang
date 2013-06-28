@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+
 import os
 import sys
 import struct
@@ -47,3 +48,5 @@ if __name__ == '__main__':
             rfk.database.session.commit()
         except urllib2.URLError:
             pass
+
+

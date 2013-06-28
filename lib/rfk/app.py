@@ -1,9 +1,5 @@
-#!/usr/bin/python
-'''
-Created on 30.04.2012
+#!/usr/bin/env python
 
-@author: teddydestodes
-'''
 import os
 import sys
 
@@ -44,3 +40,4 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
+
