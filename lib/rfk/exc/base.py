@@ -1,3 +1,6 @@
+class NoConfigException(Exception):
+    pass
+
 
 class UserNotFoundException(Exception):
     pass

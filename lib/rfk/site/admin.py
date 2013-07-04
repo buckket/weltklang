@@ -7,6 +7,7 @@ from flask import Blueprint, render_template, url_for, request, redirect
 from functools import wraps
 import math
 import rfk
+from rfk.helper import get_path
 import rfk.liquidsoap
 import rfk.site
 from rfk.site.helper import permission_required
@@ -125,7 +126,9 @@ def loop_list():
                 spl = request.form.get('begin').split(':')
                 begin = int(int(spl[0])*100+(int(spl[1])/60.)*100)
                 spl = request.form.get('end').split(':')
-                end = int(int(spl[0])*100+(int(spl[1])/60.)*100)
+                end = math.ceil(int(spl[0])*100+(int(spl[1])/60.)*100)
+                if end == begin and end == 0:
+                    end = 2400
                 loop = Loop(begin=begin, end=end, filename=request.form.get('filename'))
                 rfk.database.session.add(loop)
                 rfk.database.session.commit()
@@ -149,7 +152,8 @@ def loop_list():
                       'filename': loop.filename,
                       'file_missing': not(loop.file_exists)})
     pagination = _pagelinks('.loop_list',page ,total_pages)
-    return render_template('admin/loops/list.html', loops=loops, pagination=pagination)
+    searchpath = get_path(rfk.CONFIG.get('liquidsoap', 'looppath'))
+    return render_template('admin/loops/list.html', loops=loops, pagination=pagination, searchpath=searchpath)
 
 
 def _paginate(queryclass,page=0,per_page=25):

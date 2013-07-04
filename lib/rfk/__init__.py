@@ -1,5 +1,6 @@
 from ConfigParser import SafeConfigParser
 from flask.helpers import find_package
+from rfk.exc.base import NoConfigException
 import os
 import pygeoip
 
@@ -11,7 +12,6 @@ geoip = None
 def init():
     global geoip
     prefix, package_path = find_package(__name__)
-    print prefix, package_path
     config_locations = []
     if prefix is not None:
         config_locations.append(os.path.join(prefix, 'local','etc', 'rfk-config.cfg'))
@@ -20,4 +20,6 @@ def init():
     if package_path is not None:
         config_locations.append(os.path.join(package_path, 'rfk', 'rfk-config.cfg'))
     succ_read = CONFIG.read(config_locations)
+    if len(succ_read) == 0:
+        raise NoConfigException()
     geoip = pygeoip.GeoIP(CONFIG.get('site', 'geoipdb'), pygeoip.MEMORY_CACHE)

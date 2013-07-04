@@ -70,7 +70,7 @@ def liquidsoap_status():
 @api.route("/site/admin/liquidsoap/start")
 @permission_required(permission='manage-liquidsoap')
 def liquidsoap_start():
-    returncode = call([os.path.join(app.config['BASEDIR'], 'bin','run-liquid.py')])
+    returncode = call('rfk-liquidsoap')
     return jsonify({'status': returncode})
 
 @api.route("/site/admin/liquidsoap/shutdown")

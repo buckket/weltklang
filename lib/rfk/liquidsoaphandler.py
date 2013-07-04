@@ -213,7 +213,8 @@ def doListenerCount():
     lc = Listener.get_total_listener()
     sys.stdout.write("<icestats><source mount=\"/live.ogg\"><listeners>%d</listeners></source></icestats>" % (lc,))
 
-if __name__ == '__main__':
+
+def main():
     parser = argparse.ArgumentParser(description='PyRfK Interface for liquidsoap',
                                      epilog='Anyways this should normally not called manually')
     parser.add_argument('--debug', action='store_true')
@@ -230,7 +231,7 @@ if __name__ == '__main__':
     disconnectparser = subparsers.add_parser('disconnect', help='a help')
     disconnectparser.add_argument('data', metavar='data', help='mostly some json encoded string from liquidsoap')
     playlistparser = subparsers.add_parser('playlist', help='a help')
-    playlistparser = subparsers.add_parser('listenercount', help='prints total listenercount')
+    listenerparser = subparsers.add_parser('listenercount', help='prints total listenercount')
     
     args = parser.parse_args()
     
@@ -256,3 +257,7 @@ if __name__ == '__main__':
     elif args.command == 'listenercount':
         doListenerCount()
     rfk.database.session.remove()
+
+if __name__ == '__main__':
+    sys.exit(main())
+

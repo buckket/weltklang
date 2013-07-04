@@ -167,18 +167,22 @@ class Tag(Base):
             tag = Tag(name=name,description=name)
             rfk.database.session.add(tag)
             rfk.database.session.flush()
-        except exc.MultipleResultsFound:
-            return None
+            return tag
     
     @staticmethod
     def parse_tags(tags):
         """parses a space separated list of tags and returns a list of Tag objects"""
+        def unique(seq):
+            seen = set()
+            seen_add = seen.add
+            return [ x for x in seq if x not in seen and not seen_add(x)]
         r = []
         if tags is not None and len(tags) > 0:
-            for str_tag in tags.split(' '):
+            for str_tag in unique(tags.strip().split(' ')):
+                if str_tag == '':
+                    continue
                 tag = Tag.get_tag(str_tag)
-                if tag is not None:
-                    r.append(tag)
+                r.append(tag)
         return r
 
 class ShowTag(Base):

@@ -1,23 +1,27 @@
+import time
+import re
+import os
+from datetime import datetime, timedelta
+
+import hashlib
+from passlib.hash import bcrypt
+
 from sqlalchemy import *
 from sqlalchemy.orm import relationship, backref, sessionmaker, scoped_session, exc
 from sqlalchemy.dialects.mysql import INTEGER as Integer 
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.sql.expression import case
 
-from passlib.hash import bcrypt
 from flask.ext.login import AnonymousUserMixin
+
 from rfk.types import SET, ENUM
 from rfk import exc as rexc
-from datetime import datetime, timedelta
-import time
-import hashlib
-import re
-import os
-
-from rfk.database import Base, UTCDateTime
+from rfk import CONFIG
 import rfk.database
-from rfk.helper import now
+from rfk.database import Base, UTCDateTime
 from rfk.database.show import UserShow, Show
+from rfk.helper import now, get_path
+
 
 
 class Anonymous(AnonymousUserMixin):
@@ -362,15 +366,25 @@ class Loop(Base):
     def file_exists(self):
         if self.filename is None:
             return False
-        from rfk.site import app
-        app.logger.warn((app.config['BASEDIR'],'var','music',self.filename))
-        return os.path.exists(os.path.join(app.config['BASEDIR'],'var','music',self.filename))
+        return os.path.exists(os.path.join(get_path(CONFIG.get('liquidsoap', 'looppath')), self.filename))
         
     @staticmethod
     def get_current_loop():
         """
             returns the current loop to be scheduled
-            @todo broken ;_;
+            @todo maybe broken ;_;
         """
         n = now()
-        return Loop.query.filter(Loop.contains(int(n.hour*100+(n.minute/60.)*100))).order_by(Loop.length.asc()).first()
+        #try to find a loop that should be running
+        loops = Loop.query.filter(Loop.contains(int(n.hour*100+(n.minute/60.)*100))).order_by(Loop.length.asc()).all()
+        for loop in loops:
+            if loop.file_exists:
+                return loop;
+        # we found no loops
+        # just try to find the longest one
+        loops = Loop.query.order_by(Loop.length.asc()).all()
+        for loop in loops:
+            if loop.file_exists:
+                return loop;
+        #okay, now we have a problem, just retun none
+        return None
