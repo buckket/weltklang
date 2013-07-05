@@ -34,7 +34,8 @@ class Test(unittest.TestCase):
         rfk.liquidsoaphandler.doConnect(data)
 
     def test_do_connect_valid_user(self):
-        User.add_user('admin', 'admin')
+        user = User.add_user('teddydestodes', 'roflmaoblubb')
+        user.set_setting(False,code='use_icy')
         data = {"ice-public": "1",
                 "ice-audio-info": "bitrate=128",
                 "User-Agent": "libshout/2.3.1",
@@ -44,6 +45,17 @@ class Test(unittest.TestCase):
                 "ice-description": "waaaah",
                 "Content-Type": "application/ogg",
                 "Authorization": "Basic YWRtaW46YWRtaW4=W"}
+        data = {"ice-public": "0",
+         "ice-audio-info":
+        "bitrate=128;samplerate=44100;channels=2",
+        "User-Agent": "libshout/2.3.1",
+        "ice-url": "http://www.example.com",
+        "ice-genre": "Misc",
+        "ice-name": "Herpderp",
+        "ice-description": " ",
+        "Content-Type": "application/ogg",
+        "Authorization": "Basic dGVkZHlkZXN0b2Rlczpyb2ZsbWFvYmx1YmI="}
+
         rfk.liquidsoaphandler.doConnect(data)
 
     def test_do_metadata(self):

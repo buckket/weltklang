@@ -169,6 +169,7 @@ class User(Base):
         if setting is None:
             setting = Setting.get_setting(code)
         UserSetting.set_value(self, setting, value)
+        rfk.database.session.flush()
     
     def get_total_streamtime(self):
         """Returns a timedelta Object with the users total time streamed"""

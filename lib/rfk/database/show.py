@@ -96,11 +96,13 @@ class Show(Base):
         
     
     @staticmethod
-    def get_current_show(user=None):
+    def get_current_show(user=None, only_planned=False):
         """returns the current show"""
         query = Show.query.join(UserShow).filter((between(now(), Show.begin, Show.end)) | (Show.end == None))
         if user:
             query = query.filter(UserShow.user == user)
+        if only_planned:
+            query = query.filter(Show.flags == Show.FLAGS.PLANNED)
         return query.first()
     
     @staticmethod

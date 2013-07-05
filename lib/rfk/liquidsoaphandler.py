@@ -77,6 +77,11 @@ def init_show(user):
             show.name = user.get_setting(code='show_def_name') or ''
         show.flags = Show.FLAGS.UNPLANNED
         show.add_user(user)
+    elif show.flags == Show.FLAGS.UNPLANNED:
+        #just check if there is a planned show to transition to
+        s = Show.get_current_show(user, only_planned=True)
+        if s is not None:
+            show = s        
     us = show.get_usershow(user)
     us.status = UserShow.STATUS.STREAMING
     rfk.database.session.flush()
@@ -138,18 +143,7 @@ def doMetaData(data):
             artist = song[0]
         if ('title' not in data) or (len(data['title'].strip()) == 0):
             title = song[1]
-    if user.get_setting(code='use_icy'):
-        if 'ice-genre' in data:
-            tags = user.get_setting(code='icy_show_genre') or ''
-        if 'ice-name' in data:
-            name = user.get_setting(code='icy_show_name') or ''
-        if 'ice-description' in data:
-            description = user.get_setting(code='icy_show_description') or ''
-    else:
-        tags = user.get_setting(code='show_def_tags')
-        description = user.get_setting(code='show_def_desc')
-        name = user.get_setting(code='show_def_name')
-    show = init_show(user, name=name, description=description, tags=tags)
+    show = init_show(user)
     track = Track.new_track(show, artist, title)
     rfk.database.session.add(track)
     rfk.database.session.commit()
@@ -180,9 +174,10 @@ def doConnect(data):
                 user.set_setting(data['ice-description'],code='icy_show_description')
         show = init_show(user)
         rfk.database.session.commit()
-        log('accepted auth for %s' %(user.username,))
+        log('accepted connect for %s' %(user.username,))
         print user.user
     except (rexc.base.UserNotFoundException, rexc.base.InvalidPasswordException, KeyError):
+        log('rejected connect')
         kick()
             
 

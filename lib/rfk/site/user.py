@@ -3,15 +3,33 @@ from flask import Blueprint, Flask, session, g, render_template, flash, redirect
 
 import rfk
 from rfk.helper import now
-from rfk.database import session
-from rfk.database.base import User
+import rfk.database
+from rfk.database.base import User, ApiKey
 from rfk.database.show import Show, UserShow
 from flask.ext.login import login_required, current_user
+from rfk.site.forms.apikey import new_apikey_form
 
 from datetime import datetime, timedelta
 
 user = Blueprint('user',__name__)
 
+
+@user.route('/<user>/apikeys', methods=['GET', 'POST'])
+@login_required
+def apikey_list(user):
+    from rfk.site import app
+    apikeys = ApiKey.query.filter(ApiKey.user == current_user).all()
+    form = new_apikey_form(request.form)
+    if request.method == 'POST' and form.validate():
+        apikey = ApiKey(application=form.application.data,
+                        description=form.description.data,
+                        user=current_user)
+        apikey.gen_key()
+        rfk.database.session.add(apikey)
+        rfk.database.session.commit()
+        form.application.data = ''
+        form.description.data = ''
+    return render_template('user/apikeys.html',apikeys=apikeys, form=form)
 
 @user.route('/<user>')
 def info(user):
