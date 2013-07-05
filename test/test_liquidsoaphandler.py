@@ -9,32 +9,55 @@ import rfk.database
 from rfk.database.base import User
 from rfk.database.show import Show, UserShow
 import rfk.liquidsoaphandler
+from rfk.install import setup_settings
 
 class Test(unittest.TestCase):
 
     def setUp(self):
         rfk.database.init_db('sqlite://', False)
-        User.add_user('test', 'test')
+        setup_settings()
 
     def tearDown(self):
         pass
 
-    def test_do_connect(self):
-        rfk.liquidsoaphandler.doConnect([])
+    def test_do_connect_invalid_user(self):
+        User.add_user('test', 'test')
+        data = {"ice-public": "1",
+                "ice-audio-info": "bitrate=128",
+                "User-Agent": "libshout/2.3.1",
+                "ice-url": " ",
+                "ice-genre": "Live Mix",
+                "ice-name": "Ohh Gott nicht der schonwieder",
+                "ice-description": "waaaah",
+                "Content-Type": "application/ogg",
+                "Authorization": "Basic YWRtaW46YWRtaW4=W"}
+        rfk.liquidsoaphandler.doConnect(data)
+
+    def test_do_connect_valid_user(self):
+        User.add_user('admin', 'admin')
+        data = {"ice-public": "1",
+                "ice-audio-info": "bitrate=128",
+                "User-Agent": "libshout/2.3.1",
+                "ice-url": " ",
+                "ice-genre": "Live Mix",
+                "ice-name": "Ohh Gott nicht der schonwieder",
+                "ice-description": "waaaah",
+                "Content-Type": "application/ogg",
+                "Authorization": "Basic YWRtaW46YWRtaW4=W"}
+        rfk.liquidsoaphandler.doConnect(data)
 
     def test_do_metadata(self):
-        rfk.liquidsoaphandler.doMetaData({"album": "{Awayland}", "userid": "3", "title": "{Awayland}", "vendor": "Xiph.Org libVorbis I 20101101 (Schaufenugget)", "artist": "Villagers"})
+        data = {"ice-public": "1",
+                "ice-audio-info": "bitrate=128",
+                "User-Agent": "libshout/2.3.1",
+                "ice-url": " ",
+                "ice-genre": "Live Mix",
+                "ice-name": "Ohh Gott nicht der schonwieder",
+                "ice-description": "waaaah",
+                "Content-Type": "application/ogg",
+                "Authorization": "Basic YWRtaW46YWRtaW4=W"}
 
-    def test_init_show_unplanned(self):
-        user = User.get_user(username='test')
-        show_name = 'testshow'
-        show_description = 'testdescription'
-        show_tags = 'tag tag1 tag2 tag3'
-        show_logo = 'http://example.com/logo.png'
-        show = rfk.liquidsoaphandler.init_show(user, show_name, show_description, show_tags)
-        self.assertIs(Show.get_active_show(), show)
-        self.assertIs(show.name, show_name)
-        self.assertIs(show.description, show_description)
+        rfk.liquidsoaphandler.doMetaData(data)
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

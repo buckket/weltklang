@@ -78,14 +78,11 @@ class User(Base):
         username -- username
         password -- unencrypted password
         """
-        try:
-            user = User.get_user(username=username)
-            if user.check_password(password):
-                return user
-            else:
-                raise rexc.base.InvalidPasswordException()
-        except exc.NoResultFound:
-            raise rexc.base.UserNotFoundException()
+        user = User.get_user(username=username)
+        if user.check_password(password):
+            return user
+        else:
+            raise rexc.base.InvalidPasswordException()
             
     
     @staticmethod
@@ -97,7 +94,7 @@ class User(Base):
             else:
                 return User.query.filter(User.username == username).one()
         except exc.NoResultFound:
-            return None
+            raise rexc.base.UserNotFoundException
                 
     @staticmethod
     def check_username(username):

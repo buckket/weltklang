@@ -13,8 +13,10 @@ import pickle
 import traceback
 import sys
 import re
+import logging
 
 import rfk.liquidsoap
+from rfk.helper import get_path
 from rfk.types import RingBuffer
 
 COMMAND_LOG = 1
@@ -33,45 +35,45 @@ def read(_socket):
     f.close()
     return data
 
-class LiquidsoapDaemon(object):
+class SocketExists(BaseException):
+    pass
+
+class LiquidsoapDaemon(logging.Handler):
     
     telnet_ignore_pattern = re.compile('(New client: localhost)|(Client localhost)')
     
-    def __init__(self, basedir,socket='/tmp/liquiddaemon.sock', workdir=None, autostart=True):
-        if os.path.exists(socket):
-            raise
-        self.basedir = basedir
-        if workdir:
-            self.workdir = workdir
-        else:
-            self.workdir = basedir
-        self.socket = socket
+    def __init__(self, socket='/tmp/liquiddaemon.sock'):
+        logging.Handler.__init__(self)
+        self.logger = logging.getLogger('LiquidsoapDaemon')
+        self.logger.setLevel(logging.INFO)
+        self.logger.addHandler(self)
+        self.liquidsoap_logger = logging.getLogger('Liquidsoap')
+        self.liquidsoap_logger.setLevel(logging.INFO)
+        self.liquidsoap_logger.addHandler(self)
         self.process = None
-        self.socket_handler = SocketHandler(self.socket, self)
-        self.log = RingBuffer(1000)
+        self.socket_handler = SocketHandler(get_path(socket), self)
+        self.log = RingBuffer(100)
         self.quit = False
         self.run_liquid = True
         self.skip_telnet = True
-        if autostart:
-            self.run()
         
     def shutdown(self):
-        self.write_log('[DAEMON] Shutting down...')
+        self.logger.info('Shutting down...')
         self.run_liquid = False
         self.quit = True
         c = 0
         while self.process.returncode is None:
             c+=1
-            self.write_log('[DAEMON] Asking liquidsoap nicely to terminate... (Try #%d)' %(c,))
+            self.logger.info("Asking liquidsoap nicely to terminate... (Try #%d)", c)
             self.process.terminate()
             self.process.poll()
-            time.sleep(1)
+            time.sleep(2)
             if c > 5:
                 break
         if self.process.returncode is None:
-            self.write_log('[DAEMON] Killing Liquidsoap...')
+            self.logger.warn('Killing Liquidsoap...')
             self.process.kill()
-            self.write_log('[DAEMON] NACH FRANKREICH NUR AUF KETTEN')
+            self.logger.error('NACH FRANKREICH NUR AUF KETTEN')
     
     def get_log(self, offset=None):
         lo = 0
@@ -81,33 +83,41 @@ class LiquidsoapDaemon(object):
             lo = 0
         return (self.log.offset + (len(self.log)),self.log.get()[lo:])
     
-    def write_log(self, log):
-        self.log.append((time.time(), log))
-            
+    def emit(self, record):
+        self.log.append([time.time(),record.name, record.levelno, record.getMessage()])
+    
     def run(self):
         self.socket_handler.start()
-        while True:
-            try:
-                self.run_liquidsoap()
-                self.write_log('[DAEMON] Liquidsoap quit with: %s ' % (self.process.returncode, ))
-            except Exception as  err:
-                exc_type, exc_value, exc_tb = sys.exc_info()
-                for tb in traceback.format_exception(exc_type, exc_value, exc_tb):
-                    self.write_log(tb)
-            if self.run_liquid and not self.quit: # we want to autorestart liquidsoap and dont want to quit the daemon
-                self.write_log('[DAEMON] Trying to restart liquidsoap in 10 seconds')
-                btime = time.time()
-                while (time.time() - btime < 10) and not self.quit: # impatience is a gift
-                    time.sleep(.5)
-            else:
-                break
-
-            if not self.run_liquid or self.quit: # not autorestart or we want to exit the daemon 
-                break
-        time.sleep(1)
-        while not self.quit:
+        try:
+            while True:
+                try:
+                    self.run_liquidsoap()
+                    if self.process.returncode == 0:
+                        self.logger.info("Liquidsoap quit with: %d ", self.process.returncode)
+                    else:
+                        self.logger.error("Liquidsoap quit with: %d!", self.process.returncode)
+                except Exception as  err:
+                    exc_type, exc_value, exc_tb = sys.exc_info()
+                    for tb in traceback.format_exception(exc_type, exc_value, exc_tb):
+                        self.logger.error(tb)
+                if self.run_liquid and not self.quit: # we want to autorestart liquidsoap and dont want to quit the daemon
+                    self.logger.info('Trying to restart liquidsoap in 10 seconds')
+                    btime = time.time()
+                    while (time.time() - btime < 10) and not self.quit: # impatience is a gift
+                        time.sleep(.5)
+                else:
+                    break
+    
+                if not self.run_liquid or self.quit: # not autorestart or we want to exit the daemon 
+                    break
             time.sleep(1)
-        self.socket_handler.shutdown()
+            while not self.quit:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            self.logger.info('SIGINT: shutting down...')
+            self.shutdown()
+        finally:
+            self.socket_handler.shutdown()
 
     def run_liquidsoap(self):
         self.process = subprocess.Popen(['liquidsoap','-'],bufsize=-1,
@@ -115,23 +125,37 @@ class LiquidsoapDaemon(object):
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
         
-        print self.process.stdin.write(rfk.liquidsoap.gen_script(self.basedir).encode('utf-8'))
+        self.process.stdin.write(rfk.liquidsoap.gen_script().encode('utf-8'))
         
         self.process.stdin.close()
         while self.process.returncode == None:
             try:
-                
-                    
                 line = re.sub(r'^\d{4}/d{2}/d{2} d{2}:d{2}:d{2} ', '', self.process.stdout.readline()) 
                 if not (self.skip_telnet and self.telnet_ignore_pattern.search(line) is not None):
-                    self.write_log(line)
+                    self.liquidsoap_logger.info(line.rstrip("\n \t\r"))
             finally:
                 self.process.poll()
+    
+    def set_debug(self, debug):
+        if debug:
+            self.logger.setLevel(logging.DEBUG)
+        else:
+            self.logger.setLevel(logging.INFO)
 
+    def enable_stdout(self):
+        formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s - %(message)s')
+        ch = logging.StreamHandler()
+        ch.setLevel(self.logger.level)
+        ch.setFormatter(formatter)
+        self.logger.addHandler(ch)
+        self.liquidsoap_logger.addHandler(ch)
+        
 class SocketHandler(threading.Thread):
     
     def __init__(self, path, liquiddaemon):
         threading.Thread.__init__(self)
+        if os.path.exists(path):
+            raise SocketExists()
         self.path = path
         self.server = socket.socket( socket.AF_UNIX, socket.SOCK_STREAM )
         self.server.bind(self.path)

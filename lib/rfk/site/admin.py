@@ -45,7 +45,7 @@ def liquidsoap_manage():
 @login_required
 @permission_required(permission='manage-liquidsoap')
 def liquidsoap_config():
-    config = rfk.liquidsoap.gen_script(rfk.site.app.config['BASEDIR']).encode('utf-8')
+    config = rfk.liquidsoap.gen_script().encode('utf-8')
     return render_template('admin/liquidsoap/config.html', liq_config=config)
 
 @admin.route('/stream')

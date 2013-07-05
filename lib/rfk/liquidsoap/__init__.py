@@ -4,7 +4,7 @@ import rfk
 import os
 from string import Template
 from rfk.database.streaming import Relay, Stream
-
+from rfk.helper import get_path
 
 
 class LiquidInterface(object):
@@ -100,18 +100,19 @@ class LiquidSource(object):
         return "<rfk.liquidsoap.LiquidSource %s at %s>" % (self.type, self.handler)
     
 
-def gen_script(dir):
+def _get_template_path(template):
+    return os.path.join(get_path(os.path.join('rfk', 'templates', 'liquidsoap', template), internal=True))
+
+def gen_script():
     """generates liquidsoap script from templates
     """
-    bin = os.path.join(dir,'bin')
-    interface = os.path.join(bin, 'liquidsoap-handler.py')
-    logfile = os.path.join(dir, 'var', 'log', 'liquidsoap.log')
+    interface = os.path.join(get_path('bin'), 'rfk-liquidsoaphandler')
+    logfile = os.path.join(get_path(rfk.CONFIG.get('liquidsoap', 'logpath')))
     address = rfk.CONFIG.get('liquidsoap', 'address')
     port = rfk.CONFIG.get('liquidsoap', 'port')
     
     
-    template_string = open(os.path.join(dir, 'var', 'liquidsoap', 'main.liq'),
-                           'r').read()
+    template_string = open(_get_template_path('main.liq'),'r').read()
     
     template = Template(template_string)
     config = template.substitute(address=address,
@@ -138,17 +139,14 @@ def make_output(dir):
         if stream.type == Stream.TYPES.OGG:
             file = 'output_vorbis.liq'
         elif stream.type == Stream.TYPES.AACP:
-            continue
             file = 'output_aacp.liq'
         elif stream.type == Stream.TYPES.MP3:
             file = 'output_mp3.liq'
         elif stream.type == Stream.TYPES.OPUS:
-            continue
             file = 'output_opus.liq'
         else:
             continue
-        template_string = open(os.path.join(dir, 'var', 'liquidsoap', file),
-                           'r').read()
+        template_string = open(_get_template_path(file),'r').read()
         template = Template(template_string)
         master = Relay.get_master()
         script += template.substitute(name=stream.code,

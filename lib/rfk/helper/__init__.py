@@ -16,7 +16,7 @@ def get_location(address):
 def get_path(path='', internal=False):
     if os.path.isabs(path):
         return path
-         
+
     prefix, package_path = find_package(__name__)
     if prefix is not None and not internal:
         return os.path.join(prefix, path)

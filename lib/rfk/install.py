@@ -7,6 +7,9 @@ import rfk.database
 def setup_settings():
     settings = []
     settings.append(Setting.add_setting('use_icy', 'Use ICY-Tags for unplanned Shows', Setting.TYPES.INT))
+    settings.append(Setting.add_setting('icy_show_name', 'Temporary storage', Setting.TYPES.STR))
+    settings.append(Setting.add_setting('icy_show_description', 'Temporary storage', Setting.TYPES.STR))
+    settings.append(Setting.add_setting('icy_show_genre', 'Temporary storage', Setting.TYPES.STR))
     settings.append(Setting.add_setting('show_def_name', 'Default Name for new Shows', Setting.TYPES.STR))
     settings.append(Setting.add_setting('show_def_desc', 'Default Description for new Shows', Setting.TYPES.STR))
     settings.append(Setting.add_setting('show_def_tags', 'Default Tags for new Shows', Setting.TYPES.STR))
