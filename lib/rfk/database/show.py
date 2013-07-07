@@ -129,7 +129,11 @@ class Show(Base):
     
     def __repr__(self):
         return "<rfk.database.show.Show id=%d>" % (self.show,)
-        
+
+"""Show Indices"""
+Index('show_begin_idx', Show.begin)
+Index('show_end_idx', Show.end)
+
 
 class UserShow(Base):
     """connection between users and show"""

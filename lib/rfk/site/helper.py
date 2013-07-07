@@ -8,10 +8,10 @@ from rfk.database.track import Track
 import postmarkup
 import datetime
 from flaskext.babel import format_time
-from flask import request
+from flask import request, url_for
 from functools import wraps, partial
 from flask.ext.login import current_user
-
+import math
 def nowPlaying():
     track = Track.current_track()
     if track:
@@ -58,3 +58,29 @@ def permission_required(f=None, permission=None):
             return 'insufficient permissions'
         return f(*args, **kwargs)
     return decorated_function
+
+def paginate(query,page=0,per_page=25):
+    result = query.limit(per_page).offset(page*per_page).all()
+    total_pages = int(math.ceil(query.count()/per_page))
+    return (result, total_pages)
+
+def pagelinks(url, page, total_pages, visible_pages=7, param='page'):
+    pagelinks = {'first': None,
+                 'last': None,
+                 'pages': []}
+    if page > 0:
+        pagelinks['first'] = url_for(url, **{param:0})
+    if page < total_pages:
+        pagelinks['last'] = url_for(url, **{param:total_pages})
+    begin = int(page-(visible_pages/2))
+    
+    if begin+visible_pages > total_pages+1:
+        begin = total_pages+1-visible_pages
+    if begin < 0:
+        begin = 0
+    end = min(begin+visible_pages,total_pages+1)
+    for pn in range(begin,end):
+        pagelinks['pages'].append({'name':pn+1,
+                                   'active': pn == page,
+                                   'url': url_for(url, **{param:pn})})
+    return pagelinks

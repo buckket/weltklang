@@ -21,7 +21,7 @@ def main():
     
     rfk.init()
     
-    rfk.database.init_db("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
+    rfk.database.init_db("%s://%s:%s@%s/%s" % (rfk.CONFIG.get('database', 'engine'),
                                                             rfk.CONFIG.get('database', 'username'),
                                                             rfk.CONFIG.get('database', 'password'),
                                                             rfk.CONFIG.get('database', 'host'),

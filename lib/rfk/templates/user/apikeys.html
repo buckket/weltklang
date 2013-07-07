@@ -1,0 +1,39 @@
+{% from "_helpers.html" import render_field_inline %}
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{% trans %}Your Api Keys{% endtrans %}</h2>
+        <form class="form-inline well" method="POST">
+            <h4>{% trans %}Register Apikey{% endtrans %}</h4>
+            {{ render_field_inline(form.application) }}
+            {{ render_field_inline(form.description) }}
+            <button class="btn" type="submit">{% trans %}Add{% endtrans %}</button>
+        </form>
+        
+        <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Application</th>
+                <th>Description</th>
+                <th>Key</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for apikey in apikeys %}
+            <tr>
+                <td>{{ apikey.application }}</td>
+                <td>{{ apikey.description }}</td>
+                <td>{{ apikey.key }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5">No Apikeys registered</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+    </div>
+</div>
+{% endblock content%}
+{% block js %}
+{% endblock js %}

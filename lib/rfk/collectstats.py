@@ -13,9 +13,9 @@ from rfk.database.streaming import Relay
 from rfk.database.stats import RelayStatistic
 from rfk.icecast import Icecast
 from rfk.helper import now
-
+from rfk 
 rfk.init()
-init_db("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
+init_db("%s://%s:%s@%s/%s" % (rfk.CONFIG.get('database', 'engine'),
                                            rfk.CONFIG.get('database', 'username'),
                                            rfk.CONFIG.get('database', 'password'),
                                            rfk.CONFIG.get('database', 'host'),

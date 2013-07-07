@@ -24,11 +24,11 @@ from rfk.database import init_db
 
 
 rfk.init()
-init_db("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
+init_db("%s://%s:%s@%s/%s" % (rfk.CONFIG.get('database', 'engine'),
                                                rfk.CONFIG.get('database', 'username'),
                                                rfk.CONFIG.get('database', 'password'),
                                                rfk.CONFIG.get('database', 'host'),
-                                               rfk.CONFIG.get('database', 'database')))
+                                               rfk.CONFIG.get('database', 'database')), debug=True)
 from rfk.site import app
 app.template_folder = '../templates/'
 app.static_folder = '../static/'
@@ -40,4 +40,3 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
-

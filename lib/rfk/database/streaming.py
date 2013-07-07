@@ -62,6 +62,7 @@ class Listener(Base):
         listener.connect = now()
         listener.stream_relay = stream_relay
         rfk.database.session.add(listener)
+        rfk.database.session.flush()
         return listener
     
     @staticmethod
@@ -71,7 +72,10 @@ class Listener(Base):
     def set_disconnected(self):
         """updates the listener to disconnected state"""
         self.disconnect = now()
-        
+
+"""Listener Indices"""
+Index('listeners_disconnect_idx', Listener.disconnect)
+
 class Stream(Base):
     """database representation of an outputStream"""
     __tablename__ = 'streams'

@@ -196,6 +196,8 @@ def doDisconnect(userid):
             if usershow.show.flags & Show.FLAGS.UNPLANNED:
                 usershow.show.end_show()
         rfk.database.session.commit()
+        Track.current_track().end_track()
+        rfk.database.session.commit()
     else:
         print "no user found"
 
@@ -230,7 +232,7 @@ def main():
     args = parser.parse_args()
     
     rfk.init()
-    rfk.database.init_db("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
+    rfk.database.init_db("%s://%s:%s@%s/%s" % (rfk.CONFIG.get('database', 'engine'),
                                                               rfk.CONFIG.get('database', 'username'),
                                                               rfk.CONFIG.get('database', 'password'),
                                                               rfk.CONFIG.get('database', 'host'),

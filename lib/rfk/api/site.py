@@ -12,7 +12,7 @@ from rfk.api import api
 import rfk.database
 from rfk.database.streaming import Stream
 from rfk.database.show import Show, Series, Tag
-from rfk.helper import now, natural_join
+from rfk.helper import now, natural_join, make_user_link
 from rfk.site.helper import permission_required
 from rfk.database.track import Track
 
@@ -150,6 +150,7 @@ def show_add():
     
 
 @api.route('/site/show/<int:show>/edit', methods=['POST'])
+@permission_required
 def show_edit(show):
     #from rfk.site import app
     #app.logger.warn(request.form)
@@ -214,7 +215,7 @@ def now_playing():
                 ret['series'] = {'name': show.series.name}
             link_users = []
             for ushow in show.users:
-                link_users.append(_make_user_link(ushow.user))
+                link_users.append(make_user_link(ushow.user))
             ret['users'] = {'links': natural_join(link_users)}
         if track:
             ret['track'] = {'title': None,
@@ -235,6 +236,3 @@ def now_playing():
     except Exception as e:
         raise e
         return jsonify({'success':False, 'data':unicode(e)})
-
-def _make_user_link(user):
-    return '<a href="%s" title="%s">%s</a>' % ('#',user.username,user.username);

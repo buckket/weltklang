@@ -174,13 +174,13 @@ class User(Base):
     def get_total_streamtime(self):
         """Returns a timedelta Object with the users total time streamed"""
         try:
-            total_seconds =  int(rfk.database.session.query(func.sum(func.timestampdiff(text('second'), Show.begin, Show.end)))\
-                                                     .join(UserShow).filter(UserShow.status == UserShow.STATUS.STREAMED,
-                                                                            UserShow.user == self).first()[0])
+            return rfk.database.session.query(func.sum(Show.end - Show.begin))\
+                                       .join(UserShow).filter(UserShow.status == UserShow.STATUS.STREAMED,
+                                                              UserShow.user == self).first()[0]
         except TypeError:
-            total_seconds = 0
-        return timedelta(seconds=total_seconds)
-    
+            return timedelta(seconds=0)
+
+
 class Setting(Base):
     __tablename__ = 'settings'
     setting = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
