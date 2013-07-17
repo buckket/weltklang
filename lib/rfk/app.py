@@ -25,10 +25,10 @@ from rfk.database import init_db
 
 rfk.init()
 init_db("%s://%s:%s@%s/%s" % (rfk.CONFIG.get('database', 'engine'),
-                                               rfk.CONFIG.get('database', 'username'),
-                                               rfk.CONFIG.get('database', 'password'),
-                                               rfk.CONFIG.get('database', 'host'),
-                                               rfk.CONFIG.get('database', 'database')), debug=True)
+                              rfk.CONFIG.get('database', 'username'),
+                              rfk.CONFIG.get('database', 'password'),
+                              rfk.CONFIG.get('database', 'host'),
+                              rfk.CONFIG.get('database', 'database')))
 from rfk.site import app
 app.template_folder = '../templates/'
 app.static_folder = '../static/'
