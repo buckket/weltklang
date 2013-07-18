@@ -224,6 +224,10 @@ class UserSetting(Base):
  
     @staticmethod
     def set_value(user, setting, value):
+        if value == True:
+            value = 1
+        elif value == False:
+            value = 0
         try:
             us = UserSetting.query.filter(UserSetting.user == user,
                                           UserSetting.setting == setting).one()

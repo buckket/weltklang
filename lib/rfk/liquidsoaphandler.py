@@ -145,7 +145,6 @@ def doMetaData(data):
             title = song[1]
     show = init_show(user)
     track = Track.new_track(show, artist, title)
-    rfk.database.session.add(track)
     rfk.database.session.commit()
 
 def doConnect(data):
