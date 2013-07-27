@@ -28,20 +28,10 @@ from rfk.database.streaming import Listener
 from rfk.liquidsoap import LiquidInterface
 from rfk import exc as rexc
 from rfk.helper import get_path
+from rfk.log import init_db_logging
 
 username_delimiter = '|'
-
-
-def log(message):
-    """shorthand method for writing log to database
-    
-    Keyword arguments:
-    message -- string to write
-    
-    """
-    log = Log(message=message)
-    rfk.database.session.add(log)
-    rfk.database.session.commit()
+logger = init_db_logging('liquidsoaphandler')
 
 def kick():
     """shorthand method for kicking the currently connected user
@@ -64,8 +54,11 @@ def init_show(user):
         if non of them is found a new unplanned show is added and initialized
         if a new show was initialized the old one will be ended and the streamer staus will be resettet
     """
+    logger.info("init_show: entering")
+    logger.info("init_show: user {}".format(str(user)))
     show = Show.get_current_show(user)
     if show is None:
+        logger.info("init_show: None")
         show = Show()
         if user.get_setting(code='use_icy'):
             show.add_tags(Tag.parse_tags(user.get_setting(code='icy_show_genre') or ''))
@@ -78,9 +71,11 @@ def init_show(user):
         show.flags = Show.FLAGS.UNPLANNED
         show.add_user(user)
     elif show.flags == Show.FLAGS.UNPLANNED:
+        logger.info("init_show: UNPLANNED")
         #just check if there is a planned show to transition to
         s = Show.get_current_show(user, only_planned=True)
         if s is not None:
+            logger.info("init_show: found planned")
             show = s        
     us = show.get_usershow(user)
     us.status = UserShow.STATUS.STREAMING
@@ -115,19 +110,21 @@ def doAuth(username, password):
         show = Show.get_current_show(user)
         if show is not None and show.flags & Show.FLAGS.PLANNED:
             if kick():
-                log('kicked user')
+                logger.info('kicking user')
                 sys.stdout.write('false')
                 return
-        log('accepted auth for %s' %(username,))
+        logger.info('accepted auth for %s' %(username,))
         sys.stdout.write('true')
-        return
-    except rexc.base.InvalidPasswordException, rexc.base.UserNotFoundException:
-        pass
-    log('rejected auth for %s' %(username,))
-    sys.stdout.write('false')
+    except rexc.base.InvalidPasswordException:
+        logger.info('rejected auth for %s (invalid password)' %(username,))
+        sys.stdout.write('false')
+    except rexc.base.UserNotFoundException:
+        logger.info('rejected auth for %s (invalid user)' %(username,))
+        sys.stdout.write('false')
+    rfk.database.session.commit()
 
 def doMetaData(data):
-    log('meta %s' % (json.dumps(data),))
+    logger.debug('meta %s' % (json.dumps(data),))
     if 'userid' not in data or data['userid'] == 'none':
         print 'no userid'
         return
@@ -154,7 +151,7 @@ def doConnect(data):
     data -- list of headers
     
     """
-    log('auth request %s' % (json.dumps(data),))
+    logger.info('connect request %s' % (json.dumps(data),))
     try:
         auth = data['Authorization'].strip().split(' ')
         if auth[0].lower() == 'basic':
@@ -173,19 +170,21 @@ def doConnect(data):
                 user.set_setting(data['ice-description'],code='icy_show_description')
         show = init_show(user)
         rfk.database.session.commit()
-        log('accepted connect for %s' %(user.username,))
+        logger.info('accepted connect for %s' %(user.username,))
         print user.user
     except (rexc.base.UserNotFoundException, rexc.base.InvalidPasswordException, KeyError):
-        log('rejected connect')
+        logger.info('rejected connect')
         kick()
             
 
 
 def doDisconnect(userid):
-    if userid == "none":
+    logger.info('diconnect for userid %s' % (userid,))
+    if userid == "none" or userid == '':
         print "Whooops no userid?"
+        logger.warn('no userid supplied!')
         return
-    
+    rfk.database.session.commit()
     user = User.get_user(id=int(userid))
     if user:
         usershows = UserShow.query.filter(UserShow.user == user,
@@ -195,7 +194,9 @@ def doDisconnect(userid):
             if usershow.show.flags & Show.FLAGS.UNPLANNED:
                 usershow.show.end_show()
         rfk.database.session.commit()
-        Track.current_track().end_track()
+        track = Track.current_track()
+        if track:
+            track.end_track()
         rfk.database.session.commit()
     else:
         print "no user found"
@@ -236,6 +237,8 @@ def main():
                                                               rfk.CONFIG.get('database', 'password'),
                                                               rfk.CONFIG.get('database', 'host'),
                                                               rfk.CONFIG.get('database', 'database')))
+    logger.info(args.command)
+    rfk.database.session.commit()
     if args.command == 'auth':
         doAuth(args.username, args.password)
     elif args.command == 'meta':
@@ -254,5 +257,12 @@ def main():
     rfk.database.session.remove()
 
 if __name__ == '__main__':
-    sys.exit(main())
-
+    try:
+        sys.exit(main())
+    except Exception as e:
+        rfk.database.session.rollback()
+        exc_type, exc_value, exc_tb = sys.exc_info()
+        import traceback
+        logger.error(''.join(traceback.format_exception(exc_type, exc_value, exc_tb)))
+        rfk.database.session.commit()
+        raise e
