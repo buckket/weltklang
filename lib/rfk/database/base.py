@@ -180,6 +180,9 @@ class User(Base):
         except TypeError:
             return timedelta(seconds=0)
 
+    def __repr__(self):
+        return "<USER username={0}>".format(self.username)
+
 
 class Setting(Base):
     __tablename__ = 'settings'
@@ -337,7 +340,9 @@ class ApiKey(Base):
 class Log(Base):
     __tablename__ = 'log'
     log = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    timestamp = Column(UTCDateTime, default=now())
+    timestamp = Column(UTCDateTime, default=now)
+    severity = Column(Integer(unsigned=True))
+    module = Column(String(50))
     message = Column(Text)
     
 class Loop(Base):
