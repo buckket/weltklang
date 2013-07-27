@@ -1,0 +1,72 @@
+{% set sidebar=True %}
+{% extends "base.html" %}
+{% block sidebar %}
+{% include "admin/sidebar.html" %}
+{% endblock %}
+
+{% block content %}
+<h2>Logs</h2>
+<div class="row-fluid">
+	<div class="span12">
+	<div class="pagination">
+        <ul>
+            {% if pagination.first %}
+            <li><a href="{{ pagination.first }}">&laquo;</a></li>
+            {% else %}
+            <li class="disabled"><a href="#">&laquo;</a></li>
+            {% endif %}
+            {% for page in pagination.pages %}
+            <li {%if page.active %}class="active"{% endif %}><a href="{{ page.url }}">{{ page.name }}</a></li>
+            {% endfor %}
+            {% if pagination.last %}
+            <li><a href="{{ pagination.last }}">&raquo;</a></li>
+            {% else %}
+            <li class="disabled"><a href="#">&raquo;</a></li>
+            {% endif %}
+    </ul>
+    </div>
+		<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>Time</th>
+				<th>Module</th>
+				<th>Severity</th>
+				<th>message</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for log in logs %}
+			<tr>
+				<td>{{ log.timestamp | datetimeformat('short')}}</td>
+				<td>{{ log.module }}</td>
+				<td>{{ log.severity }}</td>
+				<td>{{ log.message }}</td>
+			</tr>
+			{% else %}
+			<tr>
+				<td colspan="4">No Logs</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		</table>
+	<div class="pagination">
+        <ul>
+            {% if pagination.first %}
+            <li><a href="{{ pagination.first }}">&laquo;</a></li>
+            {% else %}
+            <li class="disabled"><a href="#">&laquo;</a></li>
+            {% endif %}
+            {% for page in pagination.pages %}
+            <li {%if page.active %}class="active"{% endif %}><a href="{{ page.url }}">{{ page.name }}</a></li>
+            {% endfor %}
+            {% if pagination.last %}
+            <li><a href="{{ pagination.last }}">&raquo;</a></li>
+            {% else %}
+            <li class="disabled"><a href="#">&raquo;</a></li>
+            {% endif %}
+    </ul>
+    </div>
+	</div>
+	
+</div>
+{% endblock content%}
