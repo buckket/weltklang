@@ -13,9 +13,8 @@ import rfk.database
 from rfk.database.streaming import Stream
 from rfk.database.show import Show, Series, Tag
 from rfk.helper import now, natural_join, make_user_link
-from rfk.site.helper import permission_required
+from rfk.site.helper import permission_required, emit_error
 from rfk.database.track import Track
-
 
 def parse_datetimestring(datestring):
     cal = pdt.Calendar()
@@ -97,7 +96,7 @@ def show_info():
     return jsonify({'success':True, 'data':ret})
 
 @api.route('/site/show/add', methods=['POST'])
-@permission_required
+@permission_required(ajax=True)
 def show_add():
     try:
         if 'begin' in request.form and\
@@ -105,20 +104,21 @@ def show_add():
            'duration' in request.form and\
            'title' in request.form:
             if int(request.form['duration']) < 30:
-                return jsonify({'success':False, 'error':'Duration to short'})
+                return emit_error(6, 'Duration too short')
             if int(request.form['duration']) > 1440:
-                return jsonify({'success':False, 'error':'Duration to long'})
+                return emit_error(5, 'Duration too long')
             if len(request.form['title']) < 3:
-                return jsonify({'success':False, 'error':'Title to short'})
+                return emit_error(4, 'Title too short')
             if len(request.form['description']) == 0:
-                return jsonify({'success':False, 'error':'Description is empty'})
+                return emit_error(3, 'Description is empty')
+            
             begin = to_utc(datetime.fromtimestamp(int(request.form['begin'])))
             begin = begin.replace(second=0)
-            if begin < now():
-                return jsonify({'success':False, 'error':'You cannot enter a past date!'})
             end = begin+timedelta(minutes=int(request.form['duration']))
+            if begin < now():
+                return emit_error(2, 'You cannot enter a past date!')
             if Show.query.filter(Show.end > begin , Show.begin < end).count() > 0:
-                return jsonify({'success':False, 'error':'Your show collides with other shows'})
+                return emit_error(1, 'Your show collides with other shows')
             show = Show(begin=begin,
                         end=end,
                         name=request.form['title'],
@@ -126,72 +126,81 @@ def show_add():
                         flags=Show.FLAGS.PLANNED)
             rfk.database.session.add(show)
             show.add_user(current_user)
-            rfk.database.session.flush()
-            if 'series' in request.form and\
-               len(request.form['series']) > 0 and\
-               int(request.form['series']) > 0:
-                show.series_id = int(request.form['series'])
-            if 'tags' in request.form and\
-               len(request.form['tags']) > 0:
-                tags = Tag.parse_tags(request.form['tags'].replace(',',' '))
-                show.add_tags(tags)
-            if 'logo' in request.form and\
-               len(request.form['logo']) > 0:
-                show.logo = request.form['logo']
+            _set_show_info(show, request.form)
             rfk.database.session.commit()
-            flash('Series added successfully', 'info')
             return jsonify({'success':True, 'data':None})
         else:
-            return jsonify({'success':False, 'error':'what?!'})
+            return emit_error(0, 'Wait a second, are you trying to trick me again?!')
     except Exception as e:
         from rfk.site import app
         app.logger.error(e)
-        return jsonify({'success':False, 'error':'something went horribly wrong'})
+        return emit_error(0, 'something went horribly wrong')
     
 
 @api.route('/site/show/<int:show>/edit', methods=['POST'])
-@permission_required
+@permission_required(ajax=True)
 def show_edit(show):
-    #from rfk.site import app
-    #app.logger.warn(request.form)
     if 'begin' in request.form and\
        'description' in request.form and\
        'duration' in request.form and\
        'title' in request.form:
         if int(request.form['duration']) < 30:
-            return jsonify({'success':False, 'error':'Duration to short'})
+            return emit_error(6, 'Duration too short')
         if int(request.form['duration']) > 1440:
-            return jsonify({'success':False, 'error':'Duration to long'})
+            return emit_error(5, 'Duration too long')
         if len(request.form['title']) < 3:
-            return jsonify({'success':False, 'error':'Title to short'})
+            return emit_error(4, 'Title too short')
         if len(request.form['description']) == 0:
-            return jsonify({'success':False, 'error':'Description is empty'})
+            return emit_error(3, 'Description is empty')
+        show = Show.query.get(show)
+        if show is None:
+            return emit_error(7, 'Whoop, invalid show!')
+        if show.get_usershow(current_user) is None:
+            return emit_error(8, 'Trying to edit another user\'s show, eh?!' )
         begin = to_utc(datetime.fromtimestamp(int(request.form['begin'])))
         begin = begin.replace(second=0)
         if begin < now():
             return jsonify({'success':False, 'error':'You cannot enter a past date!'})
         end = begin+timedelta(minutes=int(request.form['duration']))
-        if Show.query.filter(Show.end > begin , Show.begin < end, Show.show != show).count() > 0:
-            return jsonify({'success':False, 'error':'Your show collides with other shows'})
-        show = Show.query.get(show)
-        if 'series' in request.form and\
-           len(request.form['series']) > 0 and\
-           int(request.form['series']) > 0:
-            show.series_id = int(request.form['series'])
-        if 'tags' in request.form and\
-           len(request.form['tags']) > 0:
-            tags = Tag.parse_tags(request.form['tags'].replace(',',' '))
-            show.add_tags(tags)
-        if 'logo' in request.form and\
-           len(request.form['logo']) > 0:
-            show.logo = request.form['logo']
+        if Show.query.filter(Show.end > begin , Show.begin < end, Show.show != show.show).count() > 0:
+            return emit_error(1, 'Your show collides with other shows')
+        show.begin = begin
+        show.end = end
+        _set_show_info(show,request.form)
         rfk.database.session.commit()
-        
+    else:
+        return emit_error(0, 'Wait a second, are you trying to trick me again?!')
     return jsonify({'success':True, 'data':None})
 
 def _check_shows(begin, end):
     return Show.query.filter(Show.begin < end, Show.end > begin).all()
 
+def _set_show_info(show,form):
+    show.name = form.get('title')
+    show.description = form.get('description')
+    #series
+    if 'series' in form and\
+       len(form['series']) and\
+       int(form['series']) > 0:
+        series = Series.query.get(int(form['series']))
+        if series:
+            show.series = series
+    else:
+        show.series = None
+    #tags
+    if 'tags[]' in form:
+        tags_str = ' '.join(form.getlist('tags[]'))
+    else:
+        tags_str = ''
+    tags = Tag.parse_tags(tags_str)
+    show.sync_tags(tags)
+    #logo
+    if 'logo' in form and\
+        len(form['logo']) > 0:
+        show.logo = form['logo']
+
+    
+    
 @api.route('/site/nowplaying')
 def now_playing():
     try:

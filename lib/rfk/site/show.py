@@ -135,7 +135,7 @@ def show_edit(show):
                                  'description': s.description,
                                  'series': s.series,
                                  'users': s.users,
-                                 'tags': " ".join(tags),
+                                 'tags': ",".join(tags),
                                  'begin': to_user_timezone(s.begin).strftime('%s'),
                                  'logo': s.logo,
                                  'show': s.show,
