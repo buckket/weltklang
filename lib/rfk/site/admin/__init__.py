@@ -23,6 +23,7 @@ import relays
 import streams
 import loops
 import liquidsoap
+import logs
 
 @admin.route('/')
 @login_required
