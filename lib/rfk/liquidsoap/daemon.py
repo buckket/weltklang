@@ -96,7 +96,7 @@ class LiquidsoapDaemon(logging.Handler):
                         self.logger.info("Liquidsoap quit with: %d ", self.process.returncode)
                     else:
                         self.logger.error("Liquidsoap quit with: %d!", self.process.returncode)
-                except Exception as  err:
+                except Exception as err:
                     exc_type, exc_value, exc_tb = sys.exc_info()
                     for tb in traceback.format_exception(exc_type, exc_value, exc_tb):
                         self.logger.error(tb)

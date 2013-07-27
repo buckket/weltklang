@@ -21,8 +21,12 @@ app.config['BABEL_DEFAULT_LOCALE'] = 'de'
 app.config['BABEL_LOCALE_PATH'] = 'de'
 app.secret_key = 'PENISPENISPENISPENISPENIS'
 
-locales = {'de': {'name':'Bernd','img':'/static/img/cb/de.png', 'datetime_format': 'dd.MM.yyyy hh:mm'},
-           'en': {'name':'English','img':'/static/img/cb/gb.png', 'datetime_format': 'MM/dd/yyyy hh:mm'}}
+locales = {'de': {'name':'Bernd',
+                  'img':'/static/img/cb/de.png',
+                  'datetime_format': 'dd.MM.yyyy hh:mm'},
+           'en': {'name':'English',
+                  'img':'/static/img/cb/gb.png',
+                  'datetime_format': 'MM/dd/yyyy hh:mm'}}
 
 def get_datetime_format():
     try:
@@ -32,8 +36,7 @@ def get_datetime_format():
 
 
 app.jinja_env.filters.update(bbcode=helper.bbcode,
-                             timedelta=helper.timedelta
-                             )
+                             timedelta=helper.timedelta)
 
 
 app.jinja_env.globals.update(nowPlaying= helper.nowPlaying)

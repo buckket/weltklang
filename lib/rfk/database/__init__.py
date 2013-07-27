@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, types
+from sqlalchemy import create_engine, types, text
 from sqlalchemy.orm import relationship, sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 import pytz
@@ -34,7 +34,25 @@ def init_db(db_uri, debug=False):
     session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=True,
                                          bind=engine))
-    Base.query = session.query_property()
     Base.metadata.create_all(bind=engine)
     Base.query = session.query_property()
+
+def drop_all_tables_and_sequences():
+    ''' 
+    Drops all tables and sequences (but not VIEWS) from a postgres database
+    '''
+
+    sequence_sql='''SELECT sequence_name FROM information_schema.sequences
+                    WHERE sequence_schema='public'
+                 '''
+    
+    table_sql='''SELECT table_name FROM information_schema.tables
+                 WHERE table_schema='public' AND table_type != 'VIEW' AND table_name NOT LIKE 'pg_ts_%%'
+              '''
+
+    for table in [name for (name, ) in engine.execute(text(table_sql))]:
+        engine.execute(text('DROP TABLE %s CASCADE' % table))
+     
+    for seq in [name for (name, ) in engine.execute(text(sequence_sql))]:
+        engine.execute(text('DROP SEQUENCE %s CASCADE' % seq))
     
