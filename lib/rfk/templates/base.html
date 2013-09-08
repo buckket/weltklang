@@ -43,8 +43,15 @@
 
   <body>
   <img src="/static/img/banner.png" style="z-index:9001;position:absolute;top:0px;left:0px;"> 
-  <div>
-  <img src="/static/img/logo.png">
+  <div class="banner clearfix">
+    <img src="/static/img/logo.png">
+    <div class="disco pull-right">
+            <div class="background"></div>
+            <div class="hp"><img src="/static/img/headphones.png" /></div>
+<!--             <div class="dj"><img src="/static/img/cb/de.png" /></div> -->
+            <div class="foreground"><img src="/static/img/disco.png" /></div>
+        <div class="text"><marquee scrollamount="2" id="ticker">...silence...</marquee></div>
+    </div>
   </div>
   {% include "menu.html"%}
     

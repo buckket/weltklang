@@ -12,9 +12,11 @@ from rfk.api import api
 import rfk.database
 from rfk.database.streaming import Stream
 from rfk.database.show import Show, Series, Tag
-from rfk.helper import now, natural_join, make_user_link
-from rfk.site.helper import permission_required, emit_error
 from rfk.database.track import Track
+from rfk.database.streaming import Listener
+from rfk.helper import now, natural_join, make_user_link, iso_country_to_countryball
+from rfk.site.helper import permission_required, emit_error
+
 
 def parse_datetimestring(datestring):
     cal = pdt.Calendar()
@@ -204,9 +206,9 @@ def _set_show_info(show,form):
 @api.route('/site/nowplaying')
 def now_playing():
     try:
-        track = Track.current_track()
-        show = Show.get_active_show()
         ret = {}
+        #gather showinfos
+        show = Show.get_active_show()
         if show:
             user = show.get_active_user()
             if show.end:
@@ -226,14 +228,20 @@ def now_playing():
             for ushow in show.users:
                 link_users.append(make_user_link(ushow.user))
             ret['users'] = {'links': natural_join(link_users)}
+            
+        #gather trackinfos
+        track = Track.current_track()
         if track:
             ret['track'] = {'title': None,
                             'artist': None,
                             }
+        
+        #gather nextshow infos
         if show and show.end:
             filter_begin = show.end
         else:
             filter_begin = now()
+        
         nextshow = Show.query.filter(Show.begin >= filter_begin).order_by(Show.begin.asc()).first();
         if nextshow:
             ret['nextshow'] = {'name': nextshow.name,
@@ -241,6 +249,14 @@ def now_playing():
                                'logo': nextshow.get_logo()}
             if nextshow.series:
                 ret['nextshow']['series'] = nextshow.series.name
+        
+        #get listenerinfo for disco
+        listeners = Listener.get_current_listeners()
+        ret['listener'] = {}
+        for listener in listeners:
+            ret['listener'].appen({'listener': listener.listener,
+                                   'county': listener.country,
+                                   'countryball': iso_country_to_countryball(listener.country)})
         return jsonify({'success':True, 'data':ret})
     except Exception as e:
         raise e

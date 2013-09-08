@@ -45,7 +45,13 @@ class Listener(Base):
                                          Listener.stream_relay == stream_relay,
                                          Listener.client == client).one()
         return listener
-        
+    
+    @staticmethod
+    def get_current_listeners():
+        """returns a listener"""
+        listeners = Listener.query.filter(Listener.disconnect == None).all()
+        return listeners
+    
     @staticmethod
     def create(address, client, useragent, stream_relay):
         """adds a new listener to the database"""
