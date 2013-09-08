@@ -11,7 +11,7 @@ from rfk.database.donations import Donation
 from rfk.database.streaming import Stream
 from rfk.site.forms.login import login_form, register_form
 from rfk.site.forms.settings import SettingsForm
-from rfk.exc.base import UserNameTakenException
+from rfk.exc.base import UserNameTakenException, UserNotFoundException
 from . import helper
 
 app = Flask(__name__,instance_relative_config=True)
@@ -170,19 +170,23 @@ def login():
     form = login_form(request.form)
     if request.method == "POST" and form.validate():
         username = form.username.data
-        user = User.get_user(username=username)
-        if user and user.check_password(password=form.password.data):
-            user.authenticated = True
-            remember = form.remember.data
-            if login_user(user, remember=remember):
-                user.last_login = now()
-                session.commit()
-                flash("Logged in!")
-                return redirect(request.args.get("next") or url_for("index"))
+        try:
+            user = User.get_user(username=username)
+            if user and user.check_password(password=form.password.data):
+                user.authenticated = True
+                remember = form.remember.data
+                if login_user(user, remember=remember):
+                    user.last_login = now()
+                    session.commit()
+                    flash("Logged in!")
+                    return redirect(request.args.get("next") or url_for("index"))
+                else:
+                    form.username.errors.append('There was an error while logging you in.')
+                    flash("Sorry, but you could not log in.")
             else:
-                form.username.errors.append('There was an error while logging you in.')
-                flash("Sorry, but you could not log in.")
-        else:
+                form.username.errors.append('Invalid User or Password.')
+                flash(u"Invalid username or password.")
+        except UserNotFoundException:
             form.username.errors.append('Invalid User or Password.')
             flash(u"Invalid username or password.")
     return render_template("login.html", form=form)
