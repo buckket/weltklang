@@ -1,6 +1,6 @@
 from flask import Flask, session, g, render_template, flash, redirect, url_for, request, jsonify, abort
 from flask.ext.login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from flaskext.babel import Babel, get_locale, get_timezone, refresh
+from flask.ext.babel import Babel, get_locale, get_timezone, refresh
 import pytz
 import datetime
 
@@ -92,6 +92,8 @@ from rfk.api import api
 app.register_blueprint(api, url_prefix='/api')
 from rfk.feeds import feeds
 app.register_blueprint(feeds, url_prefix='/feeds')
+from . import streaming
+app.register_blueprint(streaming.streaming, url_prefix='/')
 from . import backend
 app.register_blueprint(backend.backend, url_prefix='/backend')
 

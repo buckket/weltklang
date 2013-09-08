@@ -7,7 +7,7 @@ Created on 14.05.2012
 from rfk.database.track import Track
 import postmarkup
 import datetime
-from flaskext.babel import format_time
+from flask.ext.babel import format_time
 from flask import request, url_for, jsonify
 from functools import wraps, partial
 from flask.ext.login import current_user

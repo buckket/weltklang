@@ -1,4 +1,4 @@
-<div class="navbar navbar-fixed-top">
+<div class="navbar" id="navbar">
   <div class="navbar-inner">
     <div class="container-fluid">
       <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
@@ -24,6 +24,7 @@
                 {% endif %}
             {% endfor %}
         </ul>
+<!--         <span id="current-track" class="pull-right brand"><i class="icon-music"></i>NP: blahkeks - weee</span> -->
         <ul class="nav pull-right">
         {% if current_user.username %}
         	<li>
@@ -56,3 +57,4 @@
     </div>
   </div>
 </div>
+<div id="navbar-fixed-placeholder" style="height:42px;display:none;"></div>

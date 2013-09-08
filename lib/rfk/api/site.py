@@ -1,5 +1,5 @@
 from flask import jsonify, request, g, flash
-from flaskext.babel import to_user_timezone, to_utc, format_datetime
+from flask.ext.babel import to_user_timezone, to_utc, format_datetime
 from flask_login import current_user
 from sqlalchemy.sql.expression import between
 from sqlalchemy import or_

@@ -194,6 +194,8 @@ class Relay(Base):
     @staticmethod
     def get_relay(id=None, address=None, port=None):
         """returns a Relay either by id or by address and port"""
+        from rfk.site import app
+        app.logger.warn(address)
         assert id or (address and port)
         if id:
             return Relay.query.get(id)
@@ -249,6 +251,7 @@ class Relay(Base):
         """returns the StreamRelay combination for the given Stream and this Relay"""
         return StreamRelay.query.filter(StreamRelay.relay == self,
                                         StreamRelay.stream == stream).one()
+
     def get_statistic(self):
         if self.statistic is None:
             stat = Statistic(name='Listeners on %s:%s' % (self.address,self.port), identifier='lst-%s:%s' % (self.address,self.port))

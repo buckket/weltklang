@@ -1,5 +1,5 @@
 from flask import render_template, flash, request
-from flaskext.babel import lazy_gettext
+from flask.ext.babel import lazy_gettext
 
 import rfk.database
 from rfk.database.base import  ApiKey

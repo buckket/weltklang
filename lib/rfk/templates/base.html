@@ -10,10 +10,6 @@
     <!-- Le styles -->
     <link href="/static/css/bootstrap.css" rel="stylesheet">
     <style type="text/css">
-      body {
-        padding-top: 60px;
-        padding-bottom: 40px;
-      }
       .sidebar-nav {
         padding: 9px 0;
       }
@@ -45,8 +41,11 @@
 
    </head>
 
-  <body>   
-<!--   <img style="z-index:9001;position: absolute; top: 0; left: 0; border: 0;" src="/static/img/banner.png">     -->
+  <body>
+  <img src="/static/img/banner.png" style="z-index:9001;position:absolute;top:0px;left:0px;"> 
+  <div>
+  <img src="/static/img/logo.png">
+  </div>
   {% include "menu.html"%}
     
   <div class="container-fluid">
@@ -100,7 +99,26 @@
 		});
 	    </script>
 	   {% endif %}
-	{% endwith %}    
+	{% endwith %} 
+	<script>
+	var $window = $(window);
+	var $docWidth = $window.width()
+	var HeadNav = $('#navbar')
+	var HeadNavFixed = $('#navbar-fixed-placeholder')
+	var $pos = HeadNav.offset().top
+	$(document).on('load scroll', function(){
+	    var docHeight = $window.height();
+	    if($docWidth > 780 && docHeight > 500){
+	        if($window.scrollTop() >= $pos){
+	            HeadNav.addClass('navbar-fixed-top');
+	            HeadNavFixed.show();
+	        } else {
+	            HeadNav.removeClass(' navbar-fixed-top');
+	            HeadNavFixed.hide();
+	        }
+	    }
+	})
+	</script>
     {% block js %}{% endblock %}
   </body>
 </html>

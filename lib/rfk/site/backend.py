@@ -5,17 +5,16 @@ Created on Aug 11, 2012
 '''
 
 from flask import Blueprint, request, make_response
-import logging
 from rfk.database.streaming import Relay, Stream, StreamRelay, Listener
 from rfk.database import session
-
-
-log = logging.getLogger('werkzeug')
+from rfk.log import init_db_logging
 
 backend = Blueprint('icecast',__name__)
+logger = init_db_logging('IcecastBackend')
 
 @backend.route('/icecast/auth', methods=['POST'])
 def icecast_auth():
+    logger.info('icecast_auth {}'.format(request.form))
     if request.form['action'] != 'stream_auth':
         return make_response('you just went full retard', 405)
     relay = Relay.get_relay(address=request.form['server'],
@@ -28,6 +27,7 @@ def icecast_auth():
     
 @backend.route('/icecast/add', methods=['POST'])
 def icecast_add_mount():
+    logger.info('add_mount {}'.format(request.form))
     if request.form['action'] != 'mount_add':
         return make_response('you just went full retard', 405)
     relay = Relay.get_relay(address=request.form['server'],
@@ -44,6 +44,7 @@ def icecast_add_mount():
     
 @backend.route('/icecast/remove', methods=['POST'])
 def icecast_remove_mount():
+    logger.info('remove_mount {}'.format(request.form))
     if request.form['action'] != 'mount_remove':
         return make_response('you just went full retard', 405)
     relay = Relay.get_relay(address=request.form['server'],
@@ -64,7 +65,7 @@ def icecast_remove_mount():
 
 @backend.route('/icecast/listenerremove', methods=['POST'])
 def icecast_remove_listener():
-    log.warning(request.form)
+    logger.info('remove_listener {}'.format(request.form))
     if request.form['action'] != 'listener_remove':
         return make_response('you just went full retard', 405)
     relay = Relay.get_relay(address=request.form['server'],
@@ -81,7 +82,7 @@ def icecast_remove_listener():
 
 @backend.route('/icecast/listeneradd', methods=['POST'])
 def icecast_add_listener():
-    
+    logger.info('add_listener {}'.format(request.form))
     if request.form['action'] != 'listener_add':
         return make_response('you just went full retard', 405)
     relay = Relay.get_relay(address=request.form['server'],

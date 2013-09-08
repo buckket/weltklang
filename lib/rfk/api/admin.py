@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 
 from flask import jsonify, request
 from flask_login import current_user
-from flaskext.babel import to_user_timezone
+from flask.ext.babel import to_user_timezone
 
 from rfk.liquidsoap.daemon import LiquidDaemonClient
 from rfk.liquidsoap import LiquidInterface

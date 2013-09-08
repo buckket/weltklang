@@ -7,17 +7,17 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 #monkeypatch "broken" babel lib
-import flaskext.babel
+import flask.ext.babel
 import pytz
 def to_utc(datetime):
     """Convert a datetime object to UTC [s]and drop tzinfo[/s].  This is the
     opposite operation to :func:`to_user_timezone`.
     """
     if datetime.tzinfo is None:
-        datetime = flaskext.babel.get_timezone().localize(datetime)
+        datetime = flask.ext.babel.get_timezone().localize(datetime)
     return datetime.astimezone(pytz.utc).replace(tzinfo=pytz.UTC)
 
-flaskext.babel.to_utc = to_utc
+flask.ext.babel.to_utc = to_utc
 
 import rfk
 from rfk.database import init_db

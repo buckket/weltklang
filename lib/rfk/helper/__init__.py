@@ -2,7 +2,7 @@ import pytz
 import datetime
 import rfk
 import os
-from flaskext.babel import lazy_gettext
+from flask.ext.babel import lazy_gettext
 from flask import url_for
 from flask.helpers import find_package
 
