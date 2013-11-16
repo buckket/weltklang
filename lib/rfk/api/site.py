@@ -65,9 +65,14 @@ def listenerdata(start,stop):
     shows = Show.query.filter(between(Show.begin, start, stop)\
                             | between(Show.end, start, stop)).order_by(Show.begin.asc()).all()
     for show in shows:
+        sstart = int(to_user_timezone(show.begin).strftime("%s"))
+        if show.end:
+            send = int(to_user_timezone(show.end).strftime("%s"))
+        else:
+            send = int(to_user_timezone(now()).strftime("%s"))
         ret['shows'].append({'name': show.name,
-                             'b':int(to_user_timezone(show.begin).strftime("%s")),
-                             'e':int(to_user_timezone(show.end).strftime("%s")),})
+                             'b':sstart,
+                             'e':send})
     return jsonify(ret)
 
 @api.route('/site/series/query')
@@ -174,6 +179,15 @@ def show_edit(show):
         return emit_error(0, 'Wait a second, are you trying to trick me again?!')
     return jsonify({'success':True, 'data':None})
 
+@api.route('/site/show/<int:show>/delete', methods=['POST'])
+@permission_required(ajax=True)
+def show_delete(show):
+    show = Show.query.get(show)
+    if show.get_usershow(current_user) is None:
+        return emit_error(8, 'Trying to delete another user\'s show, eh?!' )
+    show.delete()
+    
+
 def _check_shows(begin, end):
     return Show.query.filter(Show.begin < end, Show.end > begin).all()
 
@@ -254,9 +268,9 @@ def now_playing():
         listeners = Listener.get_current_listeners()
         ret['listener'] = {}
         for listener in listeners:
-            ret['listener'].appen({'listener': listener.listener,
-                                   'county': listener.country,
-                                   'countryball': iso_country_to_countryball(listener.country)})
+            ret['listener'][listener.listener] = {'listener': listener.listener,
+                                                  'county': listener.country,
+                                                  'countryball': iso_country_to_countryball(listener.country)}
         return jsonify({'success':True, 'data':ret})
     except Exception as e:
         raise e
