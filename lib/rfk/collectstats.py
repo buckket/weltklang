@@ -44,7 +44,8 @@ def main():
         try:
             relay.usage = get_stats(relay)
             rs = RelayStatistic.get_relaystatistic(relay, RelayStatistic.TYPE.TRAFFIC)
-            rs.statistic.set(now(),relay.usage)
+            if relay.usage is not None:
+                rs.statistic.set(now(),relay.usage)
             rfk.database.session.commit()
         except urllib2.URLError:
             pass
