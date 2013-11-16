@@ -207,7 +207,7 @@ def doPlaylist():
 
 def doListenerCount():
     lc = Listener.get_total_listener()
-    sys.stdout.write("<icestats><source mount=\"/live.ogg\"><listeners>%d</listeners></source></icestats>" % (lc,))
+    sys.stdout.write("<icestats><source mount=\"/live.ogg\"><listeners>%d</listeners><Listeners>%d</Listeners></source></icestats>" % (lc,lc,))
 
 
 def main():

@@ -47,12 +47,12 @@ def new_series():
     return render_template('shows/seriesform.html',form=form,
                                                    imgur={'client': CONFIG.get('site', 'imgur-client')})
 
-@show.route('/calendar/week')
+@show.route('/schedule/week')
 def calendar_week():
     now = to_user_timezone(datetime.datetime.utcnow()).date()
     return calendar_week_spec(int(now.strftime('%Y')), int(now.strftime('%W'))+1)
 
-@show.route('/calendar/week/<int:year>/<int:week>')
+@show.route('/schedule/week/<int:year>/<int:week>')
 def calendar_week_spec(year, week):
     from rfk.site import app
     if week < 1:
@@ -175,9 +175,9 @@ def _get_shows(begin, end):
 
 def create_menu(endpoint):
     menu = {'name': 'Programme', 'submenu': [], 'active': False}
-    entries = [['show.upcoming', 'Upcomming Shows'],
+    entries = [['show.upcoming', 'Upcoming Shows'],
                ['show.list_series', 'Series'],
-               ['show.calendar_week', 'Calendar']]
+               ['show.calendar_week', 'Schedule']]
     for entry in entries:
         active = endpoint == entry[0]
         menu['submenu'].append({'name': entry[1],

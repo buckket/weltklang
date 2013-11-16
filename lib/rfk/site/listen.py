@@ -24,4 +24,9 @@ def stream(stream):
     """
     stream = Stream.query.get(int(stream))
     relay = Relay.query.first()
-    return make_response('', 301, {'Location':"http://%s:%s%s" % (relay.address, relay.port, stream.mount), 'X-LOAD':0})
+    #@hack DO NOT COMMIT
+    if relay.address == '192.168.122.156':
+        address = 'rfkbeta.0xfefe.org'
+    else:
+        address = relay.address
+    return make_response('', 301, {'Location':"http://%s:%s%s" % (address, relay.port, stream.mount), 'X-LOAD':0})

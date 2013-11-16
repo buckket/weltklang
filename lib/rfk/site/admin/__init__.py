@@ -24,6 +24,7 @@ import streams
 import loops
 import liquidsoap
 import logs
+import listener
 
 @admin.route('/')
 @login_required
@@ -50,6 +51,9 @@ def create_menu(endpoint):
         entries.append(['admin.liquidsoap_config', 'Liquidsoap-Config', 'admin'])
         entries.append(['admin.stream_list', 'Streams', 'admin'])
         entries.append(['admin.relay_list', 'Relays', 'admin'])
+        entries.append(['admin.user_list', 'Users', 'admin'])
+        entries.append(['admin.log_list', 'Logs', 'admin'])
+        entries.append(['admin.listener_list', 'Listeners', 'admin'])
     for entry in entries:
         active = endpoint == entry[0]
         menu['submenu'].append({'name': entry[1],

@@ -65,7 +65,7 @@ def icecast_remove_mount():
 
 @backend.route('/icecast/listenerremove', methods=['POST'])
 def icecast_remove_listener():
-    logger.info('remove_listener {}'.format(request.form))
+    #logger.info('remove_listener {}'.format(request.form))
     if request.form['action'] != 'listener_remove':
         return make_response('you just went full retard', 405)
     relay = Relay.get_relay(address=request.form['server'],

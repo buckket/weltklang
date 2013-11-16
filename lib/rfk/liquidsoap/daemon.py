@@ -120,7 +120,7 @@ class LiquidsoapDaemon(logging.Handler):
             self.socket_handler.shutdown()
 
     def run_liquidsoap(self):
-        self.process = subprocess.Popen(['liquidsoap','-'],bufsize=-1,
+        self.process = subprocess.Popen(['/usr/local/bin/liquidsoap','-'],bufsize=-1,
                            stdin=subprocess.PIPE,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)

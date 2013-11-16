@@ -38,10 +38,10 @@ def make_user_link(user):
 
 def iso_country_to_countryball(isocode):
     """returns the countryball for given isocode
-    
     omsk if file not found"""
     if isocode is None:
         return 'unknown.png'
+    isocode = isocode.lower()
     #rather dirty hack to get the path
     basepath = os.path.join(dirname(dirname(__file__)), 'static', 'img', 'cb')
     if os.path.exists(os.path.join(basepath,'{}.png'.format(isocode))):
