@@ -60,9 +60,9 @@ class Listener(Base):
             listener.address = int(netaddr.IPAddress(address))
         listener.client = client
         loc = get_location(address)
-        if 'city' in loc:
+        if 'city' in loc and loc['city'] is not None:
             listener.city = loc['city'].decode('latin-1') #FICK DICH MAXMIND
-        if 'country_code' in loc:
+        if 'country_code' in loc and loc['country_code'] is not None:
             listener.country = loc['country_code']
         listener.useragent = useragent
         listener.connect = now()
@@ -200,8 +200,6 @@ class Relay(Base):
     @staticmethod
     def get_relay(id=None, address=None, port=None):
         """returns a Relay either by id or by address and port"""
-        from rfk.site import app
-        app.logger.warn(address)
         assert id or (address and port)
         if id:
             return Relay.query.get(id)

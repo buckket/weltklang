@@ -82,7 +82,7 @@ def icecast_remove_listener():
 
 @backend.route('/icecast/listeneradd', methods=['POST'])
 def icecast_add_listener():
-    logger.info('add_listener {}'.format(request.form))
+    #logger.info('add_listener {}'.format(request.form))
     if request.form['action'] != 'listener_add':
         return make_response('you just went full retard', 405)
     relay = Relay.get_relay(address=request.form['server'],
