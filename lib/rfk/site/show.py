@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, url_for, request, redirect, flash
 from rfk.database.show import Show, Series
 import rfk.database
 from rfk import CONFIG
-from rfk.helper import natural_join, make_user_link
+from rfk.helper import natural_join, make_user_link, now
 from rfk.site import get_datetime_format
 from rfk.site.forms.show import new_series_form
 from flask.ext.login import login_required, current_user
@@ -18,7 +18,7 @@ show = Blueprint('show',__name__)
 @show.route('/shows/upcoming', defaults={'page':1})
 @show.route('/shows/upcoming/<int:page>')
 def upcoming(page):
-    shows = Show.query.filter(Show.end > datetime.datetime.today()).all()
+    shows = Show.query.filter(Show.end > now()).order_by(Show.end.asc()).all()
     return render_template('shows/upcoming.html', shows=shows)
 
 @show.route('/show/last')

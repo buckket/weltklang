@@ -76,8 +76,10 @@ def listenerdata(start,stop):
     return jsonify(ret)
 
 @api.route('/site/series/query')
+@permission_required(ajax=True)
 def series_query():
-    series = Series.query.filter(Series.name.like('%%%s%%'%request.args.get('query')),or_(Series.public == True)).limit(10)
+    series = Series.query.filter(Series.name.like('%%%s%%'%request.args.get('query')),
+                                 or_(Series.public == True, Series.user == current_user)).limit(10)
     ret = [];
     for s in series:
         ret.append({'id':s.series, 'name':s.name})
@@ -199,7 +201,7 @@ def _set_show_info(show,form):
        len(form['series']) and\
        int(form['series']) > 0:
         series = Series.query.get(int(form['series']))
-        if series:
+        if series and (series.public == True or series.user == current_user):
             show.series = series
     else:
         show.series = None
