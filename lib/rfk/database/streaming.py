@@ -153,6 +153,12 @@ class Stream(Base):
         stat = self.get_statistic()
         stat.set(now(), self.get_current_listeners())
     
+    def get_status(self):
+        available = False
+        for sr in self.relays:
+            if sr.status == StreamRelay.STATUS.ONLINE:
+                available = True
+        return available
     
 class Relay(Base):
     """database representation of a RelayServer"""

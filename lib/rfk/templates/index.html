@@ -8,7 +8,13 @@
 	       <div class="span12">
 	       <ul class="nav" style="padding:0 20px;">
 	       {% for stream in streams %}
-	           <li><a href="/listen/{{ stream.code }}"><i class="icon-play-circle"></i> Listen ({{ stream.name}})</a></li>
+	           <li>
+	               {% if stream.get_status() %}
+	           	   <a href="/listen/{{ stream.code }}"><i class="icon-play-circle"></i> Listen ({{ stream.name }})</a>
+	           	   {% else %}
+	           	   <a href="/listen/{{ stream.code }}"><i class="icon-frown"></i> Offline ({{ stream.name }})</a>
+	           	   {% endif %}
+	           </li>
 	       {% endfor %}
 	       </ul>
 	       </div>

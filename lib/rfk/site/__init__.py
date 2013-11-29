@@ -156,7 +156,6 @@ def page_not_found(e):
 def index():
     news = News.query.all()
     streams = Stream.query.all()
-    #print app.template_folder
     return render_template('index.html', news=news, streams=streams)
 
 
@@ -207,6 +206,8 @@ def register():
             if form.email.data:
                 user.mail = form.email.data
             session.commit()
+            flash(u"Registration successful")
+            return redirect(url_for("login"))
         except UserNameTakenException:
             form.username.errors.append('Username already taken!')
             
