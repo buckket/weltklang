@@ -8,11 +8,14 @@ import rfk.database
 
 
 rfk.init()
-init_db("%s://%s:%s@%s/%s" % (rfk.CONFIG.get('database', 'engine'),
-                              rfk.CONFIG.get('database', 'username'),
-                              rfk.CONFIG.get('database', 'password'),
-                              rfk.CONFIG.get('database', 'host'),
-                              rfk.CONFIG.get('database', 'database')))
+if rfk.CONFIG.has_option('database', 'url'):
+    init_db(rfk.CONFIG.get('database', 'url'))
+else:
+    init_db("%s://%s:%s@%s/%s" % (rfk.CONFIG.get('database', 'engine'),
+                                  rfk.CONFIG.get('database', 'username'),
+                                  rfk.CONFIG.get('database', 'password'),
+                                  rfk.CONFIG.get('database', 'host'),
+                                  rfk.CONFIG.get('database', 'database')))
 import rfk.install
 
 def main():
