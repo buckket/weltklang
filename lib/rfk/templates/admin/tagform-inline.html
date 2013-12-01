@@ -1,0 +1,80 @@
+<div class="modal-header">
+	<button type="button" class="close" data-dismiss="modal"
+		aria-hidden="true">×</button>
+	<h3 id="showform-label">{% trans %}Edit Tag{% endtrans %}</h3>
+</div>
+<div class="modal-body">
+	<div class="alert" id="statusbar" style="display: none;"></div>
+	<div class="row-fluid">
+		<div class="span2">{% trans %}Name{% endtrans %}</div>
+		<div class="span10">
+			<input id="name" type="text" class="span12" value="{{ tag.name }}" />
+		</div>
+	</div>
+	<div class="row-fluid">
+		<div class="span2">{% trans %}Description{% endtrans %}</div>
+		<div class="span10">
+			<input id="description" type="text" class="span12"
+				value="{{ tag.name }}" />
+		</div>
+	</div>
+	<div class="row-fluid">
+		<div class="span2">{% trans %}Description{% endtrans %}</div>
+		<div class="span10">
+			<select id="icon" class="span10">
+			<option>No Icon</option>
+			{% for tagicon in taglist %}
+				<option value="{{ tagicon }}" data-icon="{{ tagicon }}">{{
+					tagicon }}</option> {% endfor %}
+			</select>
+		</div>
+	</div>
+</div>
+<div class="modal-footer">
+	<button class="btn" data-dismiss="modal" aria-hidden="true">{%
+		trans %}Close{% endtrans %}</button>
+	<button class="btn btn-primary" onclick="submit_tag()"
+		id="submit-button">{% trans %}Save Changes{% endtrans %}</button>
+</div>
+<script>
+	function submit_tag() {
+		$('#submit-button').attr("disabled", "disabled");
+		$('#statusbar').removeClass('alert-error');
+		$('#statusbar')
+				.html(
+						'<i class="icon-spinner icon-spin"></i> {% trans %}Please wait...{% endtrans %}');
+		$('#statusbar').addClass('alert-info');
+		$('#statusbar').show();
+		$.post('/admin/tag/{{ tag.tag }}/save', {
+			name : $("#name").val(),
+			description : $("#description").val(),
+			icon : $("#icon").select2("val"),
+		}, function(data) {
+			if (!data.success) {
+				$('#statusbar').removeClass('alert-info');
+				$('#statusbar').addClass('alert-error');
+				$('#statusbar').html(
+						'<i class="icon-warning-sign"></i> ' + data.error.msg);
+			} else {
+				window.location.reload();
+			}
+			$('#submit-button').removeAttr("disabled");
+		});
+	}
+	function format(state) {
+		var originalOption = state.element;
+
+		return "<i class='" + $(originalOption).data('icon') + "'></i> "
+				+ state.text;
+	}
+
+	$(function() {
+		$("#icon").select2({
+			formatResult : format,
+			formatSelection : format,
+			escapeMarkup : function(m) {
+				return m;
+			}
+		});
+	});
+</script>

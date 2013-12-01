@@ -25,6 +25,7 @@ import loops
 import liquidsoap
 import logs
 import listener
+import tags
 
 @admin.route('/')
 @login_required
