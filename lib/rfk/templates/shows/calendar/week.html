@@ -17,7 +17,7 @@
 		    {% endfor %}
 		    {% for show in shows[d][0] %}
 		    <div class="entry" data-show="{{ show.show }}" style="top:{{ (show.offset/3600)*40 }}px;height:{{ (show.duration/3600)*40 }}px;">
-              <div class="content">{{ show.description }}</div>              
+              <div class="content">{{ show.description | bbcode | safe }}</div>              
               <div class="footer">
                 {% for tag in show.tags %}
                 <i class="{{ tag.icon }}" title="{{tag.alt}}"></i>
