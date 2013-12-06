@@ -6,7 +6,7 @@ class SeriesForm(Form):
     name = TextField('Name', [validators.Required()])
     description = TextAreaField('Description', [validators.Required()])
     public = BooleanField('Public')
-    image = HiddenField('', [validators.Required()])
+    image = HiddenField('')
     
 def new_series_form(rform):
     return SeriesForm(rform)

@@ -3,11 +3,11 @@ from flask import Blueprint, render_template, url_for, request, redirect, flash
 from rfk.database.show import Show, Series
 import rfk.database
 from rfk import CONFIG
-from rfk.helper import natural_join, make_user_link
+from rfk.helper import natural_join, make_user_link, now
 from rfk.site import get_datetime_format
 from rfk.site.forms.show import new_series_form
 from flask.ext.login import login_required, current_user
-from flaskext.babel import to_user_timezone, to_utc
+from flask.ext.babel import to_user_timezone, to_utc
 import datetime
 import pytz
 
@@ -18,7 +18,7 @@ show = Blueprint('show',__name__)
 @show.route('/shows/upcoming', defaults={'page':1})
 @show.route('/shows/upcoming/<int:page>')
 def upcoming(page):
-    shows = Show.query.filter(Show.end > datetime.datetime.today()).all()
+    shows = Show.query.filter(Show.end > now()).order_by(Show.end.asc()).all()
     return render_template('shows/upcoming.html', shows=shows)
 
 @show.route('/show/last')
@@ -47,12 +47,12 @@ def new_series():
     return render_template('shows/seriesform.html',form=form,
                                                    imgur={'client': CONFIG.get('site', 'imgur-client')})
 
-@show.route('/calendar/week')
+@show.route('/schedule/week')
 def calendar_week():
     now = to_user_timezone(datetime.datetime.utcnow()).date()
     return calendar_week_spec(int(now.strftime('%Y')), int(now.strftime('%W'))+1)
 
-@show.route('/calendar/week/<int:year>/<int:week>')
+@show.route('/schedule/week/<int:year>/<int:week>')
 def calendar_week_spec(year, week):
     from rfk.site import app
     if week < 1:
@@ -135,7 +135,7 @@ def show_edit(show):
                                  'description': s.description,
                                  'series': s.series,
                                  'users': s.users,
-                                 'tags': " ".join(tags),
+                                 'tags': ",".join(tags),
                                  'begin': to_user_timezone(s.begin).strftime('%s'),
                                  'logo': s.logo,
                                  'show': s.show,
@@ -175,9 +175,9 @@ def _get_shows(begin, end):
 
 def create_menu(endpoint):
     menu = {'name': 'Programme', 'submenu': [], 'active': False}
-    entries = [['show.upcoming', 'Upcomming Shows'],
+    entries = [['show.upcoming', 'Upcoming Shows'],
                ['show.list_series', 'Series'],
-               ['show.calendar_week', 'Calendar']]
+               ['show.calendar_week', 'Schedule']]
     for entry in entries:
         active = endpoint == entry[0]
         menu['submenu'].append({'name': entry[1],

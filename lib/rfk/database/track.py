@@ -4,6 +4,7 @@ from sqlalchemy.dialects.mysql import INTEGER as Integer
 
 from rfk.database import Base, UTCDateTime
 from rfk.helper import now
+import rfk.database
 
 from datetime import datetime
 import pytz
@@ -52,8 +53,14 @@ class Track(Base):
         title = Title.add_title(artist, title)
         if begin is None:
             begin = now()
-        return Track(title=title, begin=begin, show=show)
-    
+        track = Track(title=title, begin=begin, show=show)
+        rfk.database.session.add(track)
+        rfk.database.session.flush()
+
+"""Track Indices"""
+Index('curr_track_idx', Track.end)
+
+
 class Title(Base):
     """Artist/Title combination"""
     
@@ -77,21 +84,29 @@ class Title(Base):
     def add_title(artist, title, length=None):
         """adds and returns a new track to the database, or returns a track if it's already exsisting"""
         try:
-            t = Title.query.join(MetaTitle).join(Artist).join(MetaArtist).filter(MetaTitle.name == title,
-                                                                                 MetaArtist.name == artist).one()
+            t = Title.query.join(MetaTitle).\
+                            join(Artist).\
+                            join(MetaArtist).\
+                            filter(MetaTitle.name == title,
+                                   MetaArtist.name == artist).one()
         except exc.NoResultFound:
             a = Artist.get_artist(artist)
             t = Title(artist=a, name=title)
+            rfk.database.session.add(t)
+            rfk.database.session.flush()
         
         try:
             m = MetaTitle.query.filter(MetaTitle.title == t, MetaTitle.name == title).one()
         except exc.NoResultFound:
             m = MetaTitle(name=title, title=t)
+            rfk.database.session.add(m)
+            rfk.database.session.flush()
         
         if length is not None:
             m.update_length(length)
         return t
-    
+
+
 class MetaTitle(Base):
     """Metaclass for Titles
        this should not be used outside of Track()
@@ -118,6 +133,8 @@ class Artist(Base):
         if metaartist.artist is None:
             artist = Artist(name=name)
             metaartist.artist = artist
+            rfk.database.session.add(artist)
+            rfk.database.session.flush()
             return artist
         else:
             return metaartist.artist
@@ -141,5 +158,8 @@ class MetaArtist(Base):
         try:
             return MetaArtist.query.filter(MetaArtist.name == name).one()
         except exc.NoResultFound:
-            return MetaArtist(name=name)
+            ma = MetaArtist(name=name)
+            rfk.database.session.add(ma)
+            rfk.database.session.flush()
+            return ma
         

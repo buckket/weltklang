@@ -1,0 +1,39 @@
+{% set sidebar=True %}
+{% extends "base.html" %}
+{% block sidebar %}
+{% include "admin/sidebar.html" %}
+{% endblock %}
+
+{% block content %}
+<h2>Listener</h2>
+<div class="row-fluid">
+	<div class="span12">
+		<table class="table table-striped">
+		<thead>
+			<tr>
+			    <th>Connected</th>
+				<th>Relay</th>
+				<th>Mount</th>
+				<th>Country</th>
+				<th>City</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for li in listeners %}
+			<tr>
+				<td>{{ li.connect | datetimeformat('short')}}</td>
+				<td>{{ li.stream_relay.relay.address }}</td>
+				<td>{{ li.stream_relay.stream.name }}</td>
+				<td>{{ li.country }}</td>
+				<td>{{ li.city }}</td>
+			</tr>
+			{% else %}
+			<tr>
+				<td colspan="5">No Listeners</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		</table>
+	</div>
+</div>
+{% endblock content%}

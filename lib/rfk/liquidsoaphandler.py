@@ -27,20 +27,11 @@ from rfk.database.track import Track
 from rfk.database.streaming import Listener
 from rfk.liquidsoap import LiquidInterface
 from rfk import exc as rexc
+from rfk.helper import get_path
+from rfk.log import init_db_logging
 
 username_delimiter = '|'
-
-
-def log(message):
-    """shorthand method for writing log to database
-    
-    Keyword arguments:
-    message -- string to write
-    
-    """
-    log = Log(message=message)
-    rfk.database.session.add(log)
-    rfk.database.session.commit()
+logger = init_db_logging('liquidsoaphandler')
 
 def kick():
     """shorthand method for kicking the currently connected user
@@ -57,20 +48,35 @@ def kick():
     liquidsoap.close()
     return kicked
     
-def init_show(user, name="", description="", tags=""):
+def init_show(user):
     """inititalizes a show
         it either takes a planned show or an unplanned show if it's still running
         if non of them is found a new unplanned show is added and initialized
         if a new show was initialized the old one will be ended and the streamer staus will be resettet
     """
+    logger.info("init_show: entering")
+    logger.info("init_show: user {}".format(str(user)))
     show = Show.get_current_show(user)
     if show is None:
+        logger.info("init_show: None")
         show = Show()
-        show.add_tags(Tag.parse_tags(tags))
-        show.description = description
-        show.name = name
+        if user.get_setting(code='use_icy'):
+            show.add_tags(Tag.parse_tags(user.get_setting(code='icy_show_genre') or ''))
+            show.description = user.get_setting(code='icy_show_description') or ''
+            show.name = user.get_setting(code='icy_show_name') or ''
+        else:
+            show.add_tags(Tag.parse_tags(user.get_setting(code='show_def_tags') or ''))
+            show.description = user.get_setting(code='show_def_desc') or ''
+            show.name = user.get_setting(code='show_def_name') or ''
         show.flags = Show.FLAGS.UNPLANNED
         show.add_user(user)
+    elif show.flags == Show.FLAGS.UNPLANNED:
+        logger.info("init_show: UNPLANNED")
+        #just check if there is a planned show to transition to
+        s = Show.get_current_show(user, only_planned=True)
+        if s is not None:
+            logger.info("init_show: found planned")
+            show = s        
     us = show.get_usershow(user)
     us.status = UserShow.STATUS.STREAMING
     rfk.database.session.flush()
@@ -104,19 +110,21 @@ def doAuth(username, password):
         show = Show.get_current_show(user)
         if show is not None and show.flags & Show.FLAGS.PLANNED:
             if kick():
-                log('kicked user')
+                logger.info('kicking user')
                 sys.stdout.write('false')
                 return
-        log('accepted auth for %s' %(username,))
+        logger.info('accepted auth for %s' %(username,))
         sys.stdout.write('true')
-        return
-    except rexc.base.InvalidPasswordException, rexc.base.UserNotFoundException:
-        pass
-    log('rejected auth for %s' %(username,))
-    sys.stdout.write('false')
+    except rexc.base.InvalidPasswordException:
+        logger.info('rejected auth for %s (invalid password)' %(username,))
+        sys.stdout.write('false')
+    except rexc.base.UserNotFoundException:
+        logger.info('rejected auth for %s (invalid user)' %(username,))
+        sys.stdout.write('false')
+    rfk.database.session.commit()
 
 def doMetaData(data):
-    log('meta %s' % (json.dumps(data),))
+    logger.debug('meta %s' % (json.dumps(data),))
     if 'userid' not in data or data['userid'] == 'none':
         print 'no userid'
         return
@@ -132,20 +140,8 @@ def doMetaData(data):
             artist = song[0]
         if ('title' not in data) or (len(data['title'].strip()) == 0):
             title = song[1]
-    if user.get_setting(code='use_icy'):
-        if 'ice-genre' in data:
-            tags = data['ice-genre']
-        if 'ice-name' in data:
-            name = data['ice-name']
-        if 'ice-description' in data:
-            description = data['ice-decription']
-    else:
-        tags = user.get_setting(code='show_def_tags')
-        description = user.get_setting(code='show_def_desc')
-        name = user.get_setting(code='show_def_name')
-    show = init_show(user, name=name, description=description, tags=tags)
+    show = init_show(user)
     track = Track.new_track(show, artist, title)
-    rfk.database.session.add(track)
     rfk.database.session.commit()
 
 def doConnect(data):
@@ -155,44 +151,40 @@ def doConnect(data):
     data -- list of headers
     
     """
-    log('auth request %s' % (json.dumps(data),))
-    if 'Authorization' in data:
+    logger.info('connect request %s' % (json.dumps(data),))
+    try:
         auth = data['Authorization'].strip().split(' ')
         if auth[0].lower() == 'basic':
-            a = base64.b64decode(auth[1]).split(':', 1)
-            if a[0] == 'source':
-                a = a[1].split(username_delimiter, 1)
-            username = a[0]
-            password = a[1]
+            username, password = base64.b64decode(auth[1]).split(':', 1)
+            if username == 'source':
+                username, password = password.split(username_delimiter, 1)
         else:
-            kick()
-            return 
-        try:
-            user = User.authenticate(username, password)
-            if user.get_setting(code='use_icy'):
-                if 'ice-genre' in data:
-                    tags = data['ice-genre']
-                if 'ice-name' in data:
-                    name = data['ice-name']
-                if 'ice-description' in data:
-                    description = data['ice-decription']
-            else:
-                tags = user.get_setting(code='show_def_tags')
-                description = user.get_setting(code='show_def_desc')
-                name = user.get_setting(code='show_def_name')
-            show = init_show(user, name=name, description=description, tags=tags)
-            rfk.database.session.commit()
-            log('accepted auth for %s' %(user.username,))
-            print user.user
-        except rexc.base.InvalidPasswordException, rexc.base.UserNotFoundException:
-            log('rejected auth for %s' %(username,))
-            kick()
+            raise ValueError
+        user = User.authenticate(username, password)
+        if user.get_setting(code='use_icy'):
+            if 'ice-genre' in data:
+                user.set_setting(data['ice-genre'],code='icy_show_genre')
+            if 'ice-name' in data:
+                user.set_setting(data['ice-name'],code='icy_show_name')
+            if 'ice-description' in data:
+                user.set_setting(data['ice-description'],code='icy_show_description')
+        show = init_show(user)
+        rfk.database.session.commit()
+        logger.info('accepted connect for %s' %(user.username,))
+        print user.user
+    except (rexc.base.UserNotFoundException, rexc.base.InvalidPasswordException, KeyError):
+        logger.info('rejected connect')
+        kick()
+            
+
 
 def doDisconnect(userid):
-    if userid == "none":
+    logger.info('diconnect for userid %s' % (userid,))
+    if userid == "none" or userid == '':
         print "Whooops no userid?"
+        logger.warn('no userid supplied!')
         return
-    
+    rfk.database.session.commit()
     user = User.get_user(id=int(userid))
     if user:
         usershows = UserShow.query.filter(UserShow.user == user,
@@ -202,16 +194,20 @@ def doDisconnect(userid):
             if usershow.show.flags & Show.FLAGS.UNPLANNED:
                 usershow.show.end_show()
         rfk.database.session.commit()
+        track = Track.current_track()
+        if track:
+            track.end_track()
+        rfk.database.session.commit()
     else:
         print "no user found"
 
 def doPlaylist():
     loop = Loop.get_current_loop()
-    print os.path.join(basedir, 'var', 'music', loop.filename)
+    print os.path.join(get_path(rfk.CONFIG.get('liquidsoap', 'looppath')), loop.filename)
 
 def doListenerCount():
     lc = Listener.get_total_listener()
-    sys.stdout.write("<icestats><source mount=\"/live.ogg\"><listeners>%d</listeners></source></icestats>" % (lc,))
+    sys.stdout.write("<icestats><source mount=\"/live.ogg\"><listeners>%d</listeners><Listeners>%d</Listeners></source></icestats>" % (lc,lc,))
 
 
 def main():
@@ -235,12 +231,14 @@ def main():
     
     args = parser.parse_args()
     
-    rfk.init(basedir)
-    rfk.database.init_db("%s://%s:%s@%s/%s?charset=utf8" % (rfk.CONFIG.get('database', 'engine'),
+    rfk.init()
+    rfk.database.init_db("%s://%s:%s@%s/%s" % (rfk.CONFIG.get('database', 'engine'),
                                                               rfk.CONFIG.get('database', 'username'),
                                                               rfk.CONFIG.get('database', 'password'),
                                                               rfk.CONFIG.get('database', 'host'),
                                                               rfk.CONFIG.get('database', 'database')))
+    logger.info(args.command)
+    rfk.database.session.commit()
     if args.command == 'auth':
         doAuth(args.username, args.password)
     elif args.command == 'meta':
@@ -259,5 +257,12 @@ def main():
     rfk.database.session.remove()
 
 if __name__ == '__main__':
-    sys.exit(main())
-
+    try:
+        sys.exit(main())
+    except Exception as e:
+        rfk.database.session.rollback()
+        exc_type, exc_value, exc_tb = sys.exc_info()
+        import traceback
+        logger.error(''.join(traceback.format_exception(exc_type, exc_value, exc_tb)))
+        rfk.database.session.commit()
+        raise e

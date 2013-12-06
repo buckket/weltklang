@@ -52,7 +52,21 @@ class Show(Base):
         """adds a list of Tags to the Show"""
         for tag in tags:
             self.add_tag(tag=tag)
+    
+    def sync_tags(self, tags):
+        old_tags = []
+        for tag in self.tags:
+            old_tags.append(tag.tag)
+        for tag in tags:
+            if tag in old_tags:
+                old_tags.remove(tag)
+            self.add_tag(tag=tag)
+        for tag in old_tags:
+            ShowTag.query.filter(ShowTag.show == self,
+                                 ShowTag.tag == tag).delete()
+        rfk.database.session.flush()
             
+    
     def add_tag(self, tag=None, name=None):
         """adds a Tag to the Show either by object or by identifier"""
         assert tag or name
@@ -91,17 +105,30 @@ class Show(Base):
                               UserShow.show == self).delete()
     
     def get_usershow(self, user):
-        return UserShow.query.filter(UserShow.user == user,
-                                     UserShow.show == self).one()
-        
+        try:
+            return UserShow.query.filter(UserShow.user == user,
+                                         UserShow.show == self).one()
+        except exc.NoResultFound:
+            return None
     
     @staticmethod
-    def get_current_show(user=None):
+    def get_current_show(user=None, only_planned=False):
         """returns the current show"""
-        query = Show.query.join(UserShow).filter((between(now(), Show.begin, Show.end)) | (Show.end == None))
-        if user:
-            query = query.filter(UserShow.user == user)
-        return query.first()
+        clauses = []
+        clauses.append((between(datetime.utcnow(), Show.begin, Show.end)) | (Show.end == None))
+        clauses.append(UserShow.user == user)
+        if only_planned:
+            clauses.append(Show.flags == Show.FLAGS.PLANNED)
+        shows = Show.query.join(UserShow).filter(*clauses).all()
+        if len(shows) == 1:
+            return shows[0]
+        elif len(shows) > 1:
+            for show in shows:
+                if show.flags & Show.FLAGS.PLANNED:
+                    return show
+            return shows[0]
+        else:
+            return None
     
     @staticmethod
     def get_active_show():
@@ -126,8 +153,12 @@ class Show(Base):
             return self.series.logo
     
     def __repr__(self):
-        return "<rfk.database.show.Show id=%d>" % (self.show,)
-        
+        return "<rfk.database.show.Show id=%d flags=%s name=%s >" % (self.show,Show.FLAGS.name(self.flags), self.name)
+
+"""Show Indices"""
+Index('show_begin_idx', Show.begin)
+Index('show_end_idx', Show.end)
+
 
 class UserShow(Base):
     """connection between users and show"""

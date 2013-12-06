@@ -96,18 +96,13 @@ def dj():
     dj_id = request.args.get('dj_id', None)
     dj_name = request.args.get('dj_name', None)
 
-    if dj_id:
-        result = User.get_user(id=dj_id)
-    elif dj_name:
-        result = User.get_user(username=dj_name)
-    else:
+    try:
+        user = User.get_user(id=dj_id, username=dj_name)
+        return jsonify(wrapper({'dj': {'dj_id': user.user, 'dj_name': user.username }}))
+    except rexc.base.UserNotFoundException:
+        return jsonify(wrapper({'dj': None}))
+    except AssertionError:
         return jsonify(wrapper(None, 400, 'missing required query parameter'))
-
-    if result:
-        data = {'dj': {'dj_id': result.user, 'dj_name': result.username }}
-    else:
-        data = {'dj': None}
-    return jsonify(wrapper(data))
 
 
 @api.route('/web/current_dj')
@@ -361,9 +356,9 @@ def last_tracks():
     clauses = []
     clauses.append(Track.end < datetime.utcnow())
 
-    if dj_id:
+    if dj_id is not None:
         clauses.append(UserShow.user == User.get_user(id=dj_id))
-    if dj_name:
+    if dj_name is not None:
         clauses.append(UserShow.user == User.get_user(username=dj_name))
 
     result = Track.query.filter(*clauses).order_by(Track.end.desc()).limit(limit).all()

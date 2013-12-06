@@ -1,6 +1,6 @@
 from flask import Flask, session, g, render_template, flash, redirect, url_for, request, jsonify, abort
 from flask.ext.login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from flaskext.babel import Babel, get_locale, get_timezone, refresh
+from flask.ext.babel import Babel, get_locale, get_timezone, refresh
 import pytz
 import datetime
 
@@ -11,7 +11,7 @@ from rfk.database.donations import Donation
 from rfk.database.streaming import Stream
 from rfk.site.forms.login import login_form, register_form
 from rfk.site.forms.settings import SettingsForm
-from rfk.exc.base import UserNameTakenException
+from rfk.exc.base import UserNameTakenException, UserNotFoundException
 from . import helper
 
 app = Flask(__name__,instance_relative_config=True)
@@ -21,8 +21,12 @@ app.config['BABEL_DEFAULT_LOCALE'] = 'de'
 app.config['BABEL_LOCALE_PATH'] = 'de'
 app.secret_key = 'PENISPENISPENISPENISPENIS'
 
-locales = {'de': {'name':'Bernd','img':'/static/img/cb/de.png', 'datetime_format': 'dd.MM.yyyy hh:mm'},
-           'en': {'name':'English','img':'/static/img/cb/gb.png', 'datetime_format': 'MM/dd/yyyy hh:mm'}}
+locales = {'de': {'name':'Bernd',
+                  'img':'/static/img/cb/de.png',
+                  'datetime_format': 'dd.MM.yyyy hh:mm'},
+           'en': {'name':'English',
+                  'img':'/static/img/cb/gb.png',
+                  'datetime_format': 'MM/dd/yyyy hh:mm'}}
 
 def get_datetime_format():
     try:
@@ -32,8 +36,7 @@ def get_datetime_format():
 
 
 app.jinja_env.filters.update(bbcode=helper.bbcode,
-                             timedelta=helper.timedelta
-                             )
+                             timedelta=helper.timedelta)
 
 
 app.jinja_env.globals.update(nowPlaying= helper.nowPlaying)
@@ -89,6 +92,8 @@ from rfk.api import api
 app.register_blueprint(api, url_prefix='/api')
 from rfk.feeds import feeds
 app.register_blueprint(feeds, url_prefix='/feeds')
+from . import streaming
+app.register_blueprint(streaming.streaming, url_prefix='/')
 from . import backend
 app.register_blueprint(backend.backend, url_prefix='/backend')
 
@@ -151,7 +156,6 @@ def page_not_found(e):
 def index():
     news = News.query.all()
     streams = Stream.query.all()
-    #print app.template_folder
     return render_template('index.html', news=news, streams=streams)
 
 
@@ -165,19 +169,23 @@ def login():
     form = login_form(request.form)
     if request.method == "POST" and form.validate():
         username = form.username.data
-        user = User.get_user(username=username)
-        if user and user.check_password(password=form.password.data):
-            user.authenticated = True
-            remember = form.remember.data
-            if login_user(user, remember=remember):
-                user.last_login = now()
-                session.commit()
-                flash("Logged in!")
-                return redirect(request.args.get("next") or url_for("index"))
+        try:
+            user = User.get_user(username=username)
+            if user and user.check_password(password=form.password.data):
+                user.authenticated = True
+                remember = form.remember.data
+                if login_user(user, remember=remember):
+                    user.last_login = now()
+                    session.commit()
+                    flash("Logged in!")
+                    return redirect(request.args.get("next") or url_for("index"))
+                else:
+                    form.username.errors.append('There was an error while logging you in.')
+                    flash("Sorry, but you could not log in.")
             else:
-                form.username.errors.append('There was an error while logging you in.')
-                flash("Sorry, but you could not log in.")
-        else:
+                form.username.errors.append('Invalid User or Password.')
+                flash(u"Invalid username or password.")
+        except UserNotFoundException:
             form.username.errors.append('Invalid User or Password.')
             flash(u"Invalid username or password.")
     return render_template("login.html", form=form)
@@ -198,6 +206,8 @@ def register():
             if form.email.data:
                 user.mail = form.email.data
             session.commit()
+            flash(u"Registration successful")
+            return redirect(url_for("login"))
         except UserNameTakenException:
             form.username.errors.append('Username already taken!')
             

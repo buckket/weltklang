@@ -3,15 +3,14 @@ from flask import Blueprint, Flask, session, g, render_template, flash, redirect
 
 import rfk
 from rfk.helper import now
-from rfk.database import session
-from rfk.database.base import User
+import rfk.database
+from rfk.database.base import User, ApiKey
 from rfk.database.show import Show, UserShow
-from flask.ext.login import login_required, current_user
 
 from datetime import datetime, timedelta
 
 user = Blueprint('user',__name__)
-
+import apikey
 
 @user.route('/<user>')
 def info(user):

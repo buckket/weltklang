@@ -10,10 +10,6 @@
     <!-- Le styles -->
     <link href="/static/css/bootstrap.css" rel="stylesheet">
     <style type="text/css">
-      body {
-        padding-top: 60px;
-        padding-bottom: 40px;
-      }
       .sidebar-nav {
         padding: 9px 0;
       }
@@ -35,6 +31,7 @@
     <![endif]-->
     <link rel="stylesheet" href="/static/css/bootstrap-datetimepicker.min.css">
     <link rel="stylesheet" href="/static/css/select2.css">
+<!--     <link rel="stylesheet" href="/static/css/select2-bootstrap.css"> -->
     <link rel="stylesheet" href="/static/css/jquery.pnotify.default.css">
     <link rel="stylesheet" href="/static/css/jquery.pnotify.default.icons.css">
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -44,8 +41,18 @@
 
    </head>
 
-  <body>   
-<!--   <img style="z-index:9001;position: absolute; top: 0; left: 0; border: 0;" src="/static/img/banner.png">     -->
+  <body>
+  <img src="/static/img/banner.png" style="z-index:9001;position:absolute;top:0px;left:0px;"> 
+  <div class="banner clearfix">
+    <img src="/static/img/logo.png">
+    <div class="disco pull-right">
+            <div class="background"></div>
+            <div class="hp"><img src="/static/img/headphones.png" /></div>
+<!--             <div class="dj"><img src="/static/img/cb/de.png" /></div> -->
+            <div class="foreground"><img src="/static/img/disco.png" /></div>
+        <div class="text"><marquee scrollamount="2" id="ticker">...silence...</marquee></div>
+    </div>
+  </div>
   {% include "menu.html"%}
     
   <div class="container-fluid">
@@ -68,7 +75,7 @@
       <hr>
 
       <footer>
-        <p>&copy; Krautchan Inc.</p>
+        <p>&copy; Krautchan Inc. <a href="https://github.com/TeddyDesTodes/PyRfK">Steal our work at GitHub</a></p>
       </footer>
 
     </div>
@@ -90,16 +97,45 @@
 	   {% if messages %}
 	   <script>
 	   $(function(){
+		   $.pnotify.defaults.history = false;
+		   $.pnotify.defaults.styling = "bootstrap";
+		   var stack_bar_top = {"dir1": "down", "dir2": "right", "push": "top", "spacing1": 0, "spacing2": 0};
 		   {% for category, message in messages %}
 		    $.pnotify({
+		    	closer: false,
+		    	sticker: false,
+		    	styling: "bootstrap",
 		        text: '{{ message }}',
+		        addclass: "stack-bar-top",
 		        type: '{{ category }}',
-		        });
+		        cornerclass: "",
+		        width: "100%",
+		        stack: stack_bar_top
+		    });
 		    {% endfor %}
 		});
 	    </script>
 	   {% endif %}
-	{% endwith %}    
+	{% endwith %} 
+	<script>
+	var $window = $(window);
+	var $docWidth = $window.width()
+	var HeadNav = $('#navbar')
+	var HeadNavFixed = $('#navbar-fixed-placeholder')
+	var $pos = HeadNav.offset().top
+	$(document).on('load scroll', function(){
+	    var docHeight = $window.height();
+	    if($docWidth > 780 && docHeight > 500){
+	        if($window.scrollTop() >= $pos){
+	            HeadNav.addClass('navbar-fixed-top');
+	            HeadNavFixed.show();
+	        } else {
+	            HeadNav.removeClass(' navbar-fixed-top');
+	            HeadNavFixed.hide();
+	        }
+	    }
+	})
+	</script>
     {% block js %}{% endblock %}
   </body>
 </html>

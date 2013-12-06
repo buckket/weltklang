@@ -45,7 +45,13 @@ class Listener(Base):
                                          Listener.stream_relay == stream_relay,
                                          Listener.client == client).one()
         return listener
-        
+    
+    @staticmethod
+    def get_current_listeners():
+        """returns a listener"""
+        listeners = Listener.query.filter(Listener.disconnect == None).all()
+        return listeners
+    
     @staticmethod
     def create(address, client, useragent, stream_relay):
         """adds a new listener to the database"""
@@ -54,14 +60,15 @@ class Listener(Base):
             listener.address = int(netaddr.IPAddress(address))
         listener.client = client
         loc = get_location(address)
-        if 'city' in loc:
+        if 'city' in loc and loc['city'] is not None:
             listener.city = loc['city'].decode('latin-1') #FICK DICH MAXMIND
-        if 'country_code' in loc:
+        if 'country_code' in loc and loc['country_code'] is not None:
             listener.country = loc['country_code']
         listener.useragent = useragent
         listener.connect = now()
         listener.stream_relay = stream_relay
         rfk.database.session.add(listener)
+        rfk.database.session.flush()
         return listener
     
     @staticmethod
@@ -71,7 +78,10 @@ class Listener(Base):
     def set_disconnected(self):
         """updates the listener to disconnected state"""
         self.disconnect = now()
-        
+
+"""Listener Indices"""
+Index('listeners_disconnect_idx', Listener.disconnect)
+
 class Stream(Base):
     """database representation of an outputStream"""
     __tablename__ = 'streams'
@@ -143,6 +153,12 @@ class Stream(Base):
         stat = self.get_statistic()
         stat.set(now(), self.get_current_listeners())
     
+    def get_status(self):
+        available = False
+        for sr in self.relays:
+            if sr.status == StreamRelay.STATUS.ONLINE:
+                available = True
+        return available
     
 class Relay(Base):
     """database representation of a RelayServer"""
@@ -245,6 +261,7 @@ class Relay(Base):
         """returns the StreamRelay combination for the given Stream and this Relay"""
         return StreamRelay.query.filter(StreamRelay.relay == self,
                                         StreamRelay.stream == stream).one()
+
     def get_statistic(self):
         if self.statistic is None:
             stat = Statistic(name='Listeners on %s:%s' % (self.address,self.port), identifier='lst-%s:%s' % (self.address,self.port))

@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 
 from flask import jsonify, request
 from flask_login import current_user
-from flaskext.babel import to_user_timezone
+from flask.ext.babel import to_user_timezone
 
 from rfk.liquidsoap.daemon import LiquidDaemonClient
 from rfk.liquidsoap import LiquidInterface
@@ -21,7 +21,7 @@ from rfk.site import app
 from rfk.database.streaming import Relay
 from rfk.database.stats import RelayStatistic
 
-from rfk.helper import now
+from rfk.helper import now, get_path
 
 from rfk.api import api
 
@@ -70,7 +70,7 @@ def liquidsoap_status():
 @api.route("/site/admin/liquidsoap/start")
 @permission_required(permission='manage-liquidsoap')
 def liquidsoap_start():
-    returncode = call('rfk-liquidsoap')
+    returncode = call(os.path.join(get_path('bin'),'rfk-liquidsoap'), env=os.environ.copy())
     return jsonify({'status': returncode})
 
 @api.route("/site/admin/liquidsoap/shutdown")
@@ -100,7 +100,7 @@ def liquidsoap_log():
         lines = []
         for line in log:
             ts = to_user_timezone(datetime.utcfromtimestamp(int(line[0])))
-            lines.append((ts.isoformat(), line[1]))
+            lines.append((ts.isoformat(), line[3]))
         return jsonify({'log': lines, 'offset': offset})
     except Exception as e:
         return jsonify({'error': str(e)})

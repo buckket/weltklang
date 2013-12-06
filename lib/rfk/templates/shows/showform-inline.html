@@ -100,14 +100,14 @@ function submit_show() {
 		    duration: length,
 		    title: $("#title").val(),
 		    description: $("#description").val(),
-		    series: $("#series").val(),
-		    tags: $("#tags").val(),
+		    series: $("#series").select2("val"),
+		    tags: $("#tags").select2("val"),
 		    logo: $("#show-logo").val(),
 		   },function(data){
 			   if (!data.success) {
 				   $('#statusbar').removeClass('alert-info');
 				   $('#statusbar').addClass('alert-error');
-				   $('#statusbar').html('<i class="icon-warning-sign"></i> '+data.error);
+				   $('#statusbar').html('<i class="icon-warning-sign"></i> '+data.error.msg);
 			   } else {
 				   window.location.reload();
 			   }
@@ -120,9 +120,10 @@ $(function() {
       language: '{{ request.current_locale }}',
       pickSeconds: false
     });
-    $("#tags").select2({width:'resolve',tags:[],tokenSeparators: [" "],initSelection : function (element, callback) {
+    $("#tags").select2({width:'resolve',dropdownCss: {display: 'none'},tags:[],tokenSeparators: [","," "],initSelection : function (element, callback) {
         var data = [];
-        $(element.val().split(" ")).each(function () {
+        console.log(element.val())
+        $(element.val().split(",")).each(function () {
             data.push({id: this, text: this});
         });
         callback(data);
@@ -162,6 +163,7 @@ $(function() {
         length = {{ show.duration }};
         posturl = '/api/site/show/{{ show.show }}/edit';
        	$('#show-date').data('datetimepicker').setLocalDate(new Date({{ show.begin }}*1000));
+//         $('#tags').select2('val',"{{ show.tags }}");
     {% endif %}
     init_length('#show-length');
     

@@ -2,3 +2,5 @@ data.db
 .settings
 *.pyc
 *.mo
+.pydevproject
+.project

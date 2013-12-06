@@ -2,9 +2,10 @@ import pytz
 import datetime
 import rfk
 import os
-from flaskext.babel import lazy_gettext
+from flask.ext.babel import lazy_gettext
 from flask import url_for
 from flask.helpers import find_package
+from posixpath import dirname
 
 
 def now():
@@ -16,7 +17,7 @@ def get_location(address):
 def get_path(path='', internal=False):
     if os.path.isabs(path):
         return path
-         
+
     prefix, package_path = find_package(__name__)
     if prefix is not None and not internal:
         return os.path.join(prefix, path)
@@ -34,3 +35,16 @@ def natural_join(lst):
     
 def make_user_link(user):
     return '<a href="%s" title="%s">%s</a>' % (url_for('user.info',user=user.username),user.username,user.username);
+
+def iso_country_to_countryball(isocode):
+    """returns the countryball for given isocode
+    omsk if file not found"""
+    if isocode is None:
+        return 'unknown.png'
+    isocode = isocode.lower()
+    #rather dirty hack to get the path
+    basepath = os.path.join(dirname(dirname(__file__)), 'static', 'img', 'cb')
+    if os.path.exists(os.path.join(basepath,'{}.png'.format(isocode))):
+        return '{}.png'.format(isocode)
+    else:
+        return 'unknown.png'

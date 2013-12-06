@@ -48,7 +48,7 @@ class User(Base):
     mail = Column(String(255))
     country = Column(String(3))
     
-    register_date = Column(UTCDateTime, default=now())
+    register_date = Column(UTCDateTime, default=now)
     last_login = Column(UTCDateTime, default=None)
     
     def get_id(self):
@@ -78,14 +78,11 @@ class User(Base):
         username -- username
         password -- unencrypted password
         """
-        try:
-            user = User.get_user(username=username)
-            if user.check_password(password):
-                return user
-            else:
-                raise rexc.base.InvalidPasswordException()
-        except exc.NoResultFound:
-            raise rexc.base.UserNotFoundException()
+        user = User.get_user(username=username)
+        if user.check_password(password):
+            return user
+        else:
+            raise rexc.base.InvalidPasswordException()
             
     
     @staticmethod
@@ -97,7 +94,7 @@ class User(Base):
             else:
                 return User.query.filter(User.username == username).one()
         except exc.NoResultFound:
-            return None
+            raise rexc.base.UserNotFoundException
                 
     @staticmethod
     def check_username(username):
@@ -172,17 +169,21 @@ class User(Base):
         if setting is None:
             setting = Setting.get_setting(code)
         UserSetting.set_value(self, setting, value)
+        rfk.database.session.flush()
     
     def get_total_streamtime(self):
         """Returns a timedelta Object with the users total time streamed"""
         try:
-            total_seconds =  int(rfk.database.session.query(func.sum(func.timestampdiff(text('second'), Show.begin, Show.end)))\
-                                                     .join(UserShow).filter(UserShow.status == UserShow.STATUS.STREAMED,
-                                                                            UserShow.user == self).first()[0])
+            return rfk.database.session.query(func.sum(Show.end - Show.begin))\
+                                       .join(UserShow).filter(UserShow.status == UserShow.STATUS.STREAMED,
+                                                              UserShow.user == self).first()[0]
         except TypeError:
-            total_seconds = 0
-        return timedelta(seconds=total_seconds)
-    
+            return timedelta(seconds=0)
+
+    def __repr__(self):
+        return "<USER username={0}>".format(self.username)
+
+
 class Setting(Base):
     __tablename__ = 'settings'
     setting = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
@@ -226,6 +227,10 @@ class UserSetting(Base):
  
     @staticmethod
     def set_value(user, setting, value):
+        if value == True:
+            value = 1
+        elif value == False:
+            value = 0
         try:
             us = UserSetting.query.filter(UserSetting.user == user,
                                           UserSetting.setting == setting).one()
@@ -335,7 +340,9 @@ class ApiKey(Base):
 class Log(Base):
     __tablename__ = 'log'
     log = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
-    timestamp = Column(UTCDateTime, default=now())
+    timestamp = Column(UTCDateTime, default=now)
+    severity = Column(Integer(unsigned=True))
+    module = Column(String(50))
     message = Column(Text)
     
 class Loop(Base):
