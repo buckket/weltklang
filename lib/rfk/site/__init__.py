@@ -255,8 +255,9 @@ def donations():
         abort(500)
 
 @app.route('/player')
+@app.route('/player5/')
 def player():
-    return render_template(player.html)
+    return render_template('player.html')
 
 @app.route('/listeners')
 def listeners():
