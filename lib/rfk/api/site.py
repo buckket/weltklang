@@ -193,7 +193,7 @@ def show_delete(show):
 def _check_shows(begin, end):
     return Show.query.filter(Show.begin < end, Show.end > begin).all()
 
-def _set_show_info(show,form):
+def _set_show_info(show, form):
     show.name = form.get('title')
     show.description = form.get('description')
     #series
@@ -231,12 +231,14 @@ def now_playing():
                 end = int(to_user_timezone(show.end).strftime("%s"))*1000
             else:
                 end = None
-            ret['show'] = {'name': show.name,
+            ret['show'] = {'id': show.show,
+                           'name': show.name,
                            'begin': int(to_user_timezone(show.begin).strftime("%s"))*1000,
                            'now': int(to_user_timezone(now()).strftime("%s"))*1000,
                            'end': end,
                            'logo': show.get_logo(),
-                           'type': Show.FLAGS.name(show.flags)
+                           'type': Show.FLAGS.name(show.flags),
+                           'user': {'countryball': iso_country_to_countryball(user.country)}
                            }
             if show.series:
                 ret['series'] = {'name': show.series.name}
@@ -248,8 +250,8 @@ def now_playing():
         #gather trackinfos
         track = Track.current_track()
         if track:
-            ret['track'] = {'title': None,
-                            'artist': None,
+            ret['track'] = {'title': track.title.name,
+                            'artist': track.title.artist.name,
                             }
         
         #gather nextshow infos
@@ -257,14 +259,14 @@ def now_playing():
             filter_begin = show.end
         else:
             filter_begin = now()
-        
-        nextshow = Show.query.filter(Show.begin >= filter_begin).order_by(Show.begin.asc()).first();
-        if nextshow:
-            ret['nextshow'] = {'name': nextshow.name,
-                               'begin': int(to_user_timezone(nextshow.begin).strftime("%s"))*1000,
-                               'logo': nextshow.get_logo()}
-            if nextshow.series:
-                ret['nextshow']['series'] = nextshow.series.name
+        if request.args.get('full') == 'true':
+            nextshow = Show.query.filter(Show.begin >= filter_begin).order_by(Show.begin.asc()).first();
+            if nextshow:
+                ret['nextshow'] = {'name': nextshow.name,
+                                   'begin': int(to_user_timezone(nextshow.begin).strftime("%s"))*1000,
+                                   'logo': nextshow.get_logo()}
+                if nextshow.series:
+                    ret['nextshow']['series'] = nextshow.series.name
         
         #get listenerinfo for disco
         listeners = Listener.get_current_listeners()

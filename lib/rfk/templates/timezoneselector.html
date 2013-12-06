@@ -1,18 +1,21 @@
-<img id="timezone-image" src="/static/img/world.png" width="600" height="300" style="height:300px;width:600px;" usemap="#timezone-map" />
-<img class="timezone-pin" src="/static/img/cb/unknown.png" style="padding-top: 4px;" />
-<form class="form-inline">
-<select id="timezone-select" name="tz">
-<option>None</option>
-{% for zone in timezones %}
-<option value="{{zone}}" {% if zone == request.current_timezone %}selected="selected"{% endif %}>{{zone}}</option>
-{% endfor %}
-</select>
-<select name="lang" id="lang">
-{% for name, item in locales.items() %}
-<option value="{{ name }}" {% if name == request.current_locale %}selected="selected"{% endif %}>{{ item.name }}</option>
-{% endfor %}
-</select>
-<button class="btn">{% trans %}Set{% endtrans %}</button>
+<form class="navbar-form">
+	<img id="timezone-image" src="/static/img/world.png" width="600" height="300" style="height:300px;width:600px;" usemap="#timezone-map" />
+	<img class="timezone-pin" src="/static/img/cb/unknown.png" style="padding-top: 4px;" />
+	<div class="row-fluid">
+		<button class="btn span2">{% trans %}Set{% endtrans %}</button>
+		<select class="span5" id="timezone-select" name="tz">
+			<option>None</option>
+			{% for zone in timezones %}
+			<option value="{{zone}}" {% if zone == request.current_timezone %}selected="selected"{% endif %}>{{zone}}</option>
+			{% endfor %}
+		</select>
+		<select class="span5" name="lang" id="lang">
+			{% for name, item in locales.items() %}
+			<option value="{{ name }}" {% if name == request.current_locale %}selected="selected"{% endif %}>{{ item.name }}</option>
+			{% endfor %}
+		</select>
+		
+	</div>
 </form>
 <map name="timezone-map" id="timezone-map">
   <area data-timezone="Africa/Abidjan" data-country="CI" data-pin="293,141" data-offset="0" shape="poly" coords="290,142,287,143,288,140,286,139,286,137,287,137,286,136,287,136,286,133,290,132,290,133,291,133,293,134,295,133,296,136,295,139,295,141,290,142" />
