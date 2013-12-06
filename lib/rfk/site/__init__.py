@@ -254,6 +254,9 @@ def donations():
     else:
         abort(500)
 
+@app.route('/player')
+def player():
+    return render_template(player.html)
 
 @app.route('/listeners')
 def listeners():
@@ -264,3 +267,4 @@ def shutdown_server():
     if func is None:
         raise RuntimeError('Not running with the Werkzeug Server')
     func()
+

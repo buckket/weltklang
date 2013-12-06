@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+	<meta charset="utf-8" />
+	<title>Radio freies Krautchan :: Webplayer</title>
+	<link href="/static/player/css/reset.css" rel="stylesheet" type="text/css" media="all" />
+	<link href="/static/player/css/style.css" rel="stylesheet" type="text/css" media="all" />
+	<link href="/static/player/css/smoothness/jquery-ui-1.10.3.custom.css" rel="stylesheet" type="text/css" media="all" />
+	<script type="text/javascript">if(top.frames.length > 0) { top.location.href = self.location; }</script>
+	<script type="text/javascript" src="/static/player/js/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="/static/player/js/jquery-ui-1.10.3.custom.min.js"></script>
+	<script type="text/javascript" src="/static/player/js/script.js"></script>
+</head>
+<body>
+<div id="frontrow">
+	<p>
+		Radio wird gestartet. Einen Moment bitte ...<br />
+		<img src="/static/player/img/loader2.gif" alt="Loader 2" title="Radio wird gestartet ..." />
+	</p>
+</div>
+<div id="container">
+	<audio id="player" preload="none"> <source src="http://radio.krautchan.net/listen/stream/1" type="audio/mpeg" /> <source src="http://radio.krautchan.net/listen/stream/2" type="audio/ogg" /> </audio>
+	<div id="logo">
+		<img src="/static/player/img/logo33.png" alt="RfK Logo" />
+		<div style="clear: both;"></div>
+	</div>
+	<div id="controls">
+		<div class="controlElement" id="ctrlStartStop">
+			<img src="/static/player/img/stop.png" alt="Stop" width="17" height="17" title="Stream starten/stoppen" />
+		</div>
+		<div class="controlElement" id="volume">
+			<img style="float: left; position: static !important; cursor: inherit;" src="/static/player/img/volume.png" alt="Lautstaerke" width="17" height="15" />
+			<div id="slider"></div>
+			<div stlye="clear: both;"></div>
+		</div>
+		<div id="nowPlaying" class="controlElement">
+			<p>
+				<span class="nowPlayingTitle">Now Playing:</span><br />
+				<span id="nowPlayingTrack"><img src="img/loader.gif" alt="Loader" class="loader" title="Wird geladen..." /></span>
+			</p>
+		</div>
+		<div style="clear: left;"></div>
+	</div>
+	<div id="sublinks">
+		<ul>
+			<li><a href="http://radio.krautchan.net" target="_blank">RfK</a></li>
+			<li><a href="http://radio.krautchan.net/status.php" target="_blank">Mobiles H&ouml;ren & externe Player</a></li>
+			<li><a href="irc://irc.euirc.net/#RfK" target="_blank">IRC</a></li>
+		</ul>
+	</div>
+</div>
+</body>
+</html>
