@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8" />
+    <title>RfK :: Webplayer</title>
+    <script >if(top.frames.length > 0) { top.location.href = self.location; }</script>
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <link href="/static/css/slider.css" rel="stylesheet">
+    <link href="/static/css/html5player.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/font-awesome.min.css">
+    <!--[if IE 7]>
+    <link rel="stylesheet" href="/static/css/font-awesome-ie7.min.css">
+    <![endif]-->
+</head>
+<body>
+<div id="frontrow">
+        <p>
+                Radio wird gestartet. Einen Moment bitte ...<br />
+                <img src="/static/img/loader.gif" alt="Loader 2" title="Radio wird gestartet ..." />
+        </p>
+</div>
+<div id="container">
+        <audio id="player" preload="none">
+            <source src="http://radio.krautchan.net/listen/stream/1" type="audio/mpeg" />
+            <source src="http://radio.krautchan.net/listen/stream/2" type="audio/ogg" />
+        </audio>
+        <div id="logo">
+                <img src="/static/img/logo-small.png" alt="RfK Logo" />
+                <div style="clear: both;"></div>
+        </div>
+        <div id="controls">
+                <div class="controlElement" id="ctrlStartStop">
+                        <i class="icon-stop icon-large"></i>
+                </div>
+                <div class="controlElement" id="volume">
+                        <i class="icon-signal icon-large"></i>
+                        <div id="slider"></div>
+                        <div stlye="clear: both;"></div>
+                </div>
+                <div id="nowPlaying" class="controlElement">
+                        <p>
+                                <span class="nowPlayingTitle">Now Playing:</span><br />
+                                <span id="nowPlayingTrack"><img src="/static/img/loader.gif" alt="Loader" class="loader" title="Wird geladen..." /></span>
+                        </p>
+                </div>
+                <div style="clear: left;"></div>
+        </div>
+        <div id="sublinks">
+                <ul>
+                        <li><a href="http://radio.krautchan.net" target="_blank">RfK</a></li>
+                        <li><a href="http://radio.krautchan.net" target="_blank">Mobiles H&ouml;ren & externe Player</a></li>
+                        <li><a href="irc://irc.euirc.net/#RfK" target="_blank">IRC</a></li>
+                </ul>
+        </div>
+</div>
+<script src="/static/js/vendor/jquery.js"></script>
+<script src="/static/js/vendor/bootstrap.min.js"></script>
+<script src="/static/js/vendor/bootstrap-slider.js"></script>
+<script src="/static/js/html5player.js"></script>
+</body>
+</html>
