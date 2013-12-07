@@ -259,8 +259,10 @@ def donations():
 def listeners():
     return render_template("listenergraph.html")    
 
+
 def shutdown_server():
     func = request.environ.get('werkzeug.server.shutdown')
     if func is None:
         raise RuntimeError('Not running with the Werkzeug Server')
     func()
+
