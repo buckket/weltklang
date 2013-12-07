@@ -6,7 +6,12 @@ Created on 13.05.2012
 import rfk
 from flask import Blueprint, make_response
 from rfk.database.streaming import Stream, Relay
+from flask.templating import render_template
 listen = Blueprint('listen',__name__)
+
+@listen.route('/')
+def html5_player():
+    return render_template('html5player.html')
 
 @listen.route('/<stream>')
 def playlist(stream):
