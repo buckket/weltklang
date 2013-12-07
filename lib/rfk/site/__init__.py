@@ -254,14 +254,11 @@ def donations():
     else:
         abort(500)
 
-@app.route('/player')
-@app.route('/player5/')
-def player():
-    return render_template('player.html')
 
 @app.route('/listeners')
 def listeners():
     return render_template("listenergraph.html")    
+
 
 def shutdown_server():
     func = request.environ.get('werkzeug.server.shutdown')
