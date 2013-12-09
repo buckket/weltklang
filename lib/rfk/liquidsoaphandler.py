@@ -17,7 +17,7 @@ import sys
 import base64
 from datetime import datetime
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(os.path.join(basedir,'lib'))
+sys.path.append(os.path.join(basedir, 'lib'))
 
 import rfk
 import rfk.database 
@@ -31,7 +31,7 @@ from rfk.helper import get_path
 from rfk.log import init_db_logging
 
 username_delimiter = '|'
-logger = init_db_logging('liquidsoaphandler')
+logger = None
 
 def kick():
     """shorthand method for kicking the currently connected user
@@ -72,7 +72,7 @@ def init_show(user):
         show.add_user(user)
     elif show.flags == Show.FLAGS.UNPLANNED:
         logger.info("init_show: UNPLANNED")
-        #just check if there is a planned show to transition to
+        # just check if there is a planned show to transition to
         s = Show.get_current_show(user, only_planned=True)
         if s is not None:
             logger.info("init_show: found planned")
@@ -113,13 +113,13 @@ def doAuth(username, password):
                 logger.info('kicking user')
                 sys.stdout.write('false')
                 return
-        logger.info('accepted auth for %s' %(username,))
+        logger.info('accepted auth for %s' % (username,))
         sys.stdout.write('true')
     except rexc.base.InvalidPasswordException:
-        logger.info('rejected auth for %s (invalid password)' %(username,))
+        logger.info('rejected auth for %s (invalid password)' % (username,))
         sys.stdout.write('false')
     except rexc.base.UserNotFoundException:
-        logger.info('rejected auth for %s (invalid user)' %(username,))
+        logger.info('rejected auth for %s (invalid user)' % (username,))
         sys.stdout.write('false')
     rfk.database.session.commit()
 
@@ -132,13 +132,22 @@ def doMetaData(data):
     if user == None:
         print 'user not found'
         return
-    artist = data['artist'] or ''
-    title = data['title'] or ''
+    
+    if 'artist' in data:
+        artist = data['artist'].strip()
+    else:
+        artist = None
+        
+    if 'title' in data:
+        title = data['title'].strip()
+    else:
+        title = None
+        
     if 'song' in data:
         song = data['song'].split(' - ', 1)
-        if ('artist' not in data) or (len(data['artist'].strip()) == 0):
+        if (artist is None) or (len(artist) == 0):
             artist = song[0]
-        if ('title' not in data) or (len(data['title'].strip()) == 0):
+        if (title is None) or (len(title) == 0):
             title = song[1]
     show = init_show(user)
     track = Track.new_track(show, artist, title)
@@ -163,14 +172,14 @@ def doConnect(data):
         user = User.authenticate(username, password)
         if user.get_setting(code='use_icy'):
             if 'ice-genre' in data:
-                user.set_setting(data['ice-genre'],code='icy_show_genre')
+                user.set_setting(data['ice-genre'], code='icy_show_genre')
             if 'ice-name' in data:
-                user.set_setting(data['ice-name'],code='icy_show_name')
+                user.set_setting(data['ice-name'], code='icy_show_name')
             if 'ice-description' in data:
-                user.set_setting(data['ice-description'],code='icy_show_description')
+                user.set_setting(data['ice-description'], code='icy_show_description')
         show = init_show(user)
         rfk.database.session.commit()
-        logger.info('accepted connect for %s' %(user.username,))
+        logger.info('accepted connect for %s' % (user.username,))
         print user.user
     except (rexc.base.UserNotFoundException, rexc.base.InvalidPasswordException, KeyError):
         logger.info('rejected connect')
@@ -207,7 +216,7 @@ def doPlaylist():
 
 def doListenerCount():
     lc = Listener.get_total_listener()
-    sys.stdout.write("<icestats><source mount=\"/live.ogg\"><listeners>%d</listeners><Listeners>%d</Listeners></source></icestats>" % (lc,lc,))
+    sys.stdout.write("<icestats><source mount=\"/live.ogg\"><listeners>%d</listeners><Listeners>%d</Listeners></source></icestats>" % (lc, lc,))
 
 
 def main():
@@ -237,32 +246,37 @@ def main():
                                                               rfk.CONFIG.get('database', 'password'),
                                                               rfk.CONFIG.get('database', 'host'),
                                                               rfk.CONFIG.get('database', 'database')))
-    logger.info(args.command)
-    rfk.database.session.commit()
-    if args.command == 'auth':
-        doAuth(args.username, args.password)
-    elif args.command == 'meta':
-        data = json.loads(args.data);
-        doMetaData(data)
-    elif args.command == 'connect':
-        data = json.loads(args.data);
-        doConnect(data)
-    elif args.command == 'disconnect':
-        data = json.loads(args.data);
-        doDisconnect(data)
-    elif args.command == 'playlist':
-        doPlaylist()
-    elif args.command == 'listenercount':
-        doListenerCount()
-    rfk.database.session.remove()
-
-if __name__ == '__main__':
     try:
-        sys.exit(main())
+        global logger
+        logger = init_db_logging('liquidsoaphandler')
+        
+        logger.info(args.command)
+        rfk.database.session.commit()
+        if args.command == 'auth':
+            doAuth(args.username, args.password)
+        elif args.command == 'meta':
+            data = json.loads(args.data);
+            doMetaData(data)
+        elif args.command == 'connect':
+            data = json.loads(args.data);
+            doConnect(data)
+        elif args.command == 'disconnect':
+            data = json.loads(args.data);
+            doDisconnect(data)
+        elif args.command == 'playlist':
+            doPlaylist()
+        elif args.command == 'listenercount':
+            doListenerCount()
     except Exception as e:
         rfk.database.session.rollback()
         exc_type, exc_value, exc_tb = sys.exc_info()
         import traceback
         logger.error(''.join(traceback.format_exception(exc_type, exc_value, exc_tb)))
         rfk.database.session.commit()
-        raise e
+        print e
+    finally:
+        rfk.database.session.remove()
+
+if __name__ == '__main__':
+    sys.exit(main())
+        
