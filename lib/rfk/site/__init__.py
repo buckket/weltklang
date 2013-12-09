@@ -8,11 +8,14 @@ from rfk.helper import now
 from rfk.database import session
 from rfk.database.base import User, Anonymous, News
 from rfk.database.donations import Donation
-from rfk.database.streaming import Stream
+from rfk.database.streaming import Stream, Listener
 from rfk.site.forms.login import login_form, register_form
 from rfk.site.forms.settings import SettingsForm
 from rfk.exc.base import UserNameTakenException, UserNotFoundException
 from . import helper
+from rfk.database.track import Track
+from rfk.database.show import Show
+from flask_babel import to_user_timezone
 
 app = Flask(__name__,instance_relative_config=True)
 app.config['DEBUG'] = True
@@ -266,3 +269,80 @@ def shutdown_server():
         raise RuntimeError('Not running with the Werkzeug Server')
     func()
 
+@app.route('/player5')
+@app.route('/player')
+def html5player():
+    '''legacy url'''
+    return redirect(url_for("listen.html5_player"))
+
+@app.route('/api/')
+@app.route('/api/index.php')
+def api_legacy():
+    '''lazy people...'''
+    
+    apikey = request.args.get("apikey")
+    if apikey != '86c6c5162aa6845906cff55320ea8608991358c3':
+        return ''
+    
+    #ltid=0&w=track%2Clistener%2Cdj%2Cshow%2Cnextshows,
+    ret = {}
+    listeners = Listener.query.filter(Listener.disconnect == None).all()
+    tmp = {}
+    for listener in listeners:
+        if listener.stream_relay.stream.code in tmp:
+            tmp[listener.stream_relay.stream.code]['c'] += 1
+        else:
+            tmp[listener.stream_relay.stream.code] = {'c': 1,
+                                                      'name': listener.stream_relay.stream.code,
+                                                      'description': listener.stream_relay.stream.name}
+    ret['listener'] = tmp.values()
+    
+    currtrack = Track.current_track()
+    ltid = request.args.get("apikey")
+    if currtrack and ltid != currtrack.track:
+        ret['trackid'] = currtrack.track
+        ret['title'] = currtrack.title.name
+        ret['artist'] = currtrack.title.artist.name
+    
+    show = Show.get_active_show()
+    if show:
+        user = show.get_active_user()
+        ret['dj'] = user.username
+        ret['djid'] = user.user
+        ret['status'] = 'STREAMING'
+        ret['showbegin'] = int(to_user_timezone(show.begin).strftime("%s"))
+        if show.end:
+            ret['showend'] = int(to_user_timezone(show.end).strftime("%s"))
+        else:
+            ret['showend'] = None
+        ret['showtype'] = 'PLANNED';
+        ret['showname'] = show.name
+        ret['showdescription'] = show.description
+        ret['showid'] = show.show
+        ret['showthread'] = None;
+        ret['showdj'] = user.username
+        ret['showdjid'] = user.user
+        
+    ret['shows'] = []
+    if show and show.end:
+        filter_begin = show.end
+    else:
+        filter_begin = now()
+    nextshow = Show.query.filter(Show.begin >= filter_begin).order_by(Show.begin.asc()).first()
+    if nextshow:
+        arr = {}
+        arr['showbegin'] = int(to_user_timezone(nextshow.begin).strftime("%s"))
+        if nextshow.end:
+            arr['showend'] = int(to_user_timezone(nextshow.end).strftime("%s"))
+        else:
+            arr['showend'] = None
+        arr['showtype'] = 'PLANNED';
+        arr['showname'] = nextshow.name;
+        arr['showdescription'] = nextshow.description;
+        arr['showid'] = nextshow.show;
+        arr['showdj'] = nextshow.users[0].user.username;
+        arr['showdjid'] = nextshow.users[0].user.user;
+        arr['showthread'] = None;
+        ret['shows'].append(arr)
+    
+    return jsonify(ret)
