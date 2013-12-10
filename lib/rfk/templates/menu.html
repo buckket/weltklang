@@ -1,60 +1,61 @@
-<div class="navbar" id="navbar">
-  <div class="navbar-inner">
-    <div class="container-fluid">
-      <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+<div class="navbar navbar-default" role="navigation">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="brand" href="#">RfK</a>
-      <div class="nav-collapse collapse">
-        <ul class="nav">
-            {% for name, item in request.menu.items() %}
-                {% if item.submenu %}
-                <li class="dropdown{%if item.active %} active{% endif %}">
-                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ item.name }} <b class="caret"></b></a>
-                 <ul class="dropdown-menu">
-                 {% for sitem in item.submenu %}
-                     <li{%if sitem.active %} class="active"{% endif %}><a href="{{sitem.url}}">{{ sitem.name }}</a></li>
-                 {% endfor %}
-                 </ul>
-                </li>
-                {% else %}
-                    <li{%if item.active %} class="active"{% endif %}><a href="{{ item.url }}">{{ item.name }}</a></li>
-                {% endif %}
-            {% endfor %}
-        </ul>
-<!--         <span id="current-track" class="pull-right brand"><i class="icon-music"></i>NP: blahkeks - weee</span> -->
-        <ul class="nav pull-right">
-        {% if current_user.username %}
-        	<li>
-	            <a href="/user/{{ current_user.username }}">{{ current_user.username }}</a>
-	        </li>
-	        <li>
-	            <a href="/settings"><i class="icon-cogs"></i></a>
-	        </li>
-	        <li>
-	        	<a href="/logout"><i class="icon-signout"></i></a>
-	        </li>
-	        {% else %}
-	        
-	        <li>
-	            <form class="navbar-form" method="post" action="/login?next={{request.path}}">
-	                <input class="span2" name="username" type="text" placeholder="Username">
-	                <input class="span2" name="password" type="password" placeholder="Password">
-	                <button type="submit" class="btn">Sign in</button>
-	            </form>
-	        </li>
-	        {% endif %}
-	        <li>
-	            <li class="dropdown">
-	                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="locale-button"><i class="icon-globe"></i></a>
-	                 <div class="dropdown-menu" id="locale-placeholder" style="width:600px;"></div>
-	            </li>
-	        </li>
-        </ul>
-      </div>
     </div>
-  </div>
+    <div class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+      {% for name, item in request.menu.items() %}
+          {% if item.submenu %}
+          <li class="dropdown{%if item.active %} active{% endif %}">
+           <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ item.name }} <b class="caret"></b></a>
+           <ul class="dropdown-menu">
+           {% for sitem in item.submenu %}
+               <li{%if sitem.active %} class="active"{% endif %}><a href="{{sitem.url}}">{{ sitem.name }}</a></li>
+           {% endfor %}
+           </ul>
+          </li>
+          {% else %}
+              <li{%if item.active %} class="active"{% endif %}><a href="{{ item.url }}">{{ item.name }}</a></li>
+          {% endif %}
+      {% endfor %}
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+	      {% if current_user.username %}
+	        irgendwas
+	      {% else %}
+	      <li class="dropdown">
+	        <a href="#" class="dropdown-toggle" data-toggle="dropdown">{% trans %}Login{% endtrans %} <b class="caret"></b></a>
+	        <div class="dropdown-menu navbar-login">
+		        <form role="form" method="post" action="/login?next={{request.path}}">
+				  <div class="form-group">
+				    <input type="text" class="form-control" id="exampleInputEmail1" placeholder="{% trans %}Username{% endtrans %}">
+				  </div>
+				  <div class="form-group">
+				    <input type="password" class="form-control" id="exampleInputPassword1" placeholder="{% trans %}Password{% endtrans %}">
+				  </div>
+				  <div class="checkbox">
+				    <label>
+				      <input type="checkbox">{% trans %}Remember me{% endtrans %}
+				    </label>
+				  </div>
+                  <button type="submit" class="btn btn-default">{% trans %}Login{% endtrans %}</button>
+                </form>
+	        </div>
+          </li>
+          <li><a href="/register">{% trans %}Register{% endtrans %}</a></li>
+          
+          <li class="dropdown">
+               <a id="locale-button" data-toggle="dropdown" class="dropdown-toggle" href="#"><i class="icon-globe"></i></a>
+               <div style="width:600px;" id="locale-placeholder" class="dropdown-menu"></div>
+          </li>
+	      {% endif %}
+	  </ul>
+    </div><!--/.navbar-collapse -->
 </div>
+
 <div id="navbar-fixed-placeholder" style="height:42px;display:none;"></div>

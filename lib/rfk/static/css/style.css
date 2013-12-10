@@ -61,14 +61,14 @@ Calendar
 }
 
 .calendar .day .hour {
-	height: 20px;
+	height: 40px;
 	border-top: 1px solid #CDCDCD;
 	border-left: 1px solid #CDCDCD;
 	border-right: 1px solid #CDCDCD;
 	font-size: 1.5em;
 	font-weight: bold;
 	color: #CDCDCD;
-	padding-top: 9px;
+	padding-top: 0;
 	padding-bottom: 10px;
 	padding-left: 2px;
 }

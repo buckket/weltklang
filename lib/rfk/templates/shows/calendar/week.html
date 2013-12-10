@@ -2,18 +2,20 @@
 {% from "_helpers.html" import weekday %}
 {% extends '/shows/calendar/base.html' %}
 {% block content %}
-<div class="row-fluid calendar-head">
-<a href="{{ prev_week }}" class="prev"><i class="icon-angle-left"></i></a>
-<a href="{{ next_week }}" class="next"><i class="icon-angle-right"></i></a>
-<div>{{ monday | dateformat('long') }} - {{ sunday | dateformat('long') }}</div>
+<div class="row">
+	<div class="col-md-12 calendar-head clearfix">
+		<a href="{{ prev_week }}" class="prev"><i class="icon-angle-left"></i></a>
+		<a href="{{ next_week }}" class="next"><i class="icon-angle-right"></i></a>
+		<div>{{ monday | dateformat('long') }} - {{ sunday | dateformat('long') }}</div>
+	</div>
 </div>
-<div class="row-fluid calendar week">
+<div class="calendar week">
     {% for d in range(7) %}
     <div class="day">
         <div class="heading">{{ weekday(d) }}</div>
         <div class="hours">
 		    {% for h in range(24) %}
-		    <div class="hour">{{ (h + 8)%24  }}</div>
+		    <div class="hour">{{ "%02d" % ((h + 8) % 24) }}</div>
 		    {% endfor %}
 		    {% for show in shows[d][0] %}
 		    <div class="entry" data-show="{{ show.show }}" style="top:{{ (show.offset/3600)*40 }}px;height:{{ (show.duration/3600)*40 }}px;">
