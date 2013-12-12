@@ -350,7 +350,7 @@ def last_tracks():
 
     dj_id = request.args.get('dj_id', None)
     dj_name = request.args.get('dj_name', None)
-    limit = request.args.get('limit', 5)
+    limit = int(request.args.get('limit', 5))
     limit = limit if limit <= 50 else 50
 
     clauses = []
