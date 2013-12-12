@@ -235,7 +235,7 @@ def next_shows():
     if dj_name:
         clauses.append(UserShow.user == User.get_user(username=dj_name))
 
-    result = Show.query.filter(*clauses).order_by(Show.begin.asc()).limit(limit).all()
+    result = Show.query.join(UserShow).filter(*clauses).order_by(Show.begin.asc()).limit(limit).all()
 
     data = {'next_shows': {'shows': []}}
     if result:
@@ -286,7 +286,7 @@ def last_shows():
     if dj_name:
         clauses.append(UserShow.user == User.get_user(username=dj_name))
 
-    result = Show.query.filter(*clauses).order_by(Show.begin.desc()).limit(limit).all()
+    result = Show.query.join(UserShow).filter(*clauses).order_by(Show.begin.desc()).limit(limit).all()
 
     data = {'last_shows': {'shows': []}}
     if result:
@@ -361,7 +361,7 @@ def last_tracks():
     if dj_name is not None:
         clauses.append(UserShow.user == User.get_user(username=dj_name))
 
-    result = Track.query.filter(*clauses).order_by(Track.end.desc()).limit(limit).all()
+    result = Track.query.join(Show).join(UserShow).filter(*clauses).order_by(Track.end.desc()).limit(limit).all()
 
     data = {'last_tracks': {'tracks': []}}
     if result:
