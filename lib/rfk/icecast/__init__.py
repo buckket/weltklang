@@ -30,8 +30,13 @@ class Icecast(object):
                 total += int(total_read.text)
             for total_send in source.findall('total_bytes_send'):
                 total += int(total_send.text)
-        
         return total
+    
+    def get_output_bitrate(self, reload=False):
+        self._get_status(reload)
+        root = self.status_xml.getroot()
+        for outgoing_bitrate in root.findall('outgoing_kbitrate'):
+            return int(outgoing_bitrate.text)
     
     def get_version(self):
         self._get_status()
