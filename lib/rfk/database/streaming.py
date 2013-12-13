@@ -160,6 +160,21 @@ class Stream(Base):
                 available = True
         return available
     
+    def get_relay(self):
+        relays = Relay.query.join(StreamRelay).filter(StreamRelay.stream == self,
+                                                      StreamRelay.status == StreamRelay.STATUS.ONLINE).all()
+        minload = 2
+        minrelay = None
+        for relay in relays:
+            load = relay.get_load()
+            if relay.type == Relay.TYPE.MASTER:
+                load = load * 2
+            if relay.get_load() <= minload:
+                minload = relay.get_load()
+                minrelay = relay
+        
+        return minrelay
+    
 class Relay(Base):
     """database representation of a RelayServer"""
     __tablename__ = 'relays'
@@ -276,6 +291,12 @@ class Relay(Base):
     def update_statistic(self):
         stat = self.get_statistic()
         stat.set(now(), self.get_current_listeners())
+        
+    def get_load(self):
+        try:
+            return self.usage / float(self.bandwidth)
+        except TypeError:
+            return 0
             
 class StreamRelay(Base):
     __tablename__ = 'stream_relays'
