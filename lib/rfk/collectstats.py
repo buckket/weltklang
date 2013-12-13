@@ -54,7 +54,7 @@ def main():
                 if relay.usage is not None:
                     rs.statistic.set(now(),relay.usage)
                 rfk.database.session.commit()
-            except urllib2.URLError:
+            except urllib2.URLError as e:
                 print e
     except Exception as e:
         print e
