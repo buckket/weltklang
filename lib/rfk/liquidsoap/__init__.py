@@ -131,7 +131,7 @@ def gen_script():
 
 
 def make_lastfm():
-    script = u''
+    script = ''
 
     enabled = rfk.CONFIG.getboolean('liquidsoap', 'lastfm')
     username = rfk.CONFIG.get('liquidsoap', 'lastfmuser')
