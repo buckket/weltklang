@@ -103,6 +103,7 @@ class LiquidSource(object):
 def _get_template_path(template):
     return os.path.join(get_path(os.path.join('rfk', 'templates', 'liquidsoap', template), internal=True))
 
+
 def gen_script():
     """generates liquidsoap script from templates
     """
@@ -110,7 +111,8 @@ def gen_script():
     logfile = os.path.join(get_path(rfk.CONFIG.get('liquidsoap', 'logpath')))
     address = rfk.CONFIG.get('liquidsoap', 'address')
     port = rfk.CONFIG.get('liquidsoap', 'port')
-    
+
+    lastfm = make_lastfm()
     
     template_string = open(_get_template_path('main.liq'),'r').read()
     
@@ -118,7 +120,7 @@ def gen_script():
     config = template.substitute(address=address,
                         port=port,
                         logfile=logfile,
-                        lastFM='',
+                        lastFM=lastfm,
                         script=interface)
     if isinstance(config, str):
         config = config.decode('utf-8')
@@ -130,7 +132,19 @@ def gen_script():
 
 def make_lastfm():
     script = ''
+
+    enabled = rfk.CONFIG.getboolean('liquidsoap', 'lastfm')
+    username = rfk.CONFIG.get('liquidsoap', 'lastfmuser')
+    password = rfk.CONFIG.get('liquidsoap', 'lastfmpassword')
+
+    if enabled and username and password:
+        template_string = open(_get_template_path('lastfm.liq'),'r').read()
+        template = Template(template_string)
+        script += template.substitute(username=username,
+                                      password=password)
+
     return script
+
 
 def make_output(dir):
     script = u''
