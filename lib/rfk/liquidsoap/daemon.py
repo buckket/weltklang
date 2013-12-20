@@ -16,6 +16,7 @@ import re
 import logging
 
 import rfk.liquidsoap
+import rfk.database
 from rfk.helper import get_path
 from rfk.types import RingBuffer
 
@@ -126,6 +127,10 @@ class LiquidsoapDaemon(logging.Handler):
                            stderr=subprocess.PIPE)
         
         self.process.stdin.write(rfk.liquidsoap.gen_script().encode('utf-8'))
+        
+        #leave the database in a rather clean state
+        rfk.database.session.rollback()
+        rfk.database.session.remove()
         
         self.process.stdin.close()
         while self.process.returncode == None:

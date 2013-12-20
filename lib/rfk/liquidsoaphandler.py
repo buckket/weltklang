@@ -16,6 +16,7 @@ import os
 import sys
 import base64
 from datetime import datetime
+import chardet
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(basedir, 'lib'))
 
@@ -218,6 +219,13 @@ def doListenerCount():
     lc = Listener.get_total_listener()
     sys.stdout.write("<icestats><source mount=\"/live.ogg\"><listeners>%d</listeners><Listeners>%d</Listeners></source></icestats>" % (lc, lc,))
 
+def decode_json(jsonstr):
+    try:
+        jsonstr = unicode(jsonstr)
+    except UnicodeDecodeError:
+        guess = chardet.detect(jsonstr)
+        jsonstr = jsonstr.decode(guess['encoding'])
+    return json.loads(jsonstr)
 
 def main():
     parser = argparse.ArgumentParser(description='PyRfK Interface for liquidsoap',
@@ -255,13 +263,13 @@ def main():
         if args.command == 'auth':
             doAuth(args.username, args.password)
         elif args.command == 'meta':
-            data = json.loads(args.data);
+            data = decode_json(args.data);
             doMetaData(data)
         elif args.command == 'connect':
-            data = json.loads(args.data);
+            data = decode_json(args.data);
             doConnect(data)
         elif args.command == 'disconnect':
-            data = json.loads(args.data);
+            data = decode_json(args.data);
             doDisconnect(data)
         elif args.command == 'playlist':
             doPlaylist()
@@ -273,8 +281,8 @@ def main():
         import traceback
         logger.error(''.join(traceback.format_exception(exc_type, exc_value, exc_tb)))
         rfk.database.session.commit()
-        print e
     finally:
+        rfk.database.session.rollback()
         rfk.database.session.remove()
 
 if __name__ == '__main__':

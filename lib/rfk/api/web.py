@@ -26,6 +26,7 @@ from rfk.liquidsoap import LiquidInterface
 
 from datetime import datetime, timedelta
 from sqlalchemy import func, and_, or_, between
+from rfk.exc.base import UserNotFoundException
 
 
 def wrapper(data, ecode=0, emessage=None):
@@ -229,37 +230,39 @@ def next_shows():
 
     clauses = []
     clauses.append(Show.begin > datetime.utcnow())
-
-    if dj_id:
-        clauses.append(UserShow.user == User.get_user(id=dj_id))
-    if dj_name:
-        clauses.append(UserShow.user == User.get_user(username=dj_name))
-
-    result = Show.query.join(UserShow).filter(*clauses).order_by(Show.begin.asc()).limit(limit).all()
-
-    data = {'next_shows': {'shows': []}}
-    if result:
-        for show in result:
-
-            begin = show.begin.isoformat()
-            end = show.end.isoformat()
-
-            dj = []
-            for usershow in show.users:
-                dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status })
-
-            data['next_shows']['shows'].append({
-                'show_id': show.show,
-                'show_name': show.name,
-                'show_description': show.description,
-                'show_flags': show.flags,
-                'show_begin': begin,
-                'show_end': end,
-                'dj': dj
-            })
-    else:
-        data = {'next_shows': None}
-    return jsonify(wrapper(data))
+    try:
+        if dj_id:
+            clauses.append(UserShow.user == User.get_user(id=dj_id))
+        if dj_name:
+            clauses.append(UserShow.user == User.get_user(username=dj_name))
+    
+        result = Show.query.join(UserShow).filter(*clauses).order_by(Show.begin.asc()).limit(limit).all()
+    
+        data = {'next_shows': {'shows': []}}
+        if result:
+            for show in result:
+    
+                begin = show.begin.isoformat()
+                end = show.end.isoformat()
+    
+                dj = []
+                for usershow in show.users:
+                    dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status })
+    
+                data['next_shows']['shows'].append({
+                    'show_id': show.show,
+                    'show_name': show.name,
+                    'show_description': show.description,
+                    'show_flags': show.flags,
+                    'show_begin': begin,
+                    'show_end': end,
+                    'dj': dj
+                })
+        else:
+            data = {'next_shows': None}
+        return jsonify(wrapper(data))
+    except UserNotFoundException:
+        return jsonify(wrapper({'next_shows': None}))
 
 
 @api.route('/web/last_shows')

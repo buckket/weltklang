@@ -36,7 +36,9 @@ def main():
 
     except SocketExists:
         print 'Socket is already there, maybe another instance running?'
-        return 1
+    finally:
+        rfk.database.session.rollback()
+        rfk.database.session.remove()
 
 if __name__ == '__main__':
     sys.exit(main())
