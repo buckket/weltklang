@@ -78,6 +78,7 @@
 </div>
 <div class="modal-footer">
 	<button class="btn" data-dismiss="modal" aria-hidden="true">{% trans %}Close{% endtrans %}</button>
+	{% if show %}<button class="btn btn-danger" onclick="delete_show()" id="delete-button">{% trans %}Delete{% endtrans %}</button>{% endif %}
 	<button class="btn btn-primary" onclick="submit_show()" id="submit-button">{% if show %}{% trans %}Save Changes{% endtrans %}{% else %}{% trans %}Add Show{% endtrans %}{% endif %}</button>
 </div>
 <script>
@@ -88,6 +89,26 @@ var max_length = 1440;
 var length_step = 5;
 var length = min_length;
 var posturl = '/api/site/show/add'
+{% if show %}
+function delete_show() {
+	$('#delete-button').attr("disabled", "disabled");
+    $('#statusbar').removeClass('alert-error');
+    $('#statusbar').html('<i class="icon-spinner icon-spin"></i> {% trans %}Please wait...{% endtrans %}');
+    $('#statusbar').addClass('alert-info');
+    $('#statusbar').show();
+    $.post('/api/site/show/{{ show.show }}/delete',{},function(data){
+        if (!data.success) {
+            $('#statusbar').removeClass('alert-info');
+            $('#statusbar').addClass('alert-error');
+            $('#statusbar').html('<i class="icon-warning-sign"></i> '+data.error.msg);
+        } else {
+            //window.location.reload();
+        }
+        $('#delete-button').removeAttr("disabled");
+    });
+}
+{% endif %}
+
 function submit_show() {
 	$('#submit-button').attr("disabled", "disabled");
 	$('#statusbar').removeClass('alert-error');

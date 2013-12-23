@@ -184,10 +184,18 @@ def show_edit(show):
 @api.route('/site/show/<int:show>/delete', methods=['POST'])
 @permission_required(ajax=True)
 def show_delete(show):
+    from rfk.site import app
+    app.logger.warn('hnnngggg');
     show = Show.query.get(show)
+    if show is None:
+        return emit_error(7, 'Whoop, invalid show!')
     if show.get_usershow(current_user) is None:
         return emit_error(8, 'Trying to delete another user\'s show, eh?!' )
-    show.delete()
+    
+    app.logger.warn(rfk.database.session.delete(show))
+    
+    rfk.database.session.commit()
+    return jsonify({'success':True, 'data':None})
     
 
 def _check_shows(begin, end):
