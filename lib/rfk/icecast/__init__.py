@@ -17,7 +17,7 @@ class Icecast(object):
         request = urllib2.Request("http://%s:%s/admin/status.xml" % (self.host, self.port))
         base64string = base64.encodestring('%s:%s' % (self.username, self.password)).replace('\n', '')
         request.add_header("Authorization", "Basic %s" % base64string)   
-        result = urllib2.urlopen(request)
+        result = urllib2.urlopen(request, timeout=2)
         self.status_xml = ET.parse(result)
         result.close()
         

@@ -13,6 +13,7 @@ from rfk.database.streaming import Relay
 from rfk.database.stats import RelayStatistic
 from rfk.icecast import Icecast
 from rfk.helper import now, get_path
+import socket
 
 def get_stats(relay):
     statsfile = get_path(os.path.join('var', 'tmp', 'traffic{0}'.format(relay.relay)))
@@ -55,10 +56,19 @@ def main():
                     rs.statistic.set(now(),relay.usage)
                 rfk.database.session.commit()
             except urllib2.URLError as e:
+                rfk.database.session.rollback()
+                relay.status = Relay.STATUS.UNKNOWN
+                rfk.database.session.commit()
+                print e
+            except socket.timeout as e:
+                rfk.database.session.rollback()
+                relay.status = Relay.STATUS.UNKNOWN
+                rfk.database.session.commit()
                 print e
     except Exception as e:
         print e
     finally:
+        rfk.database.session.rollback()
         rfk.database.session.remove()
 
 if __name__ == '__main__':
