@@ -312,7 +312,7 @@ nowplaying Banner
 	float: left;
 	width: 59%;
 	padding: 20px 10px;
-	min-height: 120px;
+	min-height: 156px;
 	-webkit-background-size: cover; /*for webKit*/
 	-moz-background-size: cover; /*Mozilla*/
 	-o-background-size: cover; /*opera*/
@@ -328,7 +328,7 @@ nowplaying Banner
 	-o-background-size: cover; /*opera*/
 	background-size: cover; /*generic*/
 	background-position: center;
-	min-height: 129px;
+	min-height: 156px;
 	text-align: center;
 }
 
