@@ -3,50 +3,71 @@
 {% block content %}
 
 <h1>{% trans %}Settings{% endtrans %}</h1>
-<div class="row-fluid">
-	<div class="span12">
-	
-		<form class="form-horizontal" method="post">
-		<fieldset>
-		
-			<div id="legend">
-	     		<legend class="">{% trans %}Customize your very own {{ username }}{% endtrans %}</legend>
-	    	</div>
-			
-			<div class="row-fluid">
-				<div class="span6">
-					<h4>{% trans %}User settings{% endtrans %}</h4>
-					{{ render_field_horizontal(form.email) }}
-					{{ render_field_horizontal(form.old_password) }}
-					{{ render_field_horizontal(form.new_password) }}
-					{{ render_field_horizontal(form.new_password_retype) }}
-				</div>
-				
-				<div class="span6">
-					<h4>{% trans %}Default show settings{% endtrans %}</h4>
-					{{ render_field_horizontal(form.show_def_name) }}
-					{{ render_field_horizontal(form.show_def_desc) }}
-					{{ render_field_horizontal(form.show_def_tags) }}
-					{{ render_field_horizontal(form.show_def_logo) }}
-				</div>
-			</div>
-			
-			<div class="row-fluid">
-				<div class="span12">
-					<h4>{% trans %}Misc settings{% endtrans %}</h4>
-					{{ render_field_horizontal(form.use_icy) }}
-					
-					<div class="form-actions">
-					    <button type="submit" class="btn btn-primary">{% trans %}Save changes{% endtrans %}</button>
-					    <button type="reset" class="btn">{% trans %}Cancel{% endtrans %}</button>
-					</div>
-				
-				</div>
-			</div>
+<div class="row">
+    <div class="col-md-12">
+    
+        <form class="form-horizontal" method="post">
+        <fieldset>
+        
+            <div id="legend">
+                 <legend class="">{% trans %}Customize your very own {{ username }}{% endtrans %}</legend>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>{% trans %}User settings{% endtrans %}</h4>
+                    {{ render_field_horizontal(form.email) }}
+                    {{ render_field_horizontal(form.old_password) }}
+                    {{ render_field_horizontal(form.new_password) }}
+                    {{ render_field_horizontal(form.new_password_retype) }}
+                </div>
+                
+                <div class="col-md-6">
+                    <h4>{% trans %}Default show settings{% endtrans %}</h4>
+                    {{ render_field_horizontal(form.show_def_name) }}
+                    {{ render_field_horizontal(form.show_def_desc) }}
+                    {{ render_field_horizontal(form.show_def_tags) }}
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">{{ form.show_def_logo.label }}</label>
+                        <div class="col-sm-10">
+                            <div class="imageuploader" id="imguruploader">
+                                <span class="thumbnail"> <img class="preview" alt=""
+                                    style="height: 150px; width: 300px;">
+                                </span>
+                                <div class="actions">
+                                    <a href="#" title="upload"><i class="fa fa-pencil"></i></a>
+                                    <a href="#" title="empty"><i class="fa fa-times"></i></a>
+                                </div>
+                                <div class="status" style="display: none;">
+                                    <div class="progress progress-striped active">
+                                        <div class="bar" style="width: 100%;"></div>
+                                    </div>
+                                </div>
+                                <input style="visibility: collapse; width: 0px; height: 0px;"
+                                    type="file">
+                            </div>
+                        </div>
+                    </div>
+                    {{ form.show_def_logo }}
+                </div>
+            </div>
+            
+            <div class="row-fluid">
+                <div class="span12">
+                    <h4>{% trans %}Misc settings{% endtrans %}</h4>
+                    {{ render_field_horizontal(form.use_icy) }}
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">{% trans %}Save changes{% endtrans %}</button>
+                        <button type="reset" class="btn">{% trans %}Cancel{% endtrans %}</button>
+                    </div>
+                
+                </div>
+            </div>
 
-		</fieldset>
-		</form>
-	</div>
+        </fieldset>
+        </form>
+    </div>
 </div>
 
 {% endblock %}

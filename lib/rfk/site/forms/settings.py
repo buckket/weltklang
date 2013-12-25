@@ -12,10 +12,10 @@ class SettingsForm(Form):
     email = TextField('E-Mail', [validators.Optional(), validators.Email(), validators.Length(max=255, message='Address too long.')])
     
     # default show settings
-    show_def_name = TextField('Default show name', [validators.Optional(), validators.Length(max=255, message='Show name too long.')])
-    show_def_desc = TextField('Default show description', [validators.Optional(), validators.Length(max=255, message='Show description too long.')])
-    show_def_tags = TextField('Default show tags', [validators.Optional(), validators.Length(max=255, message='Show tags too long.')])
-    show_def_logo = TextField('Default show logo', [validators.Optional()])
+    show_def_name = TextField('Name', [validators.Optional(), validators.Length(max=255, message='Show name too long.')])
+    show_def_desc = TextField('Description', [validators.Optional(), validators.Length(max=255, message='Show description too long.')])
+    show_def_tags = TextField('Tags', [validators.Optional(), validators.Length(max=255, message='Show tags too long.')])
+    show_def_logo = HiddenField('Logo', [validators.Optional()])
     
     # misc settings
     use_icy = BooleanField('Use ICY-Tags for unplanned shows',[validators.Optional()])

@@ -1,18 +1,12 @@
 @font-face {
-  font-family: 'Days One';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Days One'), local('DaysOne-Regular'), url(/static/font/daysone.woff) format('woff');
-}
-@font-face {
   font-family: 'Oswald';
   font-style: normal;
   font-weight: 400;
-  src: local('Oswald Regular'), local('Oswald-Regular'), url(/static/font/oswald.woff) format('woff');
+  src: local('Oswald Regular'), local('Oswald-Regular'), url(/static/fonts/oswald.woff) format('woff');
 }
 
 body {
-  font-family: 'Oswald Regular', sans-serif;
+  font-family: 'Oswald Regular', sans-serif !important;
 }
 
 /*
@@ -259,17 +253,20 @@ Imgur Uploader
 
 .imageuploader .actions {
 	background-color: #000000;
-	border-radius: 5px 5px 5px 5px;
-	height: 16px;
+	border-radius: 2px 2px 2px 2px;
+	height: 32px;
 	left: 50%;
-	margin-left: -24px;
-	margin-top: -13px;
-	opacity: 0;
+	margin-left: -31px;
+	margin-top: -25px;
+	display: none;
 	padding: 5px 8px;
 	position: absolute;
 	top: 50%;
 	transition: opacity 0.3s ease-in-out 0s;
-	width: 32px;
+	width: 62px;
+}
+.imageuploader .actions a {
+	margin: 0 5px;
 }
 
 .imageuploader .status {
@@ -286,7 +283,7 @@ Imgur Uploader
 }
 
 .imageuploader:hover .actions {
-	opacity: 1;
+	display: block;
 }
 /*
  END Imgur Uploader
@@ -331,7 +328,7 @@ nowplaying Banner
 	-o-background-size: cover; /*opera*/
 	background-size: cover; /*generic*/
 	background-position: center;
-	min-height: 160px;
+	min-height: 129px;
 	text-align: center;
 }
 

@@ -1,20 +1,26 @@
 <img id="timezone-image" src="/static/img/world.png" width="600" height="300" style="height:300px;width:600px;" usemap="#timezone-map" />
 <img class="timezone-pin" src="/static/img/cb/unknown.png" style="padding-top: 4px;" />
-<div class="row">
-<button class="btn col-md-2">{% trans %}Set{% endtrans %}</button>
-<select class="col-md-5" id="timezone-select" name="tz">
-   <option>None</option>
-		{% for zone in timezones %}
-		<option value="{{zone}}" {% if zone == request.current_timezone %}selected="selected"{% endif %}>{{zone}}</option>
-		{% endfor %}
-	</select>
-	<select class="col-md-5" name="lang" id="lang">
-		{% for name, item in locales.items() %}
-		<option value="{{ name }}" {% if name == request.current_locale %}selected="selected"{% endif %}>{{ item.name }}</option>
-		{% endfor %}
-	</select>
-	
-</div>
+<form> 
+    <div class="row">
+        <div class="col-md-5">
+            <select class="form-control" id="timezone-select" name="tz">
+                {% for zone in timezones %}
+                <option value="{{zone}}" {% if zone == request.current_timezone %}selected="selected"{% endif %}>{{zone}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-5">
+            <select class="form-control" name="lang" id="lang">
+                {% for name, item in locales.items() %}
+                <option value="{{ name }}" {% if name == request.current_locale %}selected="selected"{% endif %}>{{ item.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-block">{% trans %}Set{% endtrans %}</button>
+        </div>
+    </div>
+</form>
 <map name="timezone-map" id="timezone-map">
   <area data-timezone="Africa/Abidjan" data-country="CI" data-pin="293,141" data-offset="0" shape="poly" coords="290,142,287,143,288,140,286,139,286,137,287,137,286,136,287,136,286,133,290,132,290,133,291,133,293,134,295,133,296,136,295,139,295,141,290,142" />
   <area data-timezone="Africa/Accra" data-country="GH" data-pin="300,141" data-offset="0" shape="poly" coords="301,140,297,142,295,142,295,141,295,139,296,136,295,132,300,132,301,136,301,139,302,140,301,140" />

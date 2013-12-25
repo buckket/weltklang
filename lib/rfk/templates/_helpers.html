@@ -1,10 +1,10 @@
 {% macro render_field_horizontal(field) %}
-  <div class="control-group{% if field.errors %} error{% endif %}">
+  <div class="form-group {% if field.errors %} has-error{% endif %}">
     {% if field.type != 'SubmitField' %}
-      <label class="control-label" for="{{ field.id }}">{{ field.label }}</label>
+      <label class="col-sm-2 control-label" for="{{ field.id }}">{{ field.label }}</label>
     {% endif %}
-    <div class="controls">
-      {{ field(**kwargs)|safe }}
+    <div class="col-sm-10">
+      {{ field(class_="form-control") | safe }}
       {% if field.errors %}
 	    {% for error in field.errors %}
 	      <span class="help-inline">{{ error }}</span>
