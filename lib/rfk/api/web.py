@@ -17,7 +17,7 @@ import rfk.database
 from rfk.database.base import User, News, ApiKey
 from rfk.database.show import Show, UserShow, Tag
 from rfk.database.track import Track, Artist, Title
-from rfk.database.streaming import Listener
+from rfk.database.streaming import Listener, Relay
 
 import rfk.helper
 from rfk.helper import now
@@ -235,20 +235,20 @@ def next_shows():
             clauses.append(UserShow.user == User.get_user(id=dj_id))
         if dj_name:
             clauses.append(UserShow.user == User.get_user(username=dj_name))
-    
+
         result = Show.query.join(UserShow).filter(*clauses).order_by(Show.begin.asc()).limit(limit).all()
-    
+
         data = {'next_shows': {'shows': []}}
         if result:
             for show in result:
-    
+
                 begin = show.begin.isoformat()
                 end = show.end.isoformat()
-    
+
                 dj = []
                 for usershow in show.users:
                     dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status })
-    
+
                 data['next_shows']['shows'].append({
                     'show_id': show.show,
                     'show_name': show.name,
@@ -420,5 +420,34 @@ def listener():
                 temp['per_country'][country] = {'count': 1}
 
     data['listener'] = temp
+    return jsonify(wrapper(data))
+
+
+@api.route('/web/active_relays')
+@check_auth
+## DONE ##
+def active_relays():
+    """Return information about all active relays
+
+    Keyword arguments:
+        - None
+    """
+
+    result = Relay.query.filter(Relay.status == Relay.STATUS.ONLINE).all()
+
+    data = {'active_relays': {'relays': [], 'total_bandwidth': 0}}
+
+    if result:
+        for relay in result:
+            data['active_relays']['relays'].append({
+                'relay_id': relay.relay,
+                'relay_type': relay.type,
+                'relay_address': relay.address,
+                'relay_max_bandwidth': relay.bandwidth,
+                'relay_current_bandwidth': relay.usage
+            })
+            data['active_relays']['total_bandwidth'] += relay.usage
+    else:
+        data = {'active_relays': None}
     return jsonify(wrapper(data))
 
