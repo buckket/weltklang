@@ -166,17 +166,17 @@ class UserShow(Base):
     userShow = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     user_id = Column("user", Integer(unsigned=True), ForeignKey('users.user',
                                                  onupdate="CASCADE",
-                                                 ondelete="RESTRICT"))
-    user = relationship("User", backref=backref('shows'))
+                                                 ondelete="CASCADE"), nullable=False)
+    user = relationship("User", backref=backref('shows', cascade="all, delete-orphan"))
     show_id = Column("show", Integer(unsigned=True),
                            ForeignKey('shows.show',
                                       onupdate="CASCADE",
-                                      ondelete="RESTRICT"))
-    show = relationship("Show", backref=backref('users'))
+                                      ondelete="CASCADE"), nullable=False)
+    show = relationship("Show", backref=backref('users', cascade="all, delete-orphan"))
     role_id = Column("role", Integer(unsigned=True),
                            ForeignKey('roles.role',
                                       onupdate="CASCADE",
-                                      ondelete="RESTRICT"))
+                                      ondelete="RESTRICT"), nullable=False)
     role = relationship("Role")
     status = Column(Integer(unsigned=True), default=0)
     STATUS = ENUM(['UNKNOWN', 'STREAMING', 'STREAMED'])
@@ -223,13 +223,13 @@ class ShowTag(Base):
     show_id = Column("show", Integer(unsigned=True),
                            ForeignKey('shows.show',
                                       onupdate="CASCADE",
-                                      ondelete="RESTRICT"))
-    show = relationship("Show", backref=backref('tags'))
+                                      ondelete="CASCADE"), nullable=False)
+    show = relationship("Show", backref=backref('tags', cascade="all, delete-orphan"))
     tag_id = Column("tag", Integer(unsigned=True),
                            ForeignKey('tags.tag',
                                       onupdate="CASCADE",
-                                      ondelete="RESTRICT"))
-    tag = relationship("Tag", backref=backref('shows'))
+                                      ondelete="RESTRICT"), nullable=False)
+    tag = relationship("Tag", backref=backref('shows', cascade="all, delete-orphan"))
     
     def __init__(self, tag):
         self.tag = tag
@@ -256,7 +256,7 @@ class Series(Base):
     series = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     user_id = Column("user", Integer(unsigned=True), ForeignKey('users.user',
                                                  onupdate="CASCADE",
-                                                 ondelete="RESTRICT"))
+                                                 ondelete="SET NULL"))
     user = relationship("User", backref=backref('series'))
     public = Column(Boolean)
     name = Column(String(50))

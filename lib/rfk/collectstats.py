@@ -50,7 +50,6 @@ def main():
         for relay in Relay.query.all():
             try:
                 relay.usage = get_stats_direct(relay)
-                print relay.usage
                 rs = RelayStatistic.get_relaystatistic(relay, RelayStatistic.TYPE.TRAFFIC)
                 if relay.usage is not None:
                     rs.statistic.set(now(),relay.usage)
@@ -59,12 +58,12 @@ def main():
                 rfk.database.session.rollback()
                 relay.status = Relay.STATUS.UNKNOWN
                 rfk.database.session.commit()
-                print e
+                print "Could not reach server: {}:{} - ".format(relay.address, relay.port, str(e))
             except socket.timeout as e:
                 rfk.database.session.rollback()
                 relay.status = Relay.STATUS.UNKNOWN
                 rfk.database.session.commit()
-                print e
+                print "Could not reach server: {}:{} - ".format(relay.address, relay.port, str(e))
     except Exception as e:
         print e
     finally:

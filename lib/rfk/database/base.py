@@ -265,12 +265,12 @@ class UserPermission(Base):
     user_id = Column("user", Integer(unsigned=True), ForeignKey('users.user',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))
-    user = relationship("User", backref=backref('permissions'))
+    user = relationship("User", backref=backref('permissions', cascade="all, delete-orphan"))
     permission_id = Column("permission", Integer(unsigned=True),
                            ForeignKey('permissions.permission',
                                       onupdate="CASCADE",
                                       ondelete="RESTRICT"))
-    permission = relationship("Permission", backref=backref('users'))
+    permission = relationship("Permission", backref=backref('users', cascade="all, delete-orphan"))
     
     def __init__(self, permission):
         self.permission = permission

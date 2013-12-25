@@ -94,7 +94,7 @@ class Stream(Base):
     statistic_id = Column("statistic", Integer(unsigned=True), ForeignKey('statistics.statistic',
                                                                           onupdate="CASCADE",
                                                                           ondelete="RESTRICT"))
-    statistic = relationship("Statistic")
+    statistic = relationship("Statistic", cascade="all")
     TYPES = ENUM(['UNKNOWN', 'MP3', 'AACP', 'OGG', 'OPUS'])
     code_pattern = re.compile('^[0-9A-Za-z_-]+$')
     
@@ -195,7 +195,7 @@ class Relay(Base):
     statistic_id = Column("statistic", Integer(unsigned=True), ForeignKey('statistics.statistic',
                                                                           onupdate="CASCADE",
                                                                           ondelete="RESTRICT"))
-    statistic = relationship("Statistic")
+    statistic = relationship("Statistic", cascade="all")
     STATUS = ENUM(['UNKNOWN', 'DISABLED', 'OFFLINE', 'ONLINE'])
     TYPE = ENUM(['MASTER', 'RELAY'])
     
@@ -304,12 +304,12 @@ class StreamRelay(Base):
     stream_id = Column("stream", Integer(unsigned=True), ForeignKey('streams.stream',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))
-    stream = relationship("Stream", backref=backref('relays'))
+    stream = relationship("Stream", backref=backref('relays', cascade="all, delete-orphan"))
     relay_id = Column("relay", Integer(unsigned=True),
                            ForeignKey('relays.relay',
                                       onupdate="CASCADE",
                                       ondelete="RESTRICT"))
-    relay = relationship("Relay", backref=backref('streams'))
+    relay = relationship("Relay", backref=backref('streams', cascade="all, delete-orphan"))
     status = Column(Integer(unsigned=True))
     statistic_id = Column("statistic", Integer(unsigned=True), ForeignKey('statistics.statistic',
                                                                           onupdate="CASCADE",
