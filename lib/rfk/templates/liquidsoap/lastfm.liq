@@ -1,1 +1,1 @@
-live = lastfm.submit.full(user="'.$_config['lastfm'][0].'", password="'.$_config['lastfm'][1].'", delay=0., force=true, live)
+live = lastfm.submit.full(user="$username", password="$password", delay=0., force=true, live)

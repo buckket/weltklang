@@ -17,7 +17,7 @@ import rfk.database
 from rfk.database.base import User, News, ApiKey
 from rfk.database.show import Show, UserShow, Tag
 from rfk.database.track import Track, Artist, Title
-from rfk.database.streaming import Listener
+from rfk.database.streaming import Listener, Relay
 
 import rfk.helper
 from rfk.helper import now
@@ -26,6 +26,7 @@ from rfk.liquidsoap import LiquidInterface
 
 from datetime import datetime, timedelta
 from sqlalchemy import func, and_, or_, between
+from rfk.exc.base import UserNotFoundException
 
 
 def wrapper(data, ecode=0, emessage=None):
@@ -229,37 +230,39 @@ def next_shows():
 
     clauses = []
     clauses.append(Show.begin > datetime.utcnow())
+    try:
+        if dj_id:
+            clauses.append(UserShow.user == User.get_user(id=dj_id))
+        if dj_name:
+            clauses.append(UserShow.user == User.get_user(username=dj_name))
 
-    if dj_id:
-        clauses.append(UserShow.user == User.get_user(id=dj_id))
-    if dj_name:
-        clauses.append(UserShow.user == User.get_user(username=dj_name))
+        result = Show.query.join(UserShow).filter(*clauses).order_by(Show.begin.asc()).limit(limit).all()
 
-    result = Show.query.filter(*clauses).order_by(Show.begin.asc()).limit(limit).all()
+        data = {'next_shows': {'shows': []}}
+        if result:
+            for show in result:
 
-    data = {'next_shows': {'shows': []}}
-    if result:
-        for show in result:
+                begin = show.begin.isoformat()
+                end = show.end.isoformat()
 
-            begin = show.begin.isoformat()
-            end = show.end.isoformat()
+                dj = []
+                for usershow in show.users:
+                    dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status })
 
-            dj = []
-            for usershow in show.users:
-                dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status })
-
-            data['next_shows']['shows'].append({
-                'show_id': show.show,
-                'show_name': show.name,
-                'show_description': show.description,
-                'show_flags': show.flags,
-                'show_begin': begin,
-                'show_end': end,
-                'dj': dj
-            })
-    else:
-        data = {'next_shows': None}
-    return jsonify(wrapper(data))
+                data['next_shows']['shows'].append({
+                    'show_id': show.show,
+                    'show_name': show.name,
+                    'show_description': show.description,
+                    'show_flags': show.flags,
+                    'show_begin': begin,
+                    'show_end': end,
+                    'dj': dj
+                })
+        else:
+            data = {'next_shows': None}
+        return jsonify(wrapper(data))
+    except UserNotFoundException:
+        return jsonify(wrapper({'next_shows': None}))
 
 
 @api.route('/web/last_shows')
@@ -286,7 +289,7 @@ def last_shows():
     if dj_name:
         clauses.append(UserShow.user == User.get_user(username=dj_name))
 
-    result = Show.query.filter(*clauses).order_by(Show.begin.desc()).limit(limit).all()
+    result = Show.query.join(UserShow).filter(*clauses).order_by(Show.begin.desc()).limit(limit).all()
 
     data = {'last_shows': {'shows': []}}
     if result:
@@ -350,7 +353,7 @@ def last_tracks():
 
     dj_id = request.args.get('dj_id', None)
     dj_name = request.args.get('dj_name', None)
-    limit = request.args.get('limit', 5)
+    limit = int(request.args.get('limit', 5))
     limit = limit if limit <= 50 else 50
 
     clauses = []
@@ -361,7 +364,7 @@ def last_tracks():
     if dj_name is not None:
         clauses.append(UserShow.user == User.get_user(username=dj_name))
 
-    result = Track.query.filter(*clauses).order_by(Track.end.desc()).limit(limit).all()
+    result = Track.query.join(Show).join(UserShow).filter(*clauses).order_by(Track.end.desc()).limit(limit).all()
 
     data = {'last_tracks': {'tracks': []}}
     if result:
@@ -417,5 +420,34 @@ def listener():
                 temp['per_country'][country] = {'count': 1}
 
     data['listener'] = temp
+    return jsonify(wrapper(data))
+
+
+@api.route('/web/active_relays')
+@check_auth
+## DONE ##
+def active_relays():
+    """Return information about all active relays
+
+    Keyword arguments:
+        - None
+    """
+
+    result = Relay.query.filter(Relay.status == Relay.STATUS.ONLINE).all()
+
+    data = {'active_relays': {'relays': [], 'total_bandwidth': 0}}
+
+    if result:
+        for relay in result:
+            data['active_relays']['relays'].append({
+                'relay_id': relay.relay,
+                'relay_type': relay.type,
+                'relay_address': relay.address,
+                'relay_max_bandwidth': relay.bandwidth,
+                'relay_current_bandwidth': relay.usage
+            })
+            data['active_relays']['total_bandwidth'] += relay.usage
+    else:
+        data = {'active_relays': None}
     return jsonify(wrapper(data))
 

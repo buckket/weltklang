@@ -94,7 +94,7 @@ class Stream(Base):
     statistic_id = Column("statistic", Integer(unsigned=True), ForeignKey('statistics.statistic',
                                                                           onupdate="CASCADE",
                                                                           ondelete="RESTRICT"))
-    statistic = relationship("Statistic")
+    statistic = relationship("Statistic", cascade="all")
     TYPES = ENUM(['UNKNOWN', 'MP3', 'AACP', 'OGG', 'OPUS'])
     code_pattern = re.compile('^[0-9A-Za-z_-]+$')
     
@@ -160,6 +160,21 @@ class Stream(Base):
                 available = True
         return available
     
+    def get_relay(self):
+        relays = Relay.query.join(StreamRelay).filter(StreamRelay.stream == self,
+                                                      StreamRelay.status == StreamRelay.STATUS.ONLINE).all()
+        minload = 2
+        minrelay = None
+        for relay in relays:
+            load = relay.get_load()
+            if relay.type == Relay.TYPE.MASTER:
+                load = load * 2
+            if relay.get_load() <= minload:
+                minload = relay.get_load()
+                minrelay = relay
+        
+        return minrelay
+    
 class Relay(Base):
     """database representation of a RelayServer"""
     __tablename__ = 'relays'
@@ -180,7 +195,7 @@ class Relay(Base):
     statistic_id = Column("statistic", Integer(unsigned=True), ForeignKey('statistics.statistic',
                                                                           onupdate="CASCADE",
                                                                           ondelete="RESTRICT"))
-    statistic = relationship("Statistic")
+    statistic = relationship("Statistic", cascade="all")
     STATUS = ENUM(['UNKNOWN', 'DISABLED', 'OFFLINE', 'ONLINE'])
     TYPE = ENUM(['MASTER', 'RELAY'])
     
@@ -276,6 +291,12 @@ class Relay(Base):
     def update_statistic(self):
         stat = self.get_statistic()
         stat.set(now(), self.get_current_listeners())
+        
+    def get_load(self):
+        try:
+            return self.usage / float(self.bandwidth)
+        except TypeError:
+            return 0
             
 class StreamRelay(Base):
     __tablename__ = 'stream_relays'
@@ -283,12 +304,12 @@ class StreamRelay(Base):
     stream_id = Column("stream", Integer(unsigned=True), ForeignKey('streams.stream',
                                                  onupdate="CASCADE",
                                                  ondelete="RESTRICT"))
-    stream = relationship("Stream", backref=backref('relays'))
+    stream = relationship("Stream", backref=backref('relays', cascade="all, delete-orphan"))
     relay_id = Column("relay", Integer(unsigned=True),
                            ForeignKey('relays.relay',
                                       onupdate="CASCADE",
                                       ondelete="RESTRICT"))
-    relay = relationship("Relay", backref=backref('streams'))
+    relay = relationship("Relay", backref=backref('streams', cascade="all, delete-orphan"))
     status = Column(Integer(unsigned=True))
     statistic_id = Column("statistic", Integer(unsigned=True), ForeignKey('statistics.statistic',
                                                                           onupdate="CASCADE",

@@ -16,6 +16,7 @@ import os
 import sys
 import base64
 from datetime import datetime
+import chardet
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(basedir, 'lib'))
 
@@ -54,11 +55,8 @@ def init_show(user):
         if non of them is found a new unplanned show is added and initialized
         if a new show was initialized the old one will be ended and the streamer staus will be resettet
     """
-    logger.info("init_show: entering")
-    logger.info("init_show: user {}".format(str(user)))
     show = Show.get_current_show(user)
     if show is None:
-        logger.info("init_show: None")
         show = Show()
         if user.get_setting(code='use_icy'):
             show.add_tags(Tag.parse_tags(user.get_setting(code='icy_show_genre') or ''))
@@ -71,12 +69,10 @@ def init_show(user):
         show.flags = Show.FLAGS.UNPLANNED
         show.add_user(user)
     elif show.flags == Show.FLAGS.UNPLANNED:
-        logger.info("init_show: UNPLANNED")
         # just check if there is a planned show to transition to
         s = Show.get_current_show(user, only_planned=True)
         if s is not None:
-            logger.info("init_show: found planned")
-            show = s        
+            show = s
     us = show.get_usershow(user)
     us.status = UserShow.STATUS.STREAMING
     rfk.database.session.flush()
@@ -104,7 +100,10 @@ def doAuth(username, password):
     
     """
     if username == 'source':
-        username, password = password.split(username_delimiter)
+        try:
+            username, password = password.split(username_delimiter)
+        except ValueError:
+            pass
     try:
         user = User.authenticate(username, password)
         show = Show.get_current_show(user)
@@ -150,7 +149,12 @@ def doMetaData(data):
         if (title is None) or (len(title) == 0):
             title = song[1]
     show = init_show(user)
-    track = Track.new_track(show, artist, title)
+    if artist is None and title is None:
+        track = Track.current_track()
+        if track:
+            track.end_track()
+    else:
+        track = Track.new_track(show, artist, title)
     rfk.database.session.commit()
 
 def doConnect(data):
@@ -218,6 +222,17 @@ def doListenerCount():
     lc = Listener.get_total_listener()
     sys.stdout.write("<icestats><source mount=\"/live.ogg\"><listeners>%d</listeners><Listeners>%d</Listeners></source></icestats>" % (lc, lc,))
 
+def decode_json(jsonstr):
+    try:
+        jsonstr = jsonstr.decode('utf-8')
+    except UnicodeDecodeError:
+        logger.warn('decode_json: not an utf-8 string: {}'.format(repr(jsonstr)))
+        jsonstr = jsonstr.decode('latin-1')
+    try:
+        return json.loads(jsonstr)
+    except ValueError:
+        logger.warn('failed to decode json {}'.format(repr(jsonstr)))
+        raise
 
 def main():
     parser = argparse.ArgumentParser(description='PyRfK Interface for liquidsoap',
@@ -255,13 +270,13 @@ def main():
         if args.command == 'auth':
             doAuth(args.username, args.password)
         elif args.command == 'meta':
-            data = json.loads(args.data);
+            data = decode_json(args.data);
             doMetaData(data)
         elif args.command == 'connect':
-            data = json.loads(args.data);
+            data = decode_json(args.data);
             doConnect(data)
         elif args.command == 'disconnect':
-            data = json.loads(args.data);
+            data = decode_json(args.data);
             doDisconnect(data)
         elif args.command == 'playlist':
             doPlaylist()
@@ -273,8 +288,8 @@ def main():
         import traceback
         logger.error(''.join(traceback.format_exception(exc_type, exc_value, exc_tb)))
         rfk.database.session.commit()
-        print e
     finally:
+        rfk.database.session.rollback()
         rfk.database.session.remove()
 
 if __name__ == '__main__':

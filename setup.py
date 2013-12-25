@@ -33,5 +33,6 @@ setup(
                       'sqlalchemy',
                       'parsedatetime',
                       'icalendar',
-                      'netaddr']
+                      'netaddr',
+                      'chardet']
 )

@@ -54,7 +54,7 @@ class StatsistcsData(Base):
     statistic_id = Column("statistic", Integer(unsigned=True), ForeignKey('statistics.statistic',
                                                                           onupdate="CASCADE",
                                                                           ondelete="RESTRICT"))
-    statistic = relationship("Statistic")
+    statistic = relationship("Statistic", cascade="all")
     timestamp = Column(UTCDateTime(), nullable=False)
     value = Column(Integer(unsigned=True), nullable=False)
     
@@ -65,11 +65,11 @@ class RelayStatistic(Base):
     statistic_id = Column("statistic", Integer(unsigned=True), ForeignKey('statistics.statistic',
                                                                           onupdate="CASCADE",
                                                                           ondelete="RESTRICT"))
-    statistic = relationship("Statistic")
+    statistic = relationship("Statistic", cascade="all")
     relay_id = Column("relay", Integer(unsigned=True), ForeignKey('relays.relay',
                                                                           onupdate="CASCADE",
                                                                           ondelete="RESTRICT"))
-    relay = relationship("Relay")    
+    relay = relationship("Relay", cascade="all")
     type = Column(Integer(unsigned=True))
     TYPE = ENUM(['TRAFFIC', 'LISTENERCOUNT'])
     

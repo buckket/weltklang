@@ -5,7 +5,7 @@ import pytz
 import datetime
 
 from rfk.helper import now
-from rfk.database import session
+import rfk.database
 from rfk.database.base import User, Anonymous, News
 from rfk.database.donations import Donation
 from rfk.database.streaming import Stream, Listener
@@ -48,7 +48,8 @@ babel = Babel(app)
 
 @app.teardown_request
 def shutdown_session(exception=None):
-    session.remove()
+    rfk.database.session.rollback()
+    rfk.database.session.remove()
 
 @babel.localeselector
 def babel_localeselector():
@@ -179,7 +180,7 @@ def login():
                 remember = form.remember.data
                 if login_user(user, remember=remember):
                     user.last_login = now()
-                    session.commit()
+                    rfk.database.session.commit()
                     flash("Logged in!")
                     return redirect(request.args.get("next") or url_for("index"))
                 else:
@@ -208,7 +209,7 @@ def register():
             user = User.add_user(form.username.data, form.password.data)
             if form.email.data:
                 user.mail = form.email.data
-            session.commit()
+            rfk.database.session.commit()
             flash(u"Registration successful")
             return redirect(url_for("login"))
         except UserNameTakenException:
@@ -240,7 +241,7 @@ def settings():
             current_user.set_setting(code='show_def_tags', value=form.show_def_tags.data)
             current_user.set_setting(code='show_def_logo', value=form.show_def_logo.data)
             current_user.set_setting(code='use_icy', value=form.use_icy.data)
-            session.commit()
+            rfk.database.session.commit()
             flash('Settings successfully updated.')
             return redirect(url_for('settings'))
         else:

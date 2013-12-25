@@ -13,13 +13,7 @@ from rfk.database.streaming import Relay
 from rfk.database.stats import RelayStatistic
 from rfk.icecast import Icecast
 from rfk.helper import now, get_path
-
-rfk.init()
-init_db("%s://%s:%s@%s/%s" % (rfk.CONFIG.get('database', 'engine'),
-                              rfk.CONFIG.get('database', 'username'),
-                              rfk.CONFIG.get('database', 'password'),
-                              rfk.CONFIG.get('database', 'host'),
-                              rfk.CONFIG.get('database', 'database')))
+import socket
 
 def get_stats(relay):
     statsfile = get_path(os.path.join('var', 'tmp', 'traffic{0}'.format(relay.relay)))
@@ -37,19 +31,45 @@ def get_stats(relay):
         f.write(struct.pack('qi', total, timestamp))
     if last_total is not None:
         return ((total-last_total)/(timestamp-last_timestamp))/1024
-    
+
+def get_stats_direct(relay):
+    ic = Icecast(relay.address, relay.port, relay.admin_username, relay.admin_password)
+    return ic.get_output_bitrate(True)
 
 def main():
-    for relay in Relay.query.all():
-        try:
-            relay.usage = get_stats(relay)
-            rs = RelayStatistic.get_relaystatistic(relay, RelayStatistic.TYPE.TRAFFIC)
-            if relay.usage is not None:
-                rs.statistic.set(now(),relay.usage)
-            rfk.database.session.commit()
-        except urllib2.URLError:
-            pass
-        
+    try:
+        rfk.init()
+        if rfk.CONFIG.has_option('database', 'url'):
+            init_db(rfk.CONFIG.get('database', 'url'))
+        else:
+            init_db("%s://%s:%s@%s/%s" % (rfk.CONFIG.get('database', 'engine'),
+                                          rfk.CONFIG.get('database', 'username'),
+                                          rfk.CONFIG.get('database', 'password'),
+                                          rfk.CONFIG.get('database', 'host'),
+                                          rfk.CONFIG.get('database', 'database')))
+        for relay in Relay.query.all():
+            try:
+                relay.usage = get_stats_direct(relay)
+                rs = RelayStatistic.get_relaystatistic(relay, RelayStatistic.TYPE.TRAFFIC)
+                if relay.usage is not None:
+                    rs.statistic.set(now(),relay.usage)
+                rfk.database.session.commit()
+            except urllib2.URLError as e:
+                rfk.database.session.rollback()
+                relay.status = Relay.STATUS.UNKNOWN
+                rfk.database.session.commit()
+                print "Could not reach server: {}:{} - ".format(relay.address, relay.port, str(e))
+            except socket.timeout as e:
+                rfk.database.session.rollback()
+                relay.status = Relay.STATUS.UNKNOWN
+                rfk.database.session.commit()
+                print "Could not reach server: {}:{} - ".format(relay.address, relay.port, str(e))
+    except Exception as e:
+        print e
+    finally:
+        rfk.database.session.rollback()
+        rfk.database.session.remove()
+
 if __name__ == '__main__':
     sys.exit(main())
 
