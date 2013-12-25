@@ -247,7 +247,7 @@ def settings():
         else:
             form.old_password.errors.append('Wrong password.')
 
-    return render_template('settings.html', form=form, username=current_user.username, TITLE='Settings')
+    return render_template('settings.html', form=form, username=current_user.username, TITLE='Settings', imgur={'client': rfk.CONFIG.get('site', 'imgur-client')})
 
 
 @app.route('/donations')
