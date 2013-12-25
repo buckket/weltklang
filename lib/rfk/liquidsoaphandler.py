@@ -224,11 +224,15 @@ def doListenerCount():
 
 def decode_json(jsonstr):
     try:
-        jsonstr = unicode(jsonstr)
+        jsonstr = jsonstr.decode('utf-8')
     except UnicodeDecodeError:
-        guess = chardet.detect(jsonstr)
-        jsonstr = jsonstr.decode(guess['encoding'])
-    return json.loads(jsonstr)
+        logger.warn('decode_json: not an utf-8 string: {}'.format(repr(jsonstr)))
+        jsonstr = jsonstr.decode('latin-1')
+    try:
+        return json.loads(jsonstr)
+    except ValueError:
+        logger.warn('failed to decode json {}'.format(repr(jsonstr)))
+        raise
 
 def main():
     parser = argparse.ArgumentParser(description='PyRfK Interface for liquidsoap',
