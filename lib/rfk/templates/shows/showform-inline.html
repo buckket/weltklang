@@ -102,7 +102,7 @@ function delete_show() {
             $('#statusbar').addClass('alert-error');
             $('#statusbar').html('<i class="icon-warning-sign"></i> '+data.error.msg);
         } else {
-            //window.location.reload();
+            window.location.reload();
         }
         $('#delete-button').removeAttr("disabled");
     });
