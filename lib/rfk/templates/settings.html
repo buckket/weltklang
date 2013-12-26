@@ -5,13 +5,8 @@
 <h1>{% trans %}Settings{% endtrans %}</h1>
 <div class="row">
     <div class="col-md-12">
-    
+        <h3>{% trans username=current_user.username %}Customize your very own {{ username }}{% endtrans %}</h3>
         <form class="form-horizontal" method="post">
-        <fieldset>
-        
-            <div id="legend">
-                 <legend class="">{% trans %}Customize your very own {{ username }}{% endtrans %}</legend>
-            </div>
             
             <div class="row">
                 <div class="col-md-6">
@@ -64,8 +59,6 @@
                 
                 </div>
             </div>
-
-        </fieldset>
         </form>
     </div>
 </div>
