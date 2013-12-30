@@ -4,6 +4,7 @@ from flask.ext.babel import Babel, get_locale, get_timezone, refresh
 import pytz
 import datetime
 
+import rfk.helper
 from rfk.helper import now
 import rfk.database
 from rfk.database.base import User, Anonymous, News
@@ -180,6 +181,9 @@ def login():
                 remember = form.remember.data
                 if login_user(user, remember=remember):
                     user.last_login = now()
+                    loc = rfk.helper.get_location(request.remote_addr)
+                    if 'country_code' in loc and loc['country_code'] is not None:
+                        user.country = loc['country_code']
                     rfk.database.session.commit()
                     flash("Logged in!")
                     return redirect(request.args.get("next") or url_for("index"))
