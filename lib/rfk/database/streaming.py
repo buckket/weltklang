@@ -59,11 +59,13 @@ class Listener(Base):
         if rfk.CONFIG.getboolean('icecast', 'log_ip'):
             listener.address = int(netaddr.IPAddress(address))
         listener.client = client
+
         loc = get_location(address)
         if 'city' in loc and loc['city'] is not None:
-            listener.city = loc['city'].decode('latin-1') #FICK DICH MAXMIND
+            listener.city = loc['city']
         if 'country_code' in loc and loc['country_code'] is not None:
             listener.country = loc['country_code']
+
         listener.useragent = useragent
         listener.connect = now()
         listener.stream_relay = stream_relay
