@@ -19,9 +19,9 @@ def get_location(address):
         location['city'] = location['city'].decode('latin-1').encode('utf-8')
 
     if 'country_code' in location and location['country_code'] is not None:
-        if location['country_code'] == 'DE' and location['region'] == '02':
+        if location['country_code'] == 'DE' and location['region_code'] == '02':
             location['country_code'] = 'BAY'
-        elif location['country_code'] == 'US' and location['region'] == '48':
+        elif location['country_code'] == 'US' and location['region_code'] == '48':
             location['country_code'] = 'TEX'
 
     return location
