@@ -57,7 +57,14 @@ def iso_country_to_countryball(isocode):
     omsk if file not found"""
     if isocode is None:
         return 'unknown.png'
+
+    if isocode == 'BAY':
+        isocode = 'bavaria'
+    elif isocode == 'TEX':
+        isocode = 'texas'
+
     isocode = isocode.lower()
+
     # rather dirty hack to get the path
     basepath = os.path.join(dirname(dirname(__file__)), 'static', 'img', 'cb')
     
