@@ -16,7 +16,7 @@ def get_location(address):
     location = rfk.geoip.record_by_addr(address)
 
     if 'city' in location and location['city'] is not None:
-        location['city'] = location['city'].decode('latin-1').encode('utf-8')
+        location['city'] = location['city'].encode('utf-8')
 
     if 'country_code' in location and location['country_code'] is not None:
         if location['country_code'] == 'DE' and location['region_code'] == '02':
