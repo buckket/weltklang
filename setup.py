@@ -28,7 +28,7 @@ setup(
                       'pytz',
                       'passlib',
                       'bcrypt',
-                      'pygeoip',
+                      'geoip2[DB]',
                       'postmarkup',
                       'sqlalchemy',
                       'parsedatetime',

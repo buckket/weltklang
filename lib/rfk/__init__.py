@@ -2,7 +2,7 @@ from ConfigParser import SafeConfigParser
 from flask.helpers import find_package
 from rfk.exc.base import NoConfigException
 import os
-import pygeoip
+import geoip2.database
 
 
 CONFIG = SafeConfigParser()
@@ -22,4 +22,4 @@ def init():
     succ_read = CONFIG.read(config_locations)
     if len(succ_read) == 0:
         raise NoConfigException()
-    geoip = pygeoip.GeoIP(CONFIG.get('site', 'geoipdb'), pygeoip.MEMORY_CACHE)
+    geoip = geoip2.database.Reader(CONFIG.get('site', 'geoipdb'))
