@@ -53,6 +53,7 @@ def main():
                 rs = RelayStatistic.get_relaystatistic(relay, RelayStatistic.TYPE.TRAFFIC)
                 if relay.usage is not None:
                     rs.statistic.set(now(),relay.usage)
+                relay.status = Relay.STATUS.ONLINE
                 rfk.database.session.commit()
             except urllib2.URLError as e:
                 rfk.database.session.rollback()
