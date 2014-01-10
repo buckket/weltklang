@@ -8,7 +8,7 @@ import subprocess
 
 
 def main():
-    rfk.init()
+    rfk.init(enable_geoip=False)
 
     (file_name, headers) = urllib.urlretrieve('http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz')
     ret_val = subprocess.call(['gunzip', file_name])

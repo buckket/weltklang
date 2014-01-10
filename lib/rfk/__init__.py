@@ -9,7 +9,7 @@ CONFIG = SafeConfigParser()
 
 geoip = None
 
-def init():
+def init(enable_geoip=True):
     global geoip
     prefix, package_path = find_package(__name__)
     config_locations = []
@@ -22,4 +22,6 @@ def init():
     succ_read = CONFIG.read(config_locations)
     if len(succ_read) == 0:
         raise NoConfigException()
-    geoip = geoip2.database.Reader(CONFIG.get('site', 'geoipdb'))
+
+    if enable_geoip:
+        geoip = geoip2.database.Reader(CONFIG.get('site', 'geoipdb'))
