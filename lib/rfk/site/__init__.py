@@ -27,10 +27,10 @@ app.secret_key = 'PENISPENISPENISPENISPENIS'
 
 locales = {'de': {'name':'Bernd',
                   'img':'/static/img/cb/de.png',
-                  'datetime_format': 'DD.MM.YYYY hh:mm'},
+                  'datetime_format': 'DD.MM.YYYY HH:mm'},
            'en': {'name':'English',
                   'img':'/static/img/cb/gb.png',
-                  'datetime_format': 'MM/DD/YYYY hh:mm'}}
+                  'datetime_format': 'MM/DD/YYYY HH:mm'}}
 
 def get_datetime_format():
     try:
