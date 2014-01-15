@@ -13,18 +13,24 @@ def now():
 
 
 def get_location(address):
-    location = rfk.geoip.record_by_addr(address)
+    location = rfk.geoip.city(address)
+    ret = {}
 
-    if 'city' in location and location['city'] is not None:
-        location['city'] = location['city'].encode('utf-8')
+    if location.city.name is not None:
+        ret['city'] = location.city.name
 
-    if 'country_code' in location and location['country_code'] is not None:
-        if location['country_code'] == 'DE' and location['region_code'] == '02':
-            location['country_code'] = 'BAY'
-        elif location['country_code'] == 'US' and location['region_code'] == '48':
-            location['country_code'] = 'TEX'
+    if location.country.iso_code is not None:
+        try:
+            if location.country.iso_code == 'DE' and location.subdivisions[0].iso_code == 'BY':
+                ret['country_code'] = 'BAY'
+            elif location.country.iso_code == 'US' and location.subdivisions[0].iso_code == 'TX':
+                ret['country_code'] = 'TEX'
+            else:
+                ret['country_code'] = location.country.iso_code
+        except IndexError:
+            ret['country_code'] = location.country.iso_code
 
-    return location
+    return ret
 
 
 def get_path(path='', internal=False):

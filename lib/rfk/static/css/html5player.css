@@ -134,10 +134,17 @@ body
     width:0;
 }
 
+/*
 #volume
 {
     height:45px;
 }
+
+#ctrlStartStop
+{
+    height:45px;
+}
+*/
 
 #slider
 {
