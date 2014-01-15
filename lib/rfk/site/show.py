@@ -27,7 +27,7 @@ def last():
 
 @show.route('/series')
 def list_series():
-    series = Series.query.all()
+    series = Series.query.order_by(Series.name.asc()).all()
     return render_template('shows/series.html', series=series)
 
 @show.route('/series/new', methods=["GET", "POST"])
