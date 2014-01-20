@@ -1,4 +1,5 @@
 set('log.file.path','$logfile')
+set('log.file', true)
 set('log.stdout', true)
 set('server.telnet', true)
 set('harbor.bind_addr','$address')
