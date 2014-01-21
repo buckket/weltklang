@@ -1,4 +1,4 @@
-from flask import Response, url_for
+from flask import url_for
 from werkzeug.contrib.atom import AtomFeed
 from rfk.feeds import feeds, get_shows, get_djs
 

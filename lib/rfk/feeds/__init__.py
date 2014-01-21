@@ -1,9 +1,7 @@
 from flask import Blueprint
 
-import rfk.helper
 from rfk.helper import now
 
-import rfk.database
 from rfk.database.base import User
 from rfk.database.show import Show, UserShow
 
