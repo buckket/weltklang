@@ -1,4 +1,4 @@
-from flask import Response
+from flask import Response, url_for
 from werkzeug.contrib.atom import AtomFeed
 from rfk.feeds import feeds, get_shows, get_djs
 
@@ -22,8 +22,7 @@ def atom():
                      title=show.name,
                      content=show.description,
                      author=author,
-                     url='http://radio.krautchan.net',
+                     url=url_for('show.show_view', show=show.show),
                      updated=show.begin,
                      published=show.begin)
-            
     return feed.get_response()
