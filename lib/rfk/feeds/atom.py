@@ -26,3 +26,4 @@ def atom():
                      updated=show.begin,
                      published=show.begin)
     return feed.get_response()
+
