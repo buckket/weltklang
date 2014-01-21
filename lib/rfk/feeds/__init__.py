@@ -1,4 +1,4 @@
-from flask import Blueprint, g, request, jsonify
+from flask import Blueprint
 
 import rfk.helper
 from rfk.helper import now
