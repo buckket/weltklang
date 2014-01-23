@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from rfk.database.base import Permission, Setting, User
 import rfk.database
+from rfk.database.base import Permission, Setting, User
 
 
 def setup_settings():
@@ -18,7 +18,8 @@ def setup_settings():
     settings.append(Setting.add_setting('timezone', 'Timezone', Setting.TYPES.STR))
     for setting in settings:
         rfk.database.session.add(setting)
-    rfk.database.session.commit() 
+    rfk.database.session.commit()
+
 
 def setup_permissions():
     permissions = []
@@ -29,7 +30,8 @@ def setup_permissions():
     for permission in permissions:
         rfk.database.session.add(permission)
     rfk.database.session.commit()
-    
+
+
 def setup_default_user(username, password):
     users = []
     users.append(User.add_user(username, password))
@@ -40,7 +42,8 @@ def setup_default_user(username, password):
         user.add_permission(code='admin')
         print "[users] Added %s" % user.username
     rfk.database.session.commit()
-    
+
+
 def setup_statistics():
     stat = rfk.database.stats.Statistic(name="Overall Listener", identifier="lst-total")
     rfk.database.session.add(stat)

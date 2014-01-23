@@ -12,17 +12,18 @@ Disconnect: streamingclient disconnects
 
 import argparse
 import json
-import os
 import sys
 import base64
-from datetime import datetime
-import chardet
+
+import os
+
+
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(basedir, 'lib'))
 
 import rfk
-import rfk.database 
-from rfk.database.base import User, Log, Loop
+import rfk.database
+from rfk.database.base import User, Loop
 from rfk.database.show import Show, Tag, UserShow
 from rfk.database.track import Track
 from rfk.database.streaming import Listener
@@ -33,6 +34,7 @@ from rfk.log import init_db_logging
 
 username_delimiter = '|'
 logger = None
+
 
 def kick():
     """shorthand method for kicking the currently connected user
@@ -48,7 +50,8 @@ def kick():
             kicked = True
     liquidsoap.close()
     return kicked
-    
+
+
 def init_show(user):
     """inititalizes a show
         it either takes a planned show or an unplanned show if it's still running
@@ -82,10 +85,11 @@ def init_show(user):
         if us.show.flags & Show.FLAGS.UNPLANNED:
             us.show.end_show()
         if us.status == UserShow.STATUS.STREAMING:
-           us.status = UserShow.STATUS.STREAMED
-        rfk.database.session.flush() 
+            us.status = UserShow.STATUS.STREAMED
+        rfk.database.session.flush()
     return show
-        
+
+
 def doAuth(username, password):
     """authenticates the user
     this function will also disconnect the current user
@@ -122,6 +126,7 @@ def doAuth(username, password):
         sys.stdout.write('false')
     rfk.database.session.commit()
 
+
 def doMetaData(data):
     logger.debug('meta %s' % (json.dumps(data),))
     if 'userid' not in data or data['userid'] == 'none':
@@ -131,17 +136,17 @@ def doMetaData(data):
     if user == None:
         print 'user not found'
         return
-    
+
     if 'artist' in data:
         artist = data['artist'].strip()
     else:
         artist = None
-        
+
     if 'title' in data:
         title = data['title'].strip()
     else:
         title = None
-        
+
     if 'song' in data:
         song = data['song'].split(' - ', 1)
         if (artist is None) or (len(artist) == 0):
@@ -156,6 +161,7 @@ def doMetaData(data):
     else:
         track = Track.new_track(show, artist, title)
     rfk.database.session.commit()
+
 
 def doConnect(data):
     """handles a connect from liquidsoap
@@ -191,7 +197,6 @@ def doConnect(data):
     except (rexc.base.UserNotFoundException, rexc.base.InvalidPasswordException, KeyError):
         logger.info('rejected connect')
         kick()
-            
 
 
 def doDisconnect(userid):
@@ -217,13 +222,16 @@ def doDisconnect(userid):
     else:
         print "no user found"
 
+
 def doPlaylist():
     loop = Loop.get_current_loop()
     print os.path.join(get_path(rfk.CONFIG.get('liquidsoap', 'looppath')), loop.filename)
 
+
 def doListenerCount():
     lc = Listener.get_total_listener()
     sys.stdout.write("<icestats><source mount=\"/live.ogg\"><listeners>%d</listeners><Listeners>%d</Listeners></source></icestats>" % (lc, lc,))
+
 
 def decode_json(jsonstr):
     try:
@@ -237,16 +245,17 @@ def decode_json(jsonstr):
         logger.warn('failed to decode json {}'.format(repr(jsonstr)))
         raise
 
+
 def main():
     parser = argparse.ArgumentParser(description='PyRfK Interface for liquidsoap',
                                      epilog='Anyways, this should normally not be called manually')
     parser.add_argument('--debug', action='store_true')
     subparsers = parser.add_subparsers(dest='command', help='sub-command help')
-    
+
     authparser = subparsers.add_parser('auth', help='a help')
     authparser.add_argument('username')
     authparser.add_argument('password')
-    
+
     metadataparser = subparsers.add_parser('meta', help='a help')
     metadataparser.add_argument('data', metavar='data', help='mostly some json encoded string from liquidsoap')
     connectparser = subparsers.add_parser('connect', help='a help')
@@ -255,19 +264,19 @@ def main():
     disconnectparser.add_argument('data', metavar='data', help='mostly some json encoded string from liquidsoap')
     playlistparser = subparsers.add_parser('playlist', help='a help')
     listenerparser = subparsers.add_parser('listenercount', help='prints total listenercount')
-    
+
     args = parser.parse_args()
-    
+
     rfk.init()
     rfk.database.init_db("%s://%s:%s@%s/%s" % (rfk.CONFIG.get('database', 'engine'),
-                                                              rfk.CONFIG.get('database', 'username'),
-                                                              rfk.CONFIG.get('database', 'password'),
-                                                              rfk.CONFIG.get('database', 'host'),
-                                                              rfk.CONFIG.get('database', 'database')))
+                                               rfk.CONFIG.get('database', 'username'),
+                                               rfk.CONFIG.get('database', 'password'),
+                                               rfk.CONFIG.get('database', 'host'),
+                                               rfk.CONFIG.get('database', 'database')))
     try:
         global logger
         logger = init_db_logging('liquidsoaphandler')
-        
+
         logger.info(args.command)
         rfk.database.session.commit()
         if args.command == 'auth':
@@ -289,12 +298,13 @@ def main():
         rfk.database.session.rollback()
         exc_type, exc_value, exc_tb = sys.exc_info()
         import traceback
+
         logger.error(''.join(traceback.format_exception(exc_type, exc_value, exc_tb)))
         rfk.database.session.commit()
     finally:
         rfk.database.session.rollback()
         rfk.database.session.remove()
 
+
 if __name__ == '__main__':
     sys.exit(main())
-        
