@@ -225,7 +225,7 @@ def _set_show_info(show, form):
             show.series = series
     else:
         show.series = None
-        #tags
+    #tags
     if 'tags[]' in form:
         tags_str = ' '.join(form.getlist('tags[]'))
     else:
