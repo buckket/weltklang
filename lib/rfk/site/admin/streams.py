@@ -1,28 +1,23 @@
-from flask import Blueprint, render_template, url_for, request, redirect
-from functools import wraps
-import math
-import rfk
-from rfk.helper import get_path
-import rfk.liquidsoap
-import rfk.site
-from rfk.site.helper import permission_required
-from rfk.site.forms.stream import new_stream
-from rfk.site.forms.relay import new_relay
+from flask import render_template, url_for, request, redirect
 from flask.ext.login import login_required, current_user
 
+import rfk
+import rfk.site
 import rfk.database
-from rfk.database.base import User, Loop
+import rfk.liquidsoap
+from rfk.site.helper import permission_required
+from rfk.site.forms.stream import new_stream
 from rfk.database.streaming import Stream, Relay
-from rfk.exc.streaming import CodeTakenException, InvalidCodeException, MountpointTakenException, MountpointTakenException,\
-    AddressTakenException
-from flask.helpers import flash
+from rfk.exc.streaming import CodeTakenException, InvalidCodeException, MountpointTakenException
 
 from ..admin import admin
+
 
 @admin.route('/streams')
 @login_required
 def streams():
     return render_template('admin/streams.html')
+
 
 @admin.route('/stream')
 @login_required
@@ -30,6 +25,7 @@ def streams():
 def stream_list():
     streams = Stream.query.all()
     return render_template('admin/stream/list.html', streams=streams)
+
 
 @admin.route('/stream/add', methods=['GET', 'POST'])
 @login_required
