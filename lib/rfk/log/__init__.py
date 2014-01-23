@@ -1,6 +1,8 @@
-import logging 
-from rfk.database.base import Log
+import logging
+
 import rfk.database
+from rfk.database.base import Log
+
 
 def init_db_logging(name):
     logger = logging.getLogger(name)
@@ -10,10 +12,9 @@ def init_db_logging(name):
 
 
 class DBLogHandler(logging.Handler):
-    
     def __init__(self):
         logging.Handler.__init__(self)
-        
+
     def emit(self, record):
         log = Log(message=record.getMessage(), module=record.name, severity=record.levelno)
         rfk.database.session.add(log)

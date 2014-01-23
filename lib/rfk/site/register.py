@@ -1,17 +1,15 @@
-'''
-Created on Sep 1, 2012
-
-@author: teddydestodes
-'''
 from flask import Blueprint, render_template, request, jsonify
+
 from rfk.database.base import User
 from rfk.database import session
-register = Blueprint('register',__name__)
+
+register = Blueprint('register', __name__)
 
 
-@register.route('/register', methods=['POST','GET'])
+@register.route('/register', methods=['POST', 'GET'])
 def form():
     return render_template("register.html")
+
 
 @register.route('/register/check', methods=['POST'])
 def check():
@@ -27,9 +25,10 @@ def check():
     response.status_code = 200
     return response
 
+
 @register.route('/register/finish', methods=['POST'])
 def finish():
-    ret = {'success':False}
+    ret = {'success': False}
     try:
         if not User.check_username(request.form['username']):
             ret['username'] = 'invalid'
@@ -51,6 +50,7 @@ def finish():
     response = jsonify(ret)
     response.status_code = 200
     return response
+
 
 @register.route('/register/success')
 def success():

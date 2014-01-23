@@ -1,16 +1,12 @@
-'''
-Created on Aug 11, 2012
-
-@author: teddydestodes
-'''
-
 from flask import Blueprint, request, make_response
+
 from rfk.database.streaming import Relay, Stream, StreamRelay, Listener
 from rfk.database import session
 from rfk.log import init_db_logging
 
-backend = Blueprint('icecast',__name__)
+backend = Blueprint('icecast', __name__)
 logger = init_db_logging('IcecastBackend')
+
 
 @backend.route('/icecast/auth', methods=['POST'])
 def icecast_auth():
@@ -19,12 +15,13 @@ def icecast_auth():
         return make_response('you just went full retard', 405)
     relay = Relay.get_relay(address=request.form['server'],
                             port=request.form['port'])
-    if relay.auth_password == request.form['pass'] and\
-       relay.auth_username == request.form['user']:
+    if relay.auth_password == request.form['pass'] and \
+                    relay.auth_username == request.form['user']:
         return make_response('ok', 200, {'icecast-auth-user': '1'})
     else:
         return make_response('authentication failed', 401)
-    
+
+
 @backend.route('/icecast/add', methods=['POST'])
 def icecast_add_mount():
     logger.info('add_mount {}'.format(request.form))
@@ -41,7 +38,8 @@ def icecast_add_mount():
         return make_response('ok', 200, {'icecast-auth-user': '1'})
     else:
         return make_response('something strange happened', 500)
-    
+
+
 @backend.route('/icecast/remove', methods=['POST'])
 def icecast_remove_mount():
     logger.info('remove_mount {}'.format(request.form))
@@ -63,6 +61,7 @@ def icecast_remove_mount():
     else:
         return make_response('something strange happened', 500)
 
+
 @backend.route('/icecast/listenerremove', methods=['POST'])
 def icecast_remove_listener():
     #logger.info('remove_listener {}'.format(request.form))
@@ -80,6 +79,7 @@ def icecast_remove_listener():
     session.commit()
     return make_response('ok', 200, {'icecast-auth-user': '1'})
 
+
 @backend.route('/icecast/listeneradd', methods=['POST'])
 def icecast_add_listener():
     #logger.info('add_listener {}'.format(request.form))
@@ -88,7 +88,8 @@ def icecast_add_listener():
     relay = Relay.get_relay(address=request.form['server'],
                             port=request.form['port'])
     stream = Stream.get_stream(mount=request.form['mount'])
-    listener = Listener.create(request.form['ip'], request.form['client'], request.form['agent'], relay.get_stream_relay(stream))
+    listener = Listener.create(request.form['ip'], request.form['client'], request.form['agent'],
+                               relay.get_stream_relay(stream))
     session.add(listener)
     session.flush()
     relay.update_statistic()
