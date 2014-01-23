@@ -1,10 +1,6 @@
-from flask import Blueprint, g, request, jsonify
-
-import rfk.database
-from rfk.database.base import ApiKey
+from flask import Blueprint
 
 api = Blueprint('api', __name__)
-
 
 from .web import *
 from .site import *

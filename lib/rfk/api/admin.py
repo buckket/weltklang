@@ -1,45 +1,36 @@
-'''
-Created on Jun 16, 2013
-
-@author: teddydestodes
-'''
-
 from subprocess import call
-import os
 from datetime import datetime, timedelta
 
+import os
+
 from flask import jsonify, request
-from flask_login import current_user
 from flask.ext.babel import to_user_timezone
 
 from rfk.liquidsoap.daemon import LiquidDaemonClient
 from rfk.liquidsoap import LiquidInterface
-
 from rfk.site.helper import permission_required
-from rfk.site import app
-
 from rfk.database.streaming import Relay
 from rfk.database.stats import RelayStatistic
-
 from rfk.helper import now, get_path
-
 from rfk.api import api
+
 
 @api.route("/site/admin/liquidsoap/endpoint/<string:action>")
 @permission_required(permission='manage-liquidsoap')
 def endpoint_action(action):
     if request.args.get('endpoint') is None:
-        return jsonify({'error':'no endpoint supplied!'})
+        return jsonify({'error': 'no endpoint supplied!'})
     try:
         ret = {}
         li = LiquidInterface()
         li.connect()
-        ret['status'] = li.endpoint_action(request.args.get('endpoint').encode('ascii','ignore'),
-                                           action.encode('ascii','ignore'))
+        ret['status'] = li.endpoint_action(request.args.get('endpoint').encode('ascii', 'ignore'),
+                                           action.encode('ascii', 'ignore'))
         li.close()
         return jsonify(ret)
     except Exception as e:
         return jsonify({'error': str(e)})
+
 
 @api.route("/site/admin/liquidsoap/status")
 @permission_required(permission='manage-liquidsoap')
@@ -55,23 +46,25 @@ def liquidsoap_status():
             ret['sources'].append({'handler': source.handler,
                                    'type': source.type,
                                    'status': (source.status() != 'no source client connected'),
-                                   'status_msg':source.status()})
-            
+                                   'status_msg': source.status()})
+
         ret['sinks'] = []
         for sink in li.get_sinks():
             ret['sinks'].append({'handler': sink.handler,
-                                   'type': sink.type,
-                                   'status': (sink.status() == 'on')})
+                                 'type': sink.type,
+                                 'status': (sink.status() == 'on')})
         li.close()
         return jsonify(ret)
     except Exception as e:
         return jsonify({'error': str(e)})
 
+
 @api.route("/site/admin/liquidsoap/start")
 @permission_required(permission='manage-liquidsoap')
 def liquidsoap_start():
-    returncode = call(os.path.join(get_path('bin'),'rfk-liquidsoap'), env=os.environ.copy())
+    returncode = call(os.path.join(get_path('bin'), 'rfk-liquidsoap'), env=os.environ.copy())
     return jsonify({'status': returncode})
+
 
 @api.route("/site/admin/liquidsoap/shutdown")
 @permission_required(permission='manage-liquidsoap')
@@ -85,6 +78,7 @@ def liquidsoap_shutdown():
     except Exception as e:
         return jsonify({'error': str(e)})
 
+
 @api.route("/site/admin/liquidsoap/log")
 @permission_required(permission='manage-liquidsoap')
 def liquidsoap_log():
@@ -94,7 +88,7 @@ def liquidsoap_log():
         offset = request.args.get('offset')
         if offset is not None:
             offset = int(offset)
-        
+
         offset, log = client.get_log(offset)
         client.close()
         lines = []
@@ -105,12 +99,13 @@ def liquidsoap_log():
     except Exception as e:
         return jsonify({'error': str(e)})
 
+
 @api.route("/site/admin/feeds/sparkline/relay/<int:relay>/traffic")
 @permission_required(permission='admin')
 def relay_sparkline(relay):
     relay = Relay.query.get(relay)
     rs = RelayStatistic.get_relaystatistic(relay, RelayStatistic.TYPE.TRAFFIC)
-    start = now()-timedelta(hours=6)
+    start = now() - timedelta(hours=6)
     dps = []
     for dp in rs.statistic.get(start=start, stop=now()):
         dps.append((int(dp.timestamp.strftime('%s')), dp.value))
