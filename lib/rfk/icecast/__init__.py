@@ -2,25 +2,26 @@ from xml.dom.minidom import Document
 import xml.etree.ElementTree as ET
 import urllib2
 import base64
+
+
 class Icecast(object):
-    
     def __init__(self, host, port, username='', password=''):
         self.host = host
         self.port = port
         self.username = username
         self.password = password
         self.status_xml = None
-        
+
     def _get_status(self, reload=False):
         if self.status_xml is not None and not reload:
             return
         request = urllib2.Request("http://%s:%s/admin/status.xml" % (self.host, self.port))
         base64string = base64.encodestring('%s:%s' % (self.username, self.password)).replace('\n', '')
-        request.add_header("Authorization", "Basic %s" % base64string)   
+        request.add_header("Authorization", "Basic %s" % base64string)
         result = urllib2.urlopen(request, timeout=2)
         self.status_xml = ET.parse(result)
         result.close()
-        
+
     def get_traffic(self, reload=False):
         self._get_status(reload)
         total = 0
@@ -31,63 +32,63 @@ class Icecast(object):
             for total_send in source.findall('total_bytes_send'):
                 total += int(total_send.text)
         return total
-    
+
     def get_output_bitrate(self, reload=False):
         self._get_status(reload)
         root = self.status_xml.getroot()
         for outgoing_bitrate in root.findall('outgoing_kbitrate'):
             return int(outgoing_bitrate.text)
-    
+
     def get_version(self):
         self._get_status()
         return self.status_xml.find('server_id').text
 
+
 class IcecastConfig(object):
-    
     def __init__(self):
         self.maxclients = 100
         self.sources = 5
         self.queue_size = 524288
         self.workers = 1
-        
+
         self.client_timeout = 30
         self.header_timeout = 15
         self.source_timeout = 10
-        
+
         self.burst_size = 65536
-        
+
         self.hostname = 'localhost'
         self.address = '127.0.0.1'
         self.port = 8000
-        
+
         self.admin = 'admin'
         self.password = 'hackme'
         self.mounts = []
-        
+
         self.chroot = False
         self.cr_user = 'nobody'
         self.cr_group = 'nogroup'
-        
+
         self.logdir = '/tmp/'
         self.acc_log = 'access.log'
         self.err_log = 'error.log'
         self.loglevel = 2
         self.logarchive = False
         self.logsize = 10000
-        
+
         self.basedir = '/usr/local/share/icecast'
         self.webroot = '/usr/local/share/icecast/web'
         self.adminroot = '/usr/local/share/icecast/admin'
-        
+
         self.master = None
         self.master_port = 8000
         self.update_interval = 120
         self.master_password = 'hackme'
         self.master_user = 'hackme'
-        
+
         self.relay_user = None
         self.relay_password = 'hackme'
-        
+
     def get_xml(self):
         doc = Document()
         conf = doc.createElement('icecast')
@@ -106,7 +107,7 @@ class IcecastConfig(object):
         for mount in self.mounts:
             conf.appendChild(self._put_mount(doc, mount))
         return doc.toprettyxml('    ')
-    
+
     def _put_limits(self, doc):
         limits = doc.createElement('limits')
         clients = doc.createElement('clients')
@@ -131,7 +132,7 @@ class IcecastConfig(object):
         limits.appendChild(burst)
         limits.appendChild(workers)
         return limits
-    
+
     def _put_auth(self, doc):
         auth = doc.createElement('authentication')
         admin_user = doc.createElement('admin-user')
@@ -148,7 +149,7 @@ class IcecastConfig(object):
         auth.appendChild(admin_user)
         auth.appendChild(admin_pass)
         return auth
-    
+
     def _put_listen(self, doc):
         listen = doc.createElement('listen-socket')
         listen_port = doc.createElement('port')
@@ -158,7 +159,7 @@ class IcecastConfig(object):
         listen.appendChild(listen_port)
         listen.appendChild(listen_address)
         return listen
-    
+
     def _put_security(self, doc):
         security = doc.createElement('security')
         chroot = doc.createElement('chroot')
@@ -174,7 +175,7 @@ class IcecastConfig(object):
             changeowner.appendChild(group)
             security.appendChild(changeowner)
         return security
-    
+
     def _put_paths(self, doc):
         paths = doc.createElement('paths')
         basedir = doc.createElement('basedir')
@@ -194,7 +195,7 @@ class IcecastConfig(object):
         paths.appendChild(adminroot)
         paths.appendChild(alias)
         return paths
-    
+
     def _put_logging(self, doc):
         logging = doc.createElement('logging')
         access = doc.createElement('accesslog')
@@ -213,7 +214,7 @@ class IcecastConfig(object):
         logging.appendChild(logsize)
         logging.appendChild(logarchive)
         return logging
-    
+
     def _put_mount(self, doc, mount):
         mnt = doc.createElement('mount')
         mount_name = doc.createElement('mount-name')
@@ -226,25 +227,25 @@ class IcecastConfig(object):
         #mnt.appendChild(username)
         #mnt.appendChild(password)
         auth = doc.createElement('authentication')
-        auth.setAttribute('type','url')
-        auth.appendChild(self._gen_auth_option(doc, 'stream_auth', mount.api_url+'auth'))
-        auth.appendChild(self._gen_auth_option(doc, 'mount_add', mount.api_url+'add'))
-        auth.appendChild(self._gen_auth_option(doc, 'mount_remove', mount.api_url+'remove'))
-        auth.appendChild(self._gen_auth_option(doc, 'listener_add', mount.api_url+'listeneradd'))
-        auth.appendChild(self._gen_auth_option(doc, 'listener_remove', mount.api_url+'listenerremove'))
+        auth.setAttribute('type', 'url')
+        auth.appendChild(self._gen_auth_option(doc, 'stream_auth', mount.api_url + 'auth'))
+        auth.appendChild(self._gen_auth_option(doc, 'mount_add', mount.api_url + 'add'))
+        auth.appendChild(self._gen_auth_option(doc, 'mount_remove', mount.api_url + 'remove'))
+        auth.appendChild(self._gen_auth_option(doc, 'listener_add', mount.api_url + 'listeneradd'))
+        auth.appendChild(self._gen_auth_option(doc, 'listener_remove', mount.api_url + 'listenerremove'))
         auth.appendChild(self._gen_auth_option(doc, 'username', mount.username))
         auth.appendChild(self._gen_auth_option(doc, 'password', mount.password))
         auth.appendChild(self._gen_auth_option(doc, 'auth_header', 'icecast-auth-user: 1'))
         mnt.appendChild(auth)
         return mnt
-    
+
     def _gen_auth_option(self, doc, name, value):
         option = doc.createElement('option')
         option.setAttribute('name', name)
         option.setAttribute('value', value)
         return option
-    
-    def _put_master(self,doc):
+
+    def _put_master(self, doc):
         master = doc.createElement('master')
         server = doc.createElement('server')
         server.appendChild(doc.createTextNode(self.master))
@@ -262,17 +263,15 @@ class IcecastConfig(object):
         master.appendChild(password)
         master.appendChild(interval)
         return master
-    
-    
+
+
 class Mount(object):
-    
     def __init__(self):
         self.mount = ''
-        
+
         self.hidden = False
-        
+
         self.username = 'hackme'
         self.password = 'hackme'
-        
+
         self.api_url = 'http://localhost:8000/backend/icecast/'
-        

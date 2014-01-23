@@ -1,11 +1,14 @@
-import pytz
 import datetime
-import rfk
+from posixpath import dirname
+
 import os
+import pytz
+
 from flask.ext.babel import lazy_gettext
 from flask import url_for
 from flask.helpers import find_package
-from posixpath import dirname
+
+import rfk
 
 
 def now():
@@ -73,12 +76,12 @@ def iso_country_to_countryball(isocode):
 
     # rather dirty hack to get the path
     basepath = os.path.join(dirname(dirname(__file__)), 'static', 'img', 'cb')
-    
+
     if rfk.CONFIG.has_option('site', 'cbprefix'):
         prebasepath = os.path.join(basepath, rfk.CONFIG.get('site', 'cbprefix'))
         if os.path.exists(os.path.join(prebasepath, '{}.png'.format(isocode))):
-            return '{}{}.png'.format(rfk.CONFIG.get('site', 'cbprefix'),isocode)
-        
+            return '{}{}.png'.format(rfk.CONFIG.get('site', 'cbprefix'), isocode)
+
     if os.path.exists(os.path.join(basepath, '{}.png'.format(isocode))):
         return '{}.png'.format(isocode)
     else:
