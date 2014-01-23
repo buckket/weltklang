@@ -1,18 +1,17 @@
 from sqlalchemy import *
 from sqlalchemy.orm import relationship, backref, exc
 from sqlalchemy.dialects.mysql import INTEGER as Integer
-from datetime import datetime
+
 import netaddr
-import pygeoip
 import re
 
-from rfk.database import Base, UTCDateTime
-from rfk.database.stats import Statistic
-from rfk.types import ENUM, SET
-from rfk import CONFIG
-from rfk.helper import now, get_location
 import rfk.database
 import rfk.icecast
+from rfk.database import Base, UTCDateTime
+from rfk.database.stats import Statistic
+from rfk.types import ENUM
+from rfk import CONFIG
+from rfk.helper import now, get_location
 from rfk.exc.streaming import *
 
 
@@ -33,11 +32,12 @@ class Listener(Base):
                                         onupdate="CASCADE",
                                         ondelete="RESTRICT"))
     stream_relay = relationship("StreamRelay")
-    show_id = Column("show",Integer(unsigned=True),
-                             ForeignKey('shows.show',
-                                        onupdate="CASCADE",
-                                        ondelete="RESTRICT"))
+    show_id = Column("show", Integer(unsigned=True),
+                     ForeignKey('shows.show',
+                                onupdate="CASCADE",
+                                ondelete="RESTRICT"))
     show = relationship("Show")
+
     @staticmethod
     def get_listener(stream_relay, client, disconnect=None):
         """returns a listener"""
@@ -45,13 +45,13 @@ class Listener(Base):
                                          Listener.stream_relay == stream_relay,
                                          Listener.client == client).one()
         return listener
-    
+
     @staticmethod
     def get_current_listeners():
         """returns a listener"""
         listeners = Listener.query.filter(Listener.disconnect == None).all()
         return listeners
-    
+
     @staticmethod
     def create(address, client, useragent, stream_relay):
         """adds a new listener to the database"""
@@ -72,17 +72,19 @@ class Listener(Base):
         rfk.database.session.add(listener)
         rfk.database.session.flush()
         return listener
-    
+
     @staticmethod
     def get_total_listener():
         return Listener.query.filter(Listener.disconnect == None).count()
-    
+
     def set_disconnected(self):
         """updates the listener to disconnected state"""
         self.disconnect = now()
 
+
 """Listener Indices"""
 Index('listeners_disconnect_idx', Listener.disconnect)
+
 
 class Stream(Base):
     """database representation of an outputStream"""
@@ -99,7 +101,7 @@ class Stream(Base):
     statistic = relationship("Statistic", cascade="all")
     TYPES = ENUM(['UNKNOWN', 'MP3', 'AACP', 'OGG', 'OPUS'])
     code_pattern = re.compile('^[0-9A-Za-z_-]+$')
-    
+
     @staticmethod
     def add_stream(code, name, mount, type, quality):
         try:
@@ -114,13 +116,13 @@ class Stream(Base):
             pass
         if not Stream.code_pattern.match(code):
             raise InvalidCodeException()
-        
+
         stream = Stream(code=code, name=name, mount=mount, type=type, quality=quality)
         rfk.database.session.add(stream)
         rfk.database.session.flush()
         return stream
-        
-    
+
+
     @staticmethod
     def get_stream(id=None, mount=None):
         """returns a Stream by id or mountpoint"""
@@ -129,7 +131,7 @@ class Stream(Base):
             return Stream.query.get(id)
         else:
             return Stream.query.filter(Stream.mount == mount).one()
-        
+
     def add_relay(self, relay):
         """adds a Relay to this Stream"""
         try:
@@ -139,7 +141,7 @@ class Stream(Base):
         except exc.NoResultFound:
             self.relays.append(StreamRelay(relay=relay))
             return True
-    
+
     def get_statistic(self):
         if self.statistic is None:
             stat = Statistic(name='Listeners on %s' % (self.code), identifier='lst-%s' % (self.code))
@@ -147,21 +149,21 @@ class Stream(Base):
             self.statistic = stat
             rfk.database.session.flush()
         return self.statistic
-    
+
     def get_current_listeners(self):
         return Listener.query.join(StreamRelay).filter(StreamRelay.stream == self, Listener.disconnect == None).count()
-    
+
     def update_statistic(self):
         stat = self.get_statistic()
         stat.set(now(), self.get_current_listeners())
-    
+
     def get_status(self):
         available = False
         for sr in self.relays:
             if sr.status == StreamRelay.STATUS.ONLINE:
                 available = True
         return available
-    
+
     def get_relay(self):
         relays = Relay.query.join(StreamRelay).filter(StreamRelay.stream == self,
                                                       StreamRelay.status == StreamRelay.STATUS.ONLINE).all()
@@ -174,9 +176,10 @@ class Stream(Base):
             if relay.get_load() <= minload:
                 minload = relay.get_load()
                 minrelay = relay
-        
+
         return minrelay
-    
+
+
 class Relay(Base):
     """database representation of a RelayServer"""
     __tablename__ = 'relays'
@@ -191,7 +194,7 @@ class Relay(Base):
     auth_username = Column(String(50))
     auth_password = Column(String(50))
     relay_username = Column(String(50))
-    relay_password = Column(String(50)) 
+    relay_password = Column(String(50))
     type = Column(Integer(unsigned=True))
     status = Column(Integer(unsigned=True), default=0)
     statistic_id = Column("statistic", Integer(unsigned=True), ForeignKey('statistics.statistic',
@@ -200,26 +203,29 @@ class Relay(Base):
     statistic = relationship("Statistic", cascade="all")
     STATUS = ENUM(['UNKNOWN', 'DISABLED', 'OFFLINE', 'ONLINE'])
     TYPE = ENUM(['MASTER', 'RELAY'])
-    
+
     @staticmethod
-    def add_relay(address, port, bandwidth, admin_username, admin_password, auth_username, auth_password, relay_username, relay_password, type):
+    def add_relay(address, port, bandwidth, admin_username, admin_password, auth_username, auth_password,
+                  relay_username, relay_password, type):
         try:
             Relay.query.filter(Relay.address == address, Relay.port == port).one()
             raise AddressTakenException()
         except exc.NoResultFound:
             pass
-        relay = Relay(address=address, port=port, bandwidth=bandwidth, admin_username=admin_username, admin_password=admin_password,
-                      auth_username=auth_username, auth_password=auth_password, relay_username=relay_username, relay_password=relay_password,
+        relay = Relay(address=address, port=port, bandwidth=bandwidth, admin_username=admin_username,
+                      admin_password=admin_password,
+                      auth_username=auth_username, auth_password=auth_password, relay_username=relay_username,
+                      relay_password=relay_password,
                       type=type)
         rfk.database.session.add(relay)
         rfk.database.session.flush()
         return relay
-        
+
     @staticmethod
     def get_master():
         """returns the master server"""
         return Relay.query.filter(Relay.type == Relay.TYPE.MASTER).one()
-    
+
     @staticmethod
     def get_relay(id=None, address=None, port=None):
         """returns a Relay either by id or by address and port"""
@@ -229,7 +235,7 @@ class Relay(Base):
         else:
             return Relay.query.filter(Relay.address == address,
                                       Relay.port == port).one()
-        
+
     def get_icecast_config(self, all_streams=False):
         """returns the configuration XML for this Relay"""
         conf = rfk.icecast.IcecastConfig()
@@ -238,11 +244,11 @@ class Relay(Base):
         conf.admin = self.admin_username
         conf.password = self.admin_password
         conf.hostname = self.address
-        api_url = "http://%s%s" % (CONFIG.get('site', 'url'),'/backend/icecast/')
+        api_url = "http://%s%s" % (CONFIG.get('site', 'url'), '/backend/icecast/')
         if all_streams:
             for stream in Stream.query.all():
                 mount = rfk.icecast.Mount()
-                mount.api_url = api_url 
+                mount.api_url = api_url
                 mount.mount = stream.mount
                 mount.username = self.auth_username
                 mount.password = self.auth_password
@@ -265,7 +271,7 @@ class Relay(Base):
             conf.relay_user = self.relay_username
             conf.relay_password = self.relay_password
         return conf.get_xml()
-        
+
     def add_stream(self, stream):
         """adds a Stream to this Relay"""
         try:
@@ -273,7 +279,7 @@ class Relay(Base):
                                             StreamRelay.stream == stream).one()
         except exc.NoResultFound:
             return self.streams.append(StreamRelay(stream=stream))
-            
+
     def get_stream_relay(self, stream):
         """returns the StreamRelay combination for the given Stream and this Relay"""
         return StreamRelay.query.filter(StreamRelay.relay == self,
@@ -281,36 +287,38 @@ class Relay(Base):
 
     def get_statistic(self):
         if self.statistic is None:
-            stat = Statistic(name='Listeners on %s:%s' % (self.address,self.port), identifier='lst-%s:%s' % (self.address,self.port))
+            stat = Statistic(name='Listeners on %s:%s' % (self.address, self.port),
+                             identifier='lst-%s:%s' % (self.address, self.port))
             rfk.database.session.add(stat)
             self.statistic = stat
             rfk.database.session.flush()
         return self.statistic
-    
+
     def get_current_listeners(self):
         return Listener.query.join(StreamRelay).filter(StreamRelay.relay == self, Listener.disconnect == None).count()
-    
+
     def update_statistic(self):
         stat = self.get_statistic()
         stat.set(now(), self.get_current_listeners())
-        
+
     def get_load(self):
         try:
             return self.usage / float(self.bandwidth)
         except TypeError:
             return 0
-            
+
+
 class StreamRelay(Base):
     __tablename__ = 'stream_relays'
     stream_relay = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     stream_id = Column("stream", Integer(unsigned=True), ForeignKey('streams.stream',
-                                                 onupdate="CASCADE",
-                                                 ondelete="RESTRICT"))
+                                                                    onupdate="CASCADE",
+                                                                    ondelete="RESTRICT"))
     stream = relationship("Stream", backref=backref('relays', cascade="all, delete-orphan"))
     relay_id = Column("relay", Integer(unsigned=True),
-                           ForeignKey('relays.relay',
-                                      onupdate="CASCADE",
-                                      ondelete="RESTRICT"))
+                      ForeignKey('relays.relay',
+                                 onupdate="CASCADE",
+                                 ondelete="RESTRICT"))
     relay = relationship("Relay", backref=backref('streams', cascade="all, delete-orphan"))
     status = Column(Integer(unsigned=True))
     statistic_id = Column("statistic", Integer(unsigned=True), ForeignKey('statistics.statistic',
@@ -318,12 +326,12 @@ class StreamRelay(Base):
                                                                           ondelete="RESTRICT"))
     statistic = relationship("Statistic")
     STATUS = ENUM(['UNKNOWN', 'DISABLED', 'OFFLINE', 'ONLINE'])
-    
+
     def __init__(self, relay=None, stream=None):
         assert relay or stream
         self.relay = relay
         self.stream = stream
-        
+
     def set_offline(self):
         """sets this combination of stream and relay to offline"""
         self.status = StreamRelay.STATUS.OFFLINE
@@ -331,18 +339,19 @@ class StreamRelay(Base):
                                                     Listener.disconnect == None).all()
         for listener in connected_listeners:
             listener.disconnect = now()
-            
+
     def get_statistic(self):
         if self.statistic is None:
-            stat = Statistic(name='Listeners on SR %s' % (self.stream_relay), identifier='lst-sr-%s' % (self.stream_relay))
+            stat = Statistic(name='Listeners on SR %s' % (self.stream_relay),
+                             identifier='lst-sr-%s' % (self.stream_relay))
             rfk.database.session.add(stat)
             self.statistic = stat
             rfk.database.session.flush()
         return self.statistic
-    
+
     def get_current_listeners(self):
         return Listener.query.filter(Listener.stream_relay == self, Listener.disconnect == None).count()
-    
+
     def update_statistic(self):
         stat = self.get_statistic()
         stat.set(now(), self.get_current_listeners())

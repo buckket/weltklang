@@ -1,10 +1,9 @@
 from sqlalchemy import *
-from sqlalchemy.orm import relationship, backref, exc
 from sqlalchemy.dialects.mysql import INTEGER as Integer
 
-import rfk.database
 from rfk.database import Base, UTCDateTime
 from rfk.helper import now
+
 
 class Donation(Base):
     __tablename__ = 'donations'
@@ -16,4 +15,3 @@ class Donation(Base):
     date = Column(UTCDateTime, default=now())
     method = Column(String(20))
     country = Column(String(3))
-    
