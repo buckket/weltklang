@@ -168,7 +168,10 @@ def doConnect(data):
     try:
         auth = data['Authorization'].strip().split(' ')
         if auth[0].lower() == 'basic':
-            username, password = base64.b64decode(auth[1]).split(':', 1)
+            try:
+                username, password = base64.b64decode(auth[1]).decode('utf-8').split(':', 1)
+            except UnicodeDecodeError:
+                username, password = base64.b64decode(auth[1]).decode('latin-1').split(':', 1)
             if username == 'source':
                 username, password = password.split(username_delimiter, 1)
         else:
@@ -236,7 +239,7 @@ def decode_json(jsonstr):
 
 def main():
     parser = argparse.ArgumentParser(description='PyRfK Interface for liquidsoap',
-                                     epilog='Anyways this should normally not called manually')
+                                     epilog='Anyways, this should normally not be called manually')
     parser.add_argument('--debug', action='store_true')
     subparsers = parser.add_subparsers(dest='command', help='sub-command help')
     
