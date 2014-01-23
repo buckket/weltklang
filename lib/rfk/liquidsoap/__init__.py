@@ -1,104 +1,106 @@
 # -*- coding: utf-8 -*-
+
 import telnetlib
-import rfk
-import os
 from string import Template
+
+import os
+
+import rfk
 from rfk.database.streaming import Relay, Stream
 from rfk.helper import get_path
 
 
 class LiquidInterface(object):
-    
     timeout = 5000
-    
+
     def __init__(self, host='127.0.0.1', port=1234):
         self.host = host
         self.port = port
-        
+
     def connect(self):
         self.conn = telnetlib.Telnet(self.host, self.port)
 
     def close(self):
         self.conn.close()
-        
+
     def get_sinks(self):
         sinks = []
         for item in self._list(filter='output'):
             sinks.append(LiquidSink(self, item[0], item[1]))
         return sinks
-    
+
     def get_sources(self):
         sources = []
         for item in self._list(filter='input'):
             sources.append(LiquidSource(self, item[0], item[1]))
         return sources
-    
+
     def get_status(self, sink_or_source):
         assert isinstance(sink_or_source, (LiquidSink, LiquidSource))
         return self.endpoint_action(sink_or_source.handler, 'status')
-    
+
     def endpoint_action(self, handler, action):
         for line in self._execute_command("%s.%s" % (handler, action)).splitlines():
             if len(line) > 0:
                 return line
-    
+
     def get_version(self):
         for line in self._execute_command('version').splitlines():
             if len(line) > 0:
                 return line
-    
+
     def get_uptime(self):
         for line in self._execute_command('uptime').splitlines():
             if len(line) > 0:
                 return line
-    
+
     def kick_harbor(self):
         for source in self.get_sinks():
             if source.type == 'input.harbor':
                 source.kick()
-        
-    def _list(self,filter=None):
+
+    def _list(self, filter=None):
         list = self._execute_command('list')
         for line in list.splitlines():
             spl = map(str.strip, line.split(':'))
             if len(spl) == 2 and (filter is None or spl[1].startswith('%s.' % (filter,))):
                 yield spl
-    
-    
+
+
     def _execute_command(self, command):
         self.conn.write("%s\n" % command)
         ret = self.conn.read_until('END', self.timeout)
         return ret
 
+
 class LiquidSink(object):
-    
     def __init__(self, interface, handler, type):
         self.interface = interface
         self.handler = handler
         self.type = type
-    
+
     def status(self):
         return self.interface.get_status(self)
-    
+
     def __repr__(self):
         return "<rfk.liquidsoap.LiquidSink %s at %s>" % (self.type, self.handler)
 
+
 class LiquidSource(object):
-    
     def __init__(self, interface, handler, type):
         self.interface = interface
         self.handler = handler
         self.type = type
-    
+
     def status(self):
         return self.interface.get_status(self)
-    
+
     def kick(self):
         self.interface._execute_command("%s.kick" % (self.handler,))
-    
+
     def __repr__(self):
         return "<rfk.liquidsoap.LiquidSource %s at %s>" % (self.type, self.handler)
-    
+
 
 def _get_template_path(template):
     return os.path.join(get_path(os.path.join('rfk', 'templates', 'liquidsoap', template), internal=True))
@@ -113,15 +115,15 @@ def gen_script():
     port = rfk.CONFIG.get('liquidsoap', 'port')
 
     lastfm = make_lastfm()
-    
-    template_string = open(_get_template_path('main.liq'),'r').read()
-    
+
+    template_string = open(_get_template_path('main.liq'), 'r').read()
+
     template = Template(template_string)
     config = template.substitute(address=address,
-                        port=port,
-                        logfile=logfile,
-                        lastFM=lastfm,
-                        script=interface)
+                                 port=port,
+                                 logfile=logfile,
+                                 lastFM=lastfm,
+                                 script=interface)
     if isinstance(config, str):
         config = config.decode('utf-8')
     if not isinstance(config, unicode):
@@ -138,7 +140,7 @@ def make_lastfm():
     password = rfk.CONFIG.get('liquidsoap', 'lastfmpassword')
 
     if enabled and username and password:
-        template_string = open(_get_template_path('lastfm.liq'),'r').read()
+        template_string = open(_get_template_path('lastfm.liq'), 'r').read()
         template = Template(template_string)
         script += template.substitute(username=username,
                                       password=password)
@@ -160,7 +162,7 @@ def make_output(dir):
             file = 'output_opus.liq'
         else:
             continue
-        template_string = open(_get_template_path(file),'r').read()
+        template_string = open(_get_template_path(file), 'r').read()
         template = Template(template_string)
         master = Relay.get_master()
         script += template.substitute(name=stream.code,
