@@ -80,13 +80,13 @@
         <script>
         $(function(){
            $.pnotify.defaults.history = false;
-           $.pnotify.defaults.styling = "bootstrap";
            var stack_bar_top = {"dir1": "down", "dir2": "right", "push": "top", "spacing1": 0, "spacing2": 0};
            {% for category, message in messages %}
             $.pnotify({
                 closer: false,
-                sticker: false,
-                styling: "bootstrap",
+                sticker: true,
+                styling: "fontawesome",
+                title: 'RfK :: {{ TITLE }}',
                 text: '{{ message }}',
                 addclass: "stack-bar-top",
                 type: '{{ category }}',
