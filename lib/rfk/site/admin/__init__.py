@@ -1,23 +1,11 @@
-from flask import Blueprint, render_template, url_for, request, redirect
-from functools import wraps
-import math
-import rfk
-from rfk.helper import get_path
-import rfk.liquidsoap
-import rfk.site
-from rfk.site.helper import permission_required, paginate, pagelinks
-from rfk.site.forms.stream import new_stream
-from rfk.site.forms.relay import new_relay
+from flask import Blueprint, render_template, url_for, request
 from flask.ext.login import login_required, current_user
 
-import rfk.database
-from rfk.database.base import User, Loop
-from rfk.database.streaming import Stream, Relay
-from rfk.exc.streaming import CodeTakenException, InvalidCodeException, MountpointTakenException, MountpointTakenException,\
-    AddressTakenException
-from flask.helpers import flash
+from rfk.database.base import User
+from rfk.site.helper import permission_required, paginate, pagelinks
 
-admin = Blueprint('admin',__name__)
+
+admin = Blueprint('admin', __name__)
 
 import relays
 import streams
@@ -27,11 +15,13 @@ import logs
 import listener
 import tags
 
+
 @admin.route('/')
 @login_required
 @permission_required(permission='admin')
 def index():
     return render_template('admin/index.html')
+
 
 @admin.route('/user', methods=['GET'])
 @login_required
@@ -39,9 +29,10 @@ def index():
 def user_list():
     page = int(request.args.get('page') or 0)
     (users, total_pages) = paginate(User.query, page=page)
-    pagination = pagelinks('.user_list',page ,total_pages)
+    pagination = pagelinks('.user_list', page, total_pages)
     return render_template('admin/user/list.html', users=users, pagination=pagination)
-        
+
+
 def create_menu(endpoint):
     if not current_user.has_permission(code='admin'):
         return False
@@ -63,5 +54,6 @@ def create_menu(endpoint):
         if active:
             menu['active'] = True
     return menu
+
 
 admin.create_menu = create_menu

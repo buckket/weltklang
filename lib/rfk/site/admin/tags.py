@@ -1,10 +1,12 @@
-from flask import Blueprint, render_template, url_for, request, redirect
+from flask import render_template, request
 from flask.ext.login import login_required, current_user
-from rfk.site.helper import permission_required, emit_error
-import rfk.database
-from ..admin import admin
-from rfk.database.show import Tag
 from flask.json import jsonify
+
+import rfk.database
+from rfk.site.helper import permission_required, emit_error
+from rfk.database.show import Tag
+
+from ..admin import admin
 
 
 taglist = ('icon-glass',
@@ -281,6 +283,7 @@ def tags_list():
     tags = Tag.query.all()
     return render_template('admin/tags_list.html', tags=tags)
 
+
 @admin.route('/tag/<int:tag>/edit')
 @login_required
 @permission_required(permission='admin')
@@ -294,6 +297,7 @@ def tags_edit(tag):
         template = '/admin/tagform.html'
     return render_template(template, taglist=taglist, tag=tag)
 
+
 @admin.route("/tag/<int:tag>/save", methods=['POST'])
 @permission_required(permission='admin', ajax=True)
 def save_tag(tag):
@@ -304,4 +308,4 @@ def save_tag(tag):
     tag.description = request.form['description']
     tag.icon = request.form['icon']
     rfk.database.session.commit()
-    return jsonify({'success':True, 'data':None})
+    return jsonify({'success': True, 'data': None})

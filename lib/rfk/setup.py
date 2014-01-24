@@ -3,8 +3,8 @@
 import sys
 
 import rfk
-from rfk.database import init_db
 import rfk.database
+from rfk.database import init_db
 
 
 rfk.init()
@@ -18,11 +18,13 @@ else:
                                   rfk.CONFIG.get('database', 'database')))
 import rfk.install
 
+
 def main():
     rfk.install.setup_permissions()
     rfk.install.setup_settings()
     rfk.install.setup_default_user('admin', 'admin')
     rfk.database.session.commit()
+
 
 if __name__ == '__main__':
     sys.exit(main())

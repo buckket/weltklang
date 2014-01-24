@@ -1,18 +1,19 @@
 from sqlalchemy import *
-from sqlalchemy.orm import relationship, backref, exc
+from sqlalchemy.orm import relationship, exc
 from sqlalchemy.dialects.mysql import INTEGER as Integer
 
-from rfk.database import Base, UTCDateTime
 import rfk.database
+from rfk.database import Base, UTCDateTime
 from rfk.helper import now
 from rfk.types import ENUM
+
 
 class Statistic(Base):
     __tablename__ = 'statistics'
     statistic = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
-    identifier = Column(String(50), unique=True,  nullable=False)
-    
+    identifier = Column(String(50), unique=True, nullable=False)
+
     def set(self, timestamp, value):
         try:
             ls = StatsistcsData.query.filter(StatsistcsData.timestamp == timestamp,
@@ -23,7 +24,7 @@ class Statistic(Base):
             ls = StatsistcsData(statistic=self, timestamp=timestamp, value=value)
             rfk.database.session.add(ls)
             rfk.database.session.flush()
-            
+
     def get(self, start=None, stop=None, num=None, reverse=False):
         clauses = []
         if start is not None:
@@ -33,13 +34,13 @@ class Statistic(Base):
         clauses.append(StatsistcsData.statistic == self)
         qry = StatsistcsData.query.filter(*clauses)
         if reverse:
-            qry = qry.order_by(StatsistcsData.timestamp.desc() )
+            qry = qry.order_by(StatsistcsData.timestamp.desc())
         else:
-            qry = qry.order_by(StatsistcsData.timestamp.asc() )
+            qry = qry.order_by(StatsistcsData.timestamp.asc())
         if num is not None:
             qry = qry.limit(num)
         return qry.yield_per(100)
-        
+
     def current_value(self):
         ret = self.get(stop=now(), num=1, reverse=True)
         if len(ret) == 1:
@@ -57,7 +58,7 @@ class StatsistcsData(Base):
     statistic = relationship("Statistic", cascade="all")
     timestamp = Column(UTCDateTime(), nullable=False)
     value = Column(Integer(unsigned=True), nullable=False)
-    
+
 
 class RelayStatistic(Base):
     __tablename__ = 'relay_statistics'
@@ -67,12 +68,12 @@ class RelayStatistic(Base):
                                                                           ondelete="RESTRICT"))
     statistic = relationship("Statistic", cascade="all")
     relay_id = Column("relay", Integer(unsigned=True), ForeignKey('relays.relay',
-                                                                          onupdate="CASCADE",
-                                                                          ondelete="RESTRICT"))
+                                                                  onupdate="CASCADE",
+                                                                  ondelete="RESTRICT"))
     relay = relationship("Relay", cascade="all")
     type = Column(Integer(unsigned=True))
     TYPE = ENUM(['TRAFFIC', 'LISTENERCOUNT'])
-    
+
     @staticmethod
     def get_relaystatistic(relay, type):
         try:

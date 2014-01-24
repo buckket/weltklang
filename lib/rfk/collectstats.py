@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
-import os
 import sys
 import struct
 import time
 import urllib2
+import socket
+
+import os
 
 import rfk
 import rfk.database
@@ -13,7 +15,7 @@ from rfk.database.streaming import Relay
 from rfk.database.stats import RelayStatistic
 from rfk.icecast import Icecast
 from rfk.helper import now, get_path
-import socket
+
 
 def get_stats(relay):
     statsfile = get_path(os.path.join('var', 'tmp', 'traffic{0}'.format(relay.relay)))
@@ -26,15 +28,17 @@ def get_stats(relay):
     ic = Icecast(relay.address, relay.port, relay.admin_username, relay.admin_password)
     total = ic.get_traffic(True)
     timestamp = int(time.time())
-    
-    with open(statsfile,'wb') as f:
+
+    with open(statsfile, 'wb') as f:
         f.write(struct.pack('qi', total, timestamp))
     if last_total is not None:
-        return ((total-last_total)/(timestamp-last_timestamp))/1024
+        return ((total - last_total) / (timestamp - last_timestamp)) / 1024
+
 
 def get_stats_direct(relay):
     ic = Icecast(relay.address, relay.port, relay.admin_username, relay.admin_password)
     return ic.get_output_bitrate(True)
+
 
 def main():
     try:
@@ -52,7 +56,7 @@ def main():
                 relay.usage = get_stats_direct(relay)
                 rs = RelayStatistic.get_relaystatistic(relay, RelayStatistic.TYPE.TRAFFIC)
                 if relay.usage is not None:
-                    rs.statistic.set(now(),relay.usage)
+                    rs.statistic.set(now(), relay.usage)
                 relay.status = Relay.STATUS.ONLINE
                 rfk.database.session.commit()
             except urllib2.URLError as e:
@@ -71,7 +75,6 @@ def main():
         rfk.database.session.rollback()
         rfk.database.session.remove()
 
+
 if __name__ == '__main__':
     sys.exit(main())
-
-

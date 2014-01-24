@@ -6,26 +6,20 @@
 
 """
 
-
 from functools import wraps, partial
+from datetime import datetime
+
+from sqlalchemy import between
+
+from flask import jsonify, request, g
 
 from rfk.api import api
 from rfk import exc as rexc
-from flask import jsonify, request, g
-
-import rfk.database
-from rfk.database.base import User, News, ApiKey
-from rfk.database.show import Show, UserShow, Tag
-from rfk.database.track import Track, Artist, Title
+from rfk.database.base import User, ApiKey
+from rfk.database.show import Show, UserShow
+from rfk.database.track import Track
 from rfk.database.streaming import Listener, Relay
-
-import rfk.helper
-from rfk.helper import now
-
 from rfk.liquidsoap import LiquidInterface
-
-from datetime import datetime, timedelta
-from sqlalchemy import func, and_, or_, between
 from rfk.exc.base import UserNotFoundException
 
 
@@ -36,6 +30,7 @@ def wrapper(data, ecode=0, emessage=None):
 def check_auth(f=None, required_permissions=None):
     if f is None:
         return partial(check_auth, required_permissions=required_permissions)
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
 
@@ -63,11 +58,13 @@ def check_auth(f=None, required_permissions=None):
         if required_permissions != None:
             for required_permission in required_permissions:
                 if not apikey.flag & required_permission:
-                    return raise_error('Flag %s (%i) required' % (ApiKey.FLAGS.name(required_permission), required_permission))
+                    return raise_error(
+                        'Flag %s (%i) required' % (ApiKey.FLAGS.name(required_permission), required_permission))
 
         g.apikey = apikey
 
         return f(*args, **kwargs)
+
     return decorated_function
 
 
@@ -99,7 +96,7 @@ def dj():
 
     try:
         user = User.get_user(id=dj_id, username=dj_name)
-        return jsonify(wrapper({'dj': {'dj_id': user.user, 'dj_name': user.username }}))
+        return jsonify(wrapper({'dj': {'dj_id': user.user, 'dj_name': user.username}}))
     except rexc.base.UserNotFoundException:
         return jsonify(wrapper({'dj': None}))
     except AssertionError:
@@ -121,7 +118,7 @@ def current_dj():
 
     result = UserShow.query.filter(UserShow.status == UserShow.STATUS.STREAMING).first()
     if result:
-        data = {'current_dj': {'dj_id': result.user.user, 'dj_name': result.user.username, 'dj_status': result.status }}
+        data = {'current_dj': {'dj_id': result.user.user, 'dj_name': result.user.username, 'dj_status': result.status}}
     else:
         data = {'current_dj': None}
     return jsonify(wrapper(data))
@@ -188,7 +185,7 @@ def current_show():
             dj = []
             connected = False
             for usershow in show.users:
-                dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status })
+                dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status})
                 if usershow.status == UserShow.STATUS.STREAMING:
                     connected = True
 
@@ -247,7 +244,8 @@ def next_shows():
 
                 dj = []
                 for usershow in show.users:
-                    dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status })
+                    dj.append(
+                        {'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status})
 
                 data['next_shows']['shows'].append({
                     'show_id': show.show,
@@ -300,7 +298,7 @@ def last_shows():
 
             dj = []
             for usershow in show.users:
-                dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status })
+                dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status})
 
             data['last_shows']['shows'].append({
                 'show_id': show.show,
@@ -328,7 +326,7 @@ def current_track():
 
     result = Track.current_track()
     if result:
-        data = {'current_track' : {
+        data = {'current_track': {
             'track_id': result.track,
             'track_begin': result.begin.isoformat(),
             'track_title': result.title.name,
@@ -369,7 +367,6 @@ def last_tracks():
     data = {'last_tracks': {'tracks': []}}
     if result:
         for track in result:
-
             begin = track.begin.isoformat()
             end = track.end.isoformat()
 
@@ -450,4 +447,3 @@ def active_relays():
     else:
         data = {'active_relays': None}
     return jsonify(wrapper(data))
-

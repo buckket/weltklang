@@ -1,10 +1,11 @@
-from flask import Blueprint, render_template, url_for, request, redirect
+from flask import render_template
 from flask.ext.login import login_required, current_user
+
 from rfk.site.helper import permission_required
 from rfk.database.streaming import Listener
 
-
 from ..admin import admin
+
 
 @admin.route('/listener')
 @login_required
