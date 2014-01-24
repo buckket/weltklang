@@ -9,6 +9,10 @@ body {
   font-family: 'Oswald Regular', sans-serif !important;
 }
 
+footer {
+  text-align: center;
+}
+
 /*
 Calendar
 */
