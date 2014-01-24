@@ -4,6 +4,8 @@ from posixpath import dirname
 import os
 import pytz
 
+import geoip2.errors
+
 from flask.ext.babel import lazy_gettext
 from flask import url_for
 from flask.helpers import find_package
@@ -16,7 +18,11 @@ def now():
 
 
 def get_location(address):
-    location = rfk.geoip.city(address)
+    try:
+        location = rfk.geoip.city(address)
+    except geoip2.errors.AddressNotFoundError:
+        return {}
+
     ret = {}
 
     if location.city.name is not None:
