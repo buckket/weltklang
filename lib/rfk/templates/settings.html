@@ -1,33 +1,46 @@
-{% from "_helpers.html" import render_field_horizontal %}
+{% from "_helpers.html" import render_field_horizontal_settings %}
 {% extends "base.html" %}
 {% block content %}
 
-<h1>{% trans %}Settings{% endtrans %}</h1>
 <div class="row">
-    <div class="col-md-12">
-        <h3>{% trans username=current_user.username %}Customize your very own {{ username }}{% endtrans %}</h3>
-        <form class="form-horizontal" method="post">
-            
+    <div class="col-sm-8">
+        <h3>{% trans username=current_user.username %}Customize your very own {{ username }}{% endtrans %}
+            (<img src="/static/img/cb/{{ ball }}" />)
+        </h3>
+        <form class="form" role="form" method="post">
+
             <div class="row">
-                <div class="col-md-6">
-                    <h4>{% trans %}User settings{% endtrans %}</h4>
-                    {{ render_field_horizontal(form.email) }}
-                    {{ render_field_horizontal(form.old_password) }}
-                    {{ render_field_horizontal(form.new_password) }}
-                    {{ render_field_horizontal(form.new_password_retype) }}
+                <div class="col-sm-6">
+                    <div class="col-sm-12 col-sm-offset-0">
+                        <h4>{% trans %}User settings{% endtrans %}:</h4>
+                        {{ render_field_horizontal_settings(form.email) }}
+                        {{ render_field_horizontal_settings(form.old_password) }}
+                        {{ render_field_horizontal_settings(form.new_password) }}
+                        {{ render_field_horizontal_settings(form.new_password_retype) }}
+                    </div>
+                    <div class="col-sm-12 col-sm-offset-0">
+                        <h4>{% trans %}Misc settings{% endtrans %}:</h4>
+                        <div class="col-sm-offset-1">
+                        <div class="checkbox">
+                            <label for="use_icy">
+                                {{ form.use_icy }} {{ form.use_icy.label }}
+                            </label>
+                        </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="col-md-6">
-                    <h4>{% trans %}Default show settings{% endtrans %}</h4>
-                    {{ render_field_horizontal(form.show_def_name) }}
-                    {{ render_field_horizontal(form.show_def_desc) }}
-                    {{ render_field_horizontal(form.show_def_tags) }}
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">{{ form.show_def_logo.label }}</label>
-                        <div class="col-sm-10">
+                <div class="col-sm-6">
+                    <div class="col-sm-12 col-sm-offset-0">
+                        <h4>{% trans %}Default show settings{% endtrans %}:</h4>
+                        {{ render_field_horizontal_settings(form.show_def_name) }}
+                        {{ render_field_horizontal_settings(form.show_def_desc) }}
+                        {{ render_field_horizontal_settings(form.show_def_tags) }}
+                        <div class="form-group">
+                            <div class="col-sm-offset-1">
+                            <label class="control-label">{{ form.show_def_logo.label }}:</label>
                             <div class="imageuploader" id="imguruploader">
                                 <span class="thumbnail"> <img class="preview" alt=""
-                                    style="height: 150px; width: 300px;">
+                                                              style="height: 150px; width: 300px;">
                                 </span>
                                 <div class="actions">
                                     <a href="#" title="upload"><i class="fa fa-pencil"></i></a>
@@ -39,30 +52,24 @@
                                     </div>
                                 </div>
                                 <input style="visibility: collapse; width: 0px; height: 0px;"
-                                    type="file">
+                                       type="file">
                             </div>
+                            {{ form.show_def_logo }}
                         </div>
+                         </div>
                     </div>
-                    {{ form.show_def_logo }}
                 </div>
             </div>
-            
+            <hr>
             <div class="row">
-                <div class="col-md-12">
-                    <h4>{% trans %}Misc settings{% endtrans %}</h4>
-                    {{ render_field_horizontal(form.use_icy) }}
-                    
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">{% trans %}Save changes{% endtrans %}</button>
-                        <button type="reset" class="btn">{% trans %}Cancel{% endtrans %}</button>
-                    </div>
-                
+                <div class="col-sm-12">
+                    <button type="submit" class="btn btn-primary">{% trans %}Save changes{% endtrans %}</button>
+                    <button type="reset" class="btn btn-default">{% trans %}Cancel{% endtrans %}</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
-
 {% endblock %}
 {% block js %}
 <script>
@@ -72,4 +79,3 @@
     })
 </script>
 {% endblock %}
-
