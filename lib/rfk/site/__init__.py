@@ -1,6 +1,6 @@
 import datetime
 
-from flask import Flask, g, render_template, flash, redirect, url_for, request, jsonify, abort
+from flask import Flask, g, render_template, flash, redirect, url_for, request, jsonify, abort, send_from_directory
 from flask.ext.login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask.ext.babel import Babel, get_locale, get_timezone, refresh
 from flask_babel import to_user_timezone
@@ -183,7 +183,7 @@ def page_not_found(e):
 def index():
     news = News.query.all()
     streams = Stream.query.all()
-    return render_template('index.html', news=news, streams=streams)
+    return render_template('index.html', TITLE='Index', news=news, streams=streams)
 
 
 @app.route('/shutdown')
@@ -192,10 +192,10 @@ def shutdown():
     return 'Server shutting down...'
 
 
-@app.route('/login', methods=["GET", "POST"])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     form = login_form(request.form)
-    if request.method == "POST" and form.validate():
+    if request.method == 'POST' and form.validate():
         username = form.username.data
         try:
             user = User.get_user(username=username)
@@ -208,26 +208,26 @@ def login():
                     if 'country_code' in loc and loc['country_code'] is not None:
                         user.country = loc['country_code']
                     rfk.database.session.commit()
-                    flash("Logged in!")
-                    return redirect(request.args.get("next") or url_for("index"))
+                    flash('Logged in!', 'success')
+                    return redirect(request.args.get('next') or url_for('index'))
                 else:
                     form.username.errors.append('There was an error while logging you in.')
-                    flash("Sorry, but you could not log in.")
+                    flash('There was an error while logging you in.', 'error')
             else:
                 form.username.errors.append('Invalid User or Password.')
-                flash(u"Invalid username or password.")
+                flash('Invalid username or password.')
         except UserNotFoundException:
             form.username.errors.append('Invalid User or Password.')
-            flash(u"Invalid username or password.")
-    return render_template("login.html", form=form)
+            flash('Invalid username or password.')
+    return render_template('login.html', form=form, TITLE='Login')
 
 
-@app.route("/logout")
+@app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    flash("Logged out.")
-    return redirect(url_for("index"))
+    flash('Logged out.', 'success')
+    return redirect(url_for('index'))
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -239,12 +239,12 @@ def register():
             if form.email.data:
                 user.mail = form.email.data
             rfk.database.session.commit()
-            flash(u"Registration successful")
+            flash('Registration successful.', 'success')
             return redirect(url_for("login"))
         except UserNameTakenException:
             form.username.errors.append('Username already taken!')
 
-    return render_template("register.html", form=form)
+    return render_template("register.html", form=form, TITLE='Register')
 
 
 @app.route('/settings', methods=['get', 'post'])
@@ -270,12 +270,13 @@ def settings():
             current_user.set_setting(code='show_def_logo', value=form.show_def_logo.data)
             current_user.set_setting(code='use_icy', value=form.use_icy.data)
             rfk.database.session.commit()
-            flash('Settings successfully updated.')
+            flash('Settings successfully updated.', 'success')
             return redirect(url_for('settings'))
         else:
             form.old_password.errors.append('Wrong password.')
 
-    return render_template('settings.html', form=form, TITLE='Settings',
+    ball = rfk.helper.iso_country_to_countryball(current_user.country)
+    return render_template('settings.html', form=form, TITLE='Settings', ball=ball,
                            imgur={'client': rfk.CONFIG.get('site', 'imgur-client')})
 
 
@@ -283,14 +284,14 @@ def settings():
 def donations():
     donations = Donation.query.all()
     if donations:
-        return render_template('donations.html', donations=donations)
+        return render_template('donations.html', TITLE='Donations', donations=donations)
     else:
         abort(500)
 
 
 @app.route('/listeners')
 def listeners():
-    return render_template("listenergraph.html")
+    return render_template("listenergraph.html", TITLE='Listeners')
 
 
 def shutdown_server():
@@ -378,3 +379,9 @@ def api_legacy():
         ret['shows'].append(arr)
 
     return jsonify(ret)
+
+
+@app.route('/robots.txt')
+@app.route('/favicon.ico')
+def static_from_root():
+    return send_from_directory(app.static_folder, request.path[1:])

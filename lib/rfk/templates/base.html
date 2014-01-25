@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
+
     <title>RfK :: {{ TITLE }}</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/static/css/bootstrap.css" rel="stylesheet">
     <link href="/static/css/bootstrap-theme.css" rel="stylesheet">
@@ -54,7 +57,7 @@
         <footer>
             <p>
                 &copy; 2009-2014 RfK Ltd. &laquo;&raquo;
-                <a href="https://github.com/TeddyDesTodes/PyRfK">Steal our work at GitHub</a> or
+                <a href="https://github.com/TeddyDesTodes/PyRfK">Steal our work on GitHub</a> or
                 <a href="https://twitter.com/krautradio">follow us on Twitter</a> &laquo;&raquo;
                 Weltklang-&beta;
             </p>
@@ -85,7 +88,7 @@
            {% for category, message in messages %}
             $.pnotify({
                 closer: false,
-                sticker: true,
+                sticker: false,
                 styling: "fontawesome",
                 title: 'RfK :: {{ TITLE }}',
                 text: '{{ message }}',
