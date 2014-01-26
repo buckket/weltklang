@@ -1,17 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row">
-    <div class="col-sm-12">
-        <h3>{% trans %}Today{% endtrans %}</h3>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">{% trans %}Today{% endtrans %}</h3>
+    </div>
+    <div class="panel-body">
         <div id="listenergraph-today" style="height:150px;"></div>
     </div>
 </div>
-<div class="row">
-    <div class="col-sm-12">
-        <h3>{% trans %}Last week{% endtrans %}</h3>
-        <div id="listenergraph-week" style="height:150px;"></div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">{% trans %}Last week{% endtrans %}</h3>
     </div>
+    <div class="panel-body">
+    <div id="listenergraph-week" style="height:150px;"></div>
 </div>
+</div>
+
 <!-- <div class="row-fluid">
 <div class="span12" id="listenergraph-month" style="height:150px;"></div>
 </div> -->
