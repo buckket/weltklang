@@ -8,23 +8,81 @@ from rfk.database.track import Track
 from flask.ext.babel import format_time
 from flask import request, url_for, jsonify
 from flask.ext.login import current_user
+from rfk.database.show import Show
+from flask_babel import to_user_timezone
+from rfk.helper import now, iso_country_to_countryball, make_user_link,\
+    natural_join
+from rfk.database.streaming import Listener
 
-
-def nowPlaying():
+def disco():
+    show = Show.get_active_show()
+    ret = {}
+    if show:
+        user = show.get_active_user()
+        ret['countryball'] = iso_country_to_countryball(user.country)
+        ret['logo'] = show.get_logo(),
+    else:
+        ret['countryball'] = False
+        ret['logo'] = False
     track = Track.current_track()
     if track:
-        title = "%s - %s" % (track.title.artist.name, track.title.name)
-        users = []
-        for usershow in track.show.users:
-            users.append(usershow)
-        return {
-            'title': title,
-            'users': users,
-            'showname': track.show.name,
-            'showdescription': track.show.description
+        ret['track'] = {'title': track.title.name,
+                        'artist': track.title.artist.name,
         }
-    else:
-        return None
+            #get listenerinfo for disco
+    listeners = Listener.get_current_listeners()
+    ret['listener'] = {}
+    for listener in listeners:
+        ret['listener'][listener.listener] = {'listener': listener.listener,
+                                              'county': listener.country,
+                                              'countryball': iso_country_to_countryball(listener.country)}
+    return ret
+
+def now_playing():
+    try:
+        ret = {}
+        #gather showinfos
+        show = Show.get_active_show()
+        if show:
+            user = show.get_active_user()
+            if show.end:
+                end = int(to_user_timezone(show.end).strftime("%s")) * 1000
+            else:
+                end = None
+            ret['show'] = {'id': show.show,
+                           'name': show.name,
+                           'begin': int(to_user_timezone(show.begin).strftime("%s")) * 1000,
+                           'now': int(to_user_timezone(now()).strftime("%s")) * 1000,
+                           'end': end,
+                           'logo': show.get_logo(),
+                           'type': Show.FLAGS.name(show.flags),
+                           'user': {'countryball': iso_country_to_countryball(user.country)}
+            }
+            if show.series:
+                ret['series'] = {'name': show.series.name}
+            link_users = []
+            for ushow in show.users:
+                link_users.append(make_user_link(ushow.user))
+            ret['users'] = {'links': natural_join(link_users)}
+
+
+        #gather nextshow infos
+        if show and show.end:
+            filter_begin = show.end
+        else:
+            filter_begin = now()
+        if request.args.get('full') == 'true':
+            nextshow = Show.query.filter(Show.begin >= filter_begin).order_by(Show.begin.asc()).first();
+            if nextshow:
+                ret['nextshow'] = {'name': nextshow.name,
+                                   'begin': int(to_user_timezone(nextshow.begin).strftime("%s")) * 1000,
+                                   'logo': nextshow.get_logo()}
+                if nextshow.series:
+                    ret['nextshow']['series'] = nextshow.series.name
+        return jsonify({'success': True, 'data': ret})
+    except Exception as e:
+        raise e
+        return jsonify({'success': False, 'data': unicode(e)})
 
 
 def menu():

@@ -20,6 +20,7 @@ from rfk.site.forms.settings import SettingsForm
 from rfk.exc.base import UserNameTakenException, UserNotFoundException
 from rfk.database.track import Track
 from rfk.database.show import Show
+from collections import OrderedDict
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -47,7 +48,8 @@ def get_datetime_format():
 app.jinja_env.filters.update(bbcode=helper.bbcode,
                              timedelta=helper.timedelta)
 
-app.jinja_env.globals.update(nowPlaying=helper.nowPlaying)
+app.jinja_env.globals.update(nowPlaying=helper.now_playing)
+app.jinja_env.globals.update(getDisco=helper.disco)
 
 babel = Babel(app)
 
@@ -161,7 +163,7 @@ def before_request():
 
 @app.before_request
 def make_menu():
-    request.menu = {}
+    request.menu = OrderedDict()
     entries = [['index', 'Home'], ['listeners', 'Listeners']]
 
     for entry in entries:
@@ -170,7 +172,9 @@ def make_menu():
 
     for bpname in app.blueprints.keys():
         try:
-            request.menu[bpname] = app.blueprints[bpname].create_menu(request.endpoint)
+            menu = app.blueprints[bpname].create_menu(request.endpoint)
+            if menu:
+                request.menu[bpname] = menu
         except AttributeError:
             pass
 
