@@ -162,10 +162,11 @@ def before_request():
 @app.before_request
 def make_menu():
     request.menu = {}
-    entries = [['index', 'Home']]
+    entries = [['index', 'Home'], ['listeners', 'Listeners']]
 
-    request.menu['app.home'] = {'name': entries[0][1],
-                                'url': url_for(entries[0][0]), 'active': (entries[0][0] == request.endpoint)}
+    for entry in entries:
+        request.menu['app.' + entry[0]] = {'name': entry[1],
+                                           'url': url_for(entry[0]), 'active': (entry[0] == request.endpoint)}
 
     for bpname in app.blueprints.keys():
         try:

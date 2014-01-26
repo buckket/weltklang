@@ -4,8 +4,8 @@ from wtforms import Form, SubmitField, BooleanField, TextField, SelectField, \
 
 class SettingsForm(Form):
     # basic settings
-    old_password = PasswordField('Old Password', [validators.Required()])
-    new_password = PasswordField('New Password', [validators.Optional(),
+    old_password = PasswordField('Old password', [validators.Required()])
+    new_password = PasswordField('New password', [validators.Optional(),
                                                   validators.Length(min=5, message='Password too short.'),
                                                   validators.EqualTo('new_password_retype',
                                                                      message='Passwords must match.')])

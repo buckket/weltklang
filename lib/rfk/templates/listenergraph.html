@@ -1,12 +1,16 @@
 {% extends "base.html" %}
-{% block content %}<h1>{% trans %}Listeners{% endtrans %}</h1>
-<h3>Today</h3>
-<div class="row-fluid">
-<div class="span12" id="listenergraph-today" style="height:150px;"></div>
+{% block content %}
+<div class="row">
+    <div class="col-sm-12">
+        <h3>{% trans %}Today{% endtrans %}</h3>
+        <div id="listenergraph-today" style="height:150px;"></div>
+    </div>
 </div>
-<h3>Last Week</h3>
-<div class="row-fluid">
-<div class="span12" id="listenergraph-week" style="height:150px;"></div>
+<div class="row">
+    <div class="col-sm-12">
+        <h3>{% trans %}Last week{% endtrans %}</h3>
+        <div id="listenergraph-week" style="height:150px;"></div>
+    </div>
 </div>
 <!-- <div class="row-fluid">
 <div class="span12" id="listenergraph-month" style="height:150px;"></div>
@@ -170,4 +174,3 @@ $(function() {
 });
 </script>
 {% endblock js%}
-
