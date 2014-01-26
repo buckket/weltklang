@@ -71,7 +71,10 @@ $(function() {
 		            data.push({
 		                label: index+ ' = 00',
 		                data: value,
-		                lines: { show: true,steps: true}
+		                lines: { show: true,
+		                	     steps: true,
+		                	     fill:true,
+		                	     lineWidth: 1}
 		            });
 		        });
 		        $.each(series['shows'], function(index,value){
