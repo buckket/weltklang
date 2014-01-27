@@ -1,3 +1,4 @@
+import pytz
 from time import mktime
 from datetime import datetime, timedelta
 
@@ -21,7 +22,7 @@ from rfk.api import api
 
 def parse_datetimestring(datestring):
     cal = pdt.Calendar()
-    return datetime.fromtimestamp(mktime(cal.parse(datestring)[0]))
+    return datetime.fromtimestamp(mktime(cal.parse(datestring)[0]), tz=pytz.utc)
 
 
 @api.route("/site/listenergraphdata/<string:start>", methods=['GET'], defaults={'stop': 'now'})
