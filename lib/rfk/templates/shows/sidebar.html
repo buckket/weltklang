@@ -1,19 +1,19 @@
 <div class="panel panel-default">
-  <div class="panel-body">
-  <div class="form-inline">
-  <div class="form-group">
-	  <div class="col-md-6">
-	    <input class="form-control" type="text" placeholder="{% trans %}Search{% endtrans %}">
+    <div class="panel-body">
+        <div class="form-inline">
+            <div class="form-group">
+                <div class="col-md-6">
+                    <input class="form-control" type="text" placeholder="{% trans %}Search{% endtrans %}">
+                </div>
+                <button class="btn btn-default" type="button">{% trans %}Go!{% endtrans %}</button>
+            </div>
+
+            {% if current_user.is_authenticated() %}
+            <div class="form-group pull-right">
+                <a class="btn btn-default" href="#" onclick="add_show(); return false;">{% trans %}Add Show{% endtrans %}</a>
+                <a class="btn btn-default" href="/series/new">{% trans %}Add Series{% endtrans %}</a>
+            </div>
+            {% endif %}
+        </div>
     </div>
-    <button class="btn" type="button">{% trans %}Go!{% endtrans %}</button>
-  </div>
-  
-    {% if current_user.is_authenticated() %}
-    <div class="form-group pull-right">
-    <a class="btn" href="#" onclick="add_show(); return false;">{% trans %}Add Show{% endtrans %}</a>
-    <a class="btn" href="/series/new">{% trans %}Add Series{% endtrans %}</a>
-    </div>
-    {% endif %}
-  </div>
-  </div>
 </div>

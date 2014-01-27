@@ -5,7 +5,7 @@ from wtforms import Form, SubmitField, BooleanField, TextField, SelectField, \
 class LoginForm(Form):
     username = TextField('Username', [validators.Required()])
     password = PasswordField('Password', [validators.Required()])
-    remember = BooleanField('remember login')
+    remember = BooleanField('Remember me')
 
 
 def login_form(rform):
@@ -15,8 +15,8 @@ def login_form(rform):
 class RegisterForm(Form):
     username = TextField('Username', [validators.Required()])
     password = PasswordField('Password', [validators.Required(),
-                                          validators.Length(min=5, message='Password too short'),
-                                          validators.EqualTo('password_retype', message='Passwords must match')])
+                                          validators.Length(min=5, message='Password too short.'),
+                                          validators.EqualTo('password_retype', message='Passwords must match.')])
     password_retype = PasswordField('Password (verification)', [validators.Required()])
     email = TextField('E-Mail', [validators.Optional(), validators.Email()])
 

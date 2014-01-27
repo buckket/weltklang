@@ -6,17 +6,17 @@
 </h3>
 <form class="form" role="form" method="post">
     <div class="row">
-        <div class="col-sm-6">
-            <div class="col-sm-12 col-sm-offset-0">
+        <div class="col-md-6">
+            <div class="col-md-12">
                 <h4>{% trans %}User settings{% endtrans %}:</h4>
                 {{ render_field_horizontal_settings(form.email) }}
                 {{ render_field_horizontal_settings(form.old_password) }}
                 {{ render_field_horizontal_settings(form.new_password) }}
                 {{ render_field_horizontal_settings(form.new_password_retype) }}
             </div>
-            <div class="col-sm-12 col-sm-offset-0">
+            <div class="col-md-12">
                 <h4>{% trans %}Misc settings{% endtrans %}:</h4>
-                <div class="col-sm-offset-1">
+                <div class="col-md-offset-1">
                     <div class="checkbox">
                         <label for="use_icy">
                             {{ form.use_icy }} {{ form.use_icy.label }}
@@ -25,14 +25,14 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-6">
-            <div class="col-sm-12 col-sm-offset-0">
+        <div class="col-md-6">
+            <div class="col-md-12">
                 <h4>{% trans %}Default show settings{% endtrans %}:</h4>
                 {{ render_field_horizontal_settings(form.show_def_name) }}
                 {{ render_field_horizontal_settings(form.show_def_desc) }}
                 {{ render_field_horizontal_settings(form.show_def_tags) }}
                 <div class="form-group">
-                    <div class="col-sm-offset-1">
+                    <div class="col-md-offset-1">
                         <label class="control-label">{{ form.show_def_logo.label }}:</label>
                         <div class="imageuploader" id="imguruploader">
                                 <span class="thumbnail"> <img class="preview" alt=""
@@ -56,9 +56,8 @@
             </div>
         </div>
     </div>
-    <hr>
     <div class="row">
-        <div class="col-sm-12">
+        <div class="col-md-12">
             <button type="submit" class="btn btn-primary">{% trans %}Save changes{% endtrans %}</button>
             <button type="reset" class="btn btn-default">{% trans %}Cancel{% endtrans %}</button>
         </div>

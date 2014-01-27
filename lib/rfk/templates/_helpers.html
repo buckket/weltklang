@@ -19,9 +19,9 @@
 {% macro render_field_horizontal_settings(field) %}
   <div class="form-group {% if field.errors %} has-error{% endif %}">
     {% if field.type != 'SubmitField' %}
-      <label class="col-sm-offset-1 control-label" for="{{ field.id }}">{{ field.label }}:</label>
+      <label class="col-md-offset-1 control-label" for="{{ field.id }}">{{ field.label }}:</label>
     {% endif %}
-      <div class="col-sm-offset-1">
+      <div class="col-md-offset-1">
       {{ field(class_="form-control") | safe }}
       {% if field.errors %}
 	    {% for error in field.errors %}
@@ -35,9 +35,9 @@
 {% macro render_field_horizontal_register(field) %}
   <div class="form-group {% if field.errors %} has-error{% endif %}">
     {% if field.type != 'SubmitField' %}
-      <label class="col-sm-offset-0 control-label" for="{{ field.id }}">{{ field.label }}:</label>
+      <label class="col-md-offset-0 control-label" for="{{ field.id }}">{{ field.label }}:</label>
     {% endif %}
-      <div class="col-sm-offset-0">
+      <div class="col-md-offset-0">
       {{ field(class_="form-control") | safe }}
       {% if field.errors %}
 	    {% for error in field.errors %}

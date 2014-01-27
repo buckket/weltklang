@@ -1,22 +1,29 @@
-{% from "_helpers.html" import render_field_horizontal %}
+{% from "_helpers.html" import render_field_horizontal_register %}
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row-fluid">
-<h1>{% trans %}Login{% endtrans %}</h1>
-<div class="span12">
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h1 class="panel-title">{% trans %}Login{% endtrans %}</h1>
+            </div>
+            <div class="panel-body">
 
 
-<form class="form-horizontal" method="post">
-{{ render_field_horizontal(form.username) }}
-{{ render_field_horizontal(form.password) }}
-{{ render_field_horizontal(form.remember) }}
-<div class="control-group">
-  <div class="controls">
-    <button type="submit" class="btn btn-primary">Login</button>
-    <a class="btn" href="/register">Register</a>
-  </div>
-</div>
-</form>
+                <form class="form" method="post">
+                    {{ render_field_horizontal_register(form.username) }}
+                    {{ render_field_horizontal_register(form.password) }}
+                    <div class="checkbox">
+                        <label for="remember">
+                            {{ form.remember }} {{ form.remember.label }}
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <a class="btn btn-default" href="/register">Register</a>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
