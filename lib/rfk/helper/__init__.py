@@ -1,4 +1,5 @@
 import datetime
+import calendar
 from posixpath import dirname
 
 import os
@@ -15,6 +16,10 @@ import rfk
 
 def now():
     return pytz.utc.localize(datetime.datetime.utcnow())
+
+
+def to_timestamp(datetime):
+    return int(calendar.timegm(datetime.timetuple())) * 1000
 
 
 def get_location(address):

@@ -15,7 +15,7 @@ from rfk.database.streaming import Stream
 from rfk.database.show import Show, Series, Tag
 from rfk.database.track import Track
 from rfk.database.streaming import Listener
-from rfk.helper import now, natural_join, make_user_link, iso_country_to_countryball
+from rfk.helper import now, to_timestamp, natural_join, make_user_link, iso_country_to_countryball
 from rfk.site.helper import permission_required, emit_error
 from rfk.api import api
 
@@ -47,7 +47,7 @@ def listenerdata(start, stop):
             c = stat.value
         else:
             c = 0
-        ret['data'][str(stream.mount)].append((int(to_user_timezone(start).strftime("%s")) * 1000, int(c)))
+        ret['data'][str(stream.mount)].append((to_timestamp(to_user_timezone(start)), int(c)))
 
     #fill in the actual datapoints
     streams = Stream.query.all()
@@ -55,7 +55,7 @@ def listenerdata(start, stop):
         stats = stream.statistic.get(start=start, stop=stop)
         for stat in stats:
             ret['data'][str(stream.mount)].append(
-                (int(to_user_timezone(stat.timestamp).strftime("%s")) * 1000, int(stat.value)))
+                (to_timestamp(to_user_timezone(stat.timestamp)), int(stat.value)))
 
     streams = Stream.query.all()
     for stream in streams:
@@ -64,17 +64,17 @@ def listenerdata(start, stop):
             c = stat.value
         else:
             c = 0
-        ret['data'][str(stream.mount)].append((int(to_user_timezone(stop).strftime("%s")) * 1000, int(c)))
+        ret['data'][str(stream.mount)].append((to_timestamp(to_user_timezone(stop)), int(c)))
 
     #get the shows for the graph
     shows = Show.query.filter(between(Show.begin, start, stop) \
                               | between(Show.end, start, stop)).order_by(Show.begin.asc()).all()
     for show in shows:
-        sstart = int(to_user_timezone(show.begin).strftime("%s"))
+        sstart = to_timestamp(to_user_timezone(show.begin))
         if show.end:
-            send = int(to_user_timezone(show.end).strftime("%s"))
+            send = to_timestamp(to_user_timezone(show.end))
         else:
-            send = int(to_user_timezone(now()).strftime("%s"))
+            send = to_timestamp(to_user_timezone(now()))
         ret['shows'].append({'name': show.name,
                              'b': sstart,
                              'e': send})
@@ -248,13 +248,13 @@ def now_playing():
         if show:
             user = show.get_active_user()
             if show.end:
-                end = int(to_user_timezone(show.end).strftime("%s")) * 1000
+                end = to_timestamp(to_user_timezone(show.end))
             else:
                 end = None
             ret['show'] = {'id': show.show,
                            'name': show.name,
-                           'begin': int(to_user_timezone(show.begin).strftime("%s")) * 1000,
-                           'now': int(to_user_timezone(now()).strftime("%s")) * 1000,
+                           'begin': to_timestamp(to_user_timezone(show.begin)),
+                           'now': to_timestamp(to_user_timezone(now())),
                            'end': end,
                            'logo': show.get_logo(),
                            'type': Show.FLAGS.name(show.flags),
@@ -283,7 +283,7 @@ def now_playing():
             nextshow = Show.query.filter(Show.begin >= filter_begin).order_by(Show.begin.asc()).first();
             if nextshow:
                 ret['nextshow'] = {'name': nextshow.name,
-                                   'begin': int(to_user_timezone(nextshow.begin).strftime("%s")) * 1000,
+                                   'begin': to_timestamp(to_user_timezone(nextshow.begin)),
                                    'logo': nextshow.get_logo()}
                 if nextshow.series:
                     ret['nextshow']['series'] = nextshow.series.name
