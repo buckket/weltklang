@@ -10,11 +10,11 @@ from . import helper
 import pytz
 
 import rfk.helper
-from rfk.helper import now
+from rfk.helper import now, iso_country_to_countryball
 import rfk.database
 from rfk.database.base import User, Anonymous, News
 from rfk.database.donations import Donation
-from rfk.database.streaming import Stream, Listener
+from rfk.database.streaming import Stream, Listener, Relay
 from rfk.site.forms.login import login_form, register_form
 from rfk.site.forms.settings import SettingsForm
 from rfk.exc.base import UserNameTakenException, UserNotFoundException
@@ -285,6 +285,11 @@ def settings():
                            imgur={'client': rfk.CONFIG.get('site', 'imgur-client')})
 
 
+@app.route('/irc')
+def irc():
+    return render_template('irc.html', TITEL='IRC')
+
+
 @app.route('/donations')
 def donations():
     donations = Donation.query.all()
@@ -296,7 +301,31 @@ def donations():
 
 @app.route('/listeners')
 def listeners():
-    return render_template("listenergraph.html", TITLE='Listeners')
+
+    # get current bandwidth of all active relays
+    total_bandwidth = 0
+    relays = Relay.query.filter(Relay.status == Relay.STATUS.ONLINE).all()
+    active_relays = len(relays)
+    for relay in relays:
+        total_bandwidth += relay.usage
+    total_bandwidth *= 128 # convert kbit to byte
+
+    # get all current listeners
+    current_listener = Listener.get_current_listeners()
+
+    # generate per country stats
+    per_country = {}
+    for listener in current_listener:
+        country = listener.country
+        try:
+            per_country[country]['count'] += 1
+        except KeyError:
+            per_country[country] = {'count': 1}
+            per_country[country]['ball'] = iso_country_to_countryball(country)
+    per_country = sorted(per_country.iteritems(), key=lambda (k, v): v['count'], reverse=True)
+
+    return render_template('listenergraph.html', TITLE='Listeners', listeners=current_listener, per_country=per_country,
+                           total_bandwidth=total_bandwidth, active_relays=active_relays)
 
 
 def shutdown_server():
