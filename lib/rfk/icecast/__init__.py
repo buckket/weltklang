@@ -226,6 +226,10 @@ class IcecastConfig(object):
         mnt.appendChild(mount_name)
         #mnt.appendChild(username)
         #mnt.appendChild(password)
+        if mount.hidden:
+            mount_hidden = doc.createElement('hidden')
+            mount_hidden.appendChild(doc.createTextNode('1'))
+            mnt.appendChild(mount_hidden)
         auth = doc.createElement('authentication')
         auth.setAttribute('type', 'url')
         auth.appendChild(self._gen_auth_option(doc, 'stream_auth', mount.api_url + 'auth'))
@@ -269,7 +273,7 @@ class Mount(object):
     def __init__(self):
         self.mount = ''
 
-        self.hidden = False
+        self.hidden = True
 
         self.username = 'hackme'
         self.password = 'hackme'
