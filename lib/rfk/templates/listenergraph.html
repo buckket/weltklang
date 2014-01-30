@@ -10,7 +10,7 @@
             (<i class="fa fa-arrow-up" style="color: green;"></i>)
             {% if listeners %}
             &mdash;	[
-                {% for country in per_country %}<img src="static/img/cb/{{ country[1]['ball'] }}">
+                {% for country in per_country %}<img class="cb-inline" src="static/img/cb/{{ country[1]['ball'] }}">
                 &raquo; <strong>{{ country[1]['count'] }}</strong>
                 {% if not loop.last	%} |{% endif %}
                 {% endfor %}

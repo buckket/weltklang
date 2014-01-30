@@ -512,6 +512,14 @@ END nowplaying Banner
 	padding: 0;
 }
 
+.cb-inline {
+    vertical-align: text-bottom;
+}
+
+.cb-baseline {
+    vertical-align: baseline;
+}
+
 .ui-pnotify.stack-bar-top {
 	right: 0;
 	top: 0;

@@ -2,7 +2,7 @@
 {% extends "base.html" %}
 {% block content %}
 <h3>{% trans username=current_user.username %}Customize your very own {{ username }}{% endtrans %}
-    (<img src="/static/img/cb/{{ ball }}" />)
+    (<img class="cb-baseline" src="/static/img/cb/{{ ball }}" />)
 </h3>
 <form class="form" role="form" method="post">
     <div class="row">
