@@ -40,21 +40,21 @@
 }
 </style>
 {% for s in series %}
-<div class="row-fluid series">
-    <div class="span3 series-logo outline"  style="background-image: url('{{s.logo}}');">
+<div class="row series">
+    <div class="col-md-3 series-logo outline"  style="background-image: url('{{s.logo}}');">
         <h4>{{ s.name }}</h4>
     </div>
-    <div class="span9">
-        <div class="row-fluid">
-            <div class="span12">
+    <div class="col-md-9">
+        <div class="row">
+            <div class="col-md-12">
                 {{ s.description }}
             </div>
         </div>
-        <div class="row-fluid">
-            <div class="span3">
-                <b>Upcomming</b>
+        <div class="row">
+            <div class="col-md-3">
+                <b>Upcoming shows</b>
             </div>
-            <div class="span9">Show, show, show,show</div>
+            <div class="col-md-9">...</div>
         </div>
     </div>
 </div>

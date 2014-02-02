@@ -1,20 +1,19 @@
-{% set sidebar=True %}
 
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="row-fluid">
-    <div class="hero-unit" style="background-image: url('{{ show.logo }}'); background-position:center;background-size:cover;">
+<div class="row">
+    <div class="jumbotron" style="margin-top:-21px;border-radius:0px;background-image: url('{{ show.logo }}'); background-position:center;background-size:cover;">
     <h1 class="outline">{%if show.series %}{{ show.series.name }} <small>{{ show.name }}</small>{% else %}{{ show.name }}{% endif %}</h1>
     <h2 class="outline">{{ show.begin | datetimeformat }}</h2>
     <h3 class="outline">{% trans users=show.users|safe %}by {{ users }}{% endtrans %}</h3>
     </div>
 </div>
-<div class="row-fluid">
-    <div class="span12">{{show.description | bbcode | safe }}</div>
+<div class="row">
+    <div class="col-md-12">{{show.description | bbcode | safe }}</div>
 </div>
-<div class="row-fluid">
-    <div class="span12" >
+<div class="row">
+    <div class="col-md-12" >
         <p class="muted">
         {% for tag in show.tags %}
             <abbr title="{{ tag.tag.description }}">{{ tag.tag.name }}</abbr>
