@@ -1,5 +1,6 @@
 from flask import Blueprint, request, make_response
 
+from rfk.helper import update_global_statistics
 from rfk.database.streaming import Relay, Stream, StreamRelay, Listener
 from rfk.database import session
 from rfk.log import init_db_logging
@@ -56,6 +57,7 @@ def icecast_remove_mount():
         relay.update_statistic()
         stream.update_statistic()
         relay.get_stream_relay(stream).update_statistic()
+        update_global_statistics()
         session.commit()
         return make_response('ok', 200, {'icecast-auth-user': '1'})
     else:
@@ -76,6 +78,7 @@ def icecast_remove_listener():
     relay.update_statistic()
     stream.update_statistic()
     relay.get_stream_relay(stream).update_statistic()
+    update_global_statistics()
     session.commit()
     return make_response('ok', 200, {'icecast-auth-user': '1'})
 
@@ -95,5 +98,6 @@ def icecast_add_listener():
     relay.update_statistic()
     stream.update_statistic()
     relay.get_stream_relay(stream).update_statistic()
+    update_global_statistics()
     session.commit()
     return make_response('ok', 200, {'icecast-auth-user': '1'})
