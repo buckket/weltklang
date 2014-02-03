@@ -45,7 +45,7 @@ def listenerdata(start, stop):
         stats = stream.statistic.get(stop=start, num=1, reverse=True)
         for stat in stats:
             c = stat.value
-        else:
+        if not stats:
             c = 0
         ret['data'][str(stream.mount)].append((to_timestamp(to_user_timezone(start)), int(c)))
 
@@ -62,7 +62,7 @@ def listenerdata(start, stop):
         stats = stream.statistic.get(stop=stop, num=1, reverse=True)
         for stat in stats:
             c = stat.value
-        else:
+        if not stats:
             c = 0
         ret['data'][str(stream.mount)].append((to_timestamp(to_user_timezone(stop)), int(c)))
 
