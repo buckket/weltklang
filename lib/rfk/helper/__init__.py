@@ -6,6 +6,7 @@ import os
 import pytz
 
 import geoip2.errors
+import sqlalchemy.orm.exc
 
 from flask.ext.babel import lazy_gettext
 from flask import url_for
@@ -97,3 +98,13 @@ def iso_country_to_countryball(isocode):
         return '{}.png'.format(isocode)
     else:
         return 'unknown.png'
+
+
+def update_global_statistics():
+    try:
+        stat = rfk.database.stats.Statistic.query.filter(rfk.database.stats.Statistic.identifier == 'lst-total').one()
+    except sqlalchemy.orm.exc.NoResultFound:
+        stat = rfk.database.stats.Statistic(name='Overall Listener', identifier='lst-total')
+        rfk.database.session.add(stat)
+        rfk.database.session.flush()
+    stat.set(now(), rfk.database.streaming.Listener.get_total_listener())
