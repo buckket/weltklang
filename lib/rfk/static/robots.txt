@@ -1,2 +1,7 @@
+# Radio freies Krautchan
+
 User-agent: *
 Disallow: /
+
+# Google (and maybe others) won't import our feeds when "Disallow: /" is active, so here you go:
+Allow: /feeds/
