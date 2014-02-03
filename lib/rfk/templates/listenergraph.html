@@ -7,7 +7,13 @@
     <div class="panel-body">
         <div class="pull-left">
             {% trans %}Total listeners{% endtrans %}: <strong>{{ listeners | count }}</strong>
+            {% if listeners|count > average_listeners %}
             (<i class="fa fa-arrow-up" style="color: green;"></i>)
+            {% elif listeners|count < average_listeners %}
+            (<i class="fa fa-arrow-down" style="color: red;"></i>)
+            {% else %}
+            (<i class="fa fa-arrow-right" style="color: gray;"></i>)
+            {% endif %}
             {% if listeners %}
             &mdash;	[
                 {% for country in per_country %}<img class="cb-baseline" src="static/img/cb/{{ country[1]['ball'] }}">

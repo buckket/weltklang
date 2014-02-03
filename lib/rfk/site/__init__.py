@@ -20,6 +20,7 @@ from rfk.site.forms.settings import SettingsForm
 from rfk.exc.base import UserNameTakenException, UserNotFoundException
 from rfk.database.track import Track
 from rfk.database.show import Show
+from rfk.database.stats import Statistic
 from collections import OrderedDict
 
 
@@ -324,8 +325,19 @@ def listeners():
             per_country[country]['ball'] = iso_country_to_countryball(country)
     per_country = sorted(per_country.iteritems(), key=lambda (k, v): v['count'], reverse=True)
 
+    # get recent listener count to calculate a trend
+    stats_total = Statistic.query.filter(Statistic.identifier == 'lst-total').one()
+    stats = stats_total.get(start=now() - datetime.timedelta(minutes=2), stop=now())
+    if stats and stats.count() > 0:
+        listener_sum = 0
+        for stat in stats:
+            listener_sum += stat.value
+        average_listeners = listener_sum / stats.count()
+    else:
+        average_listeners = len(current_listener)
+
     return render_template('listenergraph.html', TITLE='Listeners', listeners=current_listener, per_country=per_country,
-                           total_bandwidth=total_bandwidth, active_relays=active_relays)
+                           total_bandwidth=total_bandwidth, active_relays=active_relays, average_listeners=average_listeners)
 
 
 def shutdown_server():
