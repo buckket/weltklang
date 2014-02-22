@@ -33,6 +33,12 @@ def icecast_add_mount():
     stream = Stream.get_stream(mount=request.form['mount'])
     if relay and stream:
         stream.add_relay(relay)
+        session.flush()
+        
+        '''Cycle every listener'''
+        relay.get_stream_relay(stream).set_offline()
+        session.flush()
+        
         relay.get_stream_relay(stream).status = StreamRelay.STATUS.ONLINE
         relay.status = Relay.STATUS.ONLINE
         session.commit()
