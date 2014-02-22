@@ -36,7 +36,7 @@ def stream(stream):
 
     relay = stream.get_relay()
     if relay is None:
-        return make_response('I\'m sorry ;_;', 503)
+        return make_response('I\'m sorry ;_; no suitable relays found', 503)
 
     address = relay.address
     return make_response('', 301, {'Location': "http://%s:%s%s" % (address, relay.port, stream.mount), 'X-LOAD': 0})
