@@ -140,6 +140,7 @@ class Stream(Base):
             return False
         except exc.NoResultFound:
             self.relays.append(StreamRelay(relay=relay))
+            rfk.database.session.flush()
             return True
 
     def get_statistic(self):
