@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 from sqlalchemy.sql.expression import between
 from sqlalchemy import or_
-import parsedatetime.parsedatetime as pdt
+import parsedatetime as pdt
 
 from flask import jsonify, request
 from flask.ext.babel import to_user_timezone, to_utc, format_datetime
