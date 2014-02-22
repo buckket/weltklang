@@ -171,12 +171,13 @@ class Stream(Base):
         minload = 2
         minrelay = None
         for relay in relays:
-            load = relay.get_load()
-            if relay.type == Relay.TYPE.MASTER:
-                load = load * 2
-            if relay.get_load() <= minload:
-                minload = relay.get_load()
-                minrelay = relay
+            if relay.status == Relay.STATUS.ONLINE:
+                load = relay.get_load()
+                if relay.type == Relay.TYPE.MASTER:
+                    load = load * 2
+                if relay.get_load() <= minload:
+                    minload = relay.get_load()
+                    minrelay = relay
 
         return minrelay
 
