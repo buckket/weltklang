@@ -1,255 +1,394 @@
 # Translations template for PROJECT.
-# Copyright (C) 2013 ORGANIZATION
+# Copyright (C) 2014 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2013.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2013-06-17 19:01+0200\n"
+"POT-Creation-Date: 2014-02-23 15:23+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 0.9.6\n"
+"Generated-By: Babel 1.3\n"
 
-#: lib/rfk/helper/__init__.py:15
+#: lib/rfk/helper/__init__.py:65
 msgid " and "
 msgstr ""
 
-#: lib/rfk/helper/__init__.py:18
+#: lib/rfk/helper/__init__.py:68
 msgid "and"
 msgstr ""
 
-#: var/template/_helpers.html:35
+#: lib/rfk/site/user/apikey.py:25
+msgid "Added Apikey"
+msgstr ""
+
+#: lib/rfk/static/js/vendor/moment.min.js:6
+msgid "Weeks"
+msgstr ""
+
+#: lib/rfk/templates/_helpers.html:78
 msgid "Monday"
 msgstr ""
 
-#: var/template/_helpers.html:37
+#: lib/rfk/templates/_helpers.html:80
 msgid "Tuesday"
 msgstr ""
 
-#: var/template/_helpers.html:39
+#: lib/rfk/templates/_helpers.html:82
 msgid "Wednesday"
 msgstr ""
 
-#: var/template/_helpers.html:41
+#: lib/rfk/templates/_helpers.html:84
 msgid "Thursday"
 msgstr ""
 
-#: var/template/_helpers.html:43
+#: lib/rfk/templates/_helpers.html:86
 msgid "Friday"
 msgstr ""
 
-#: var/template/_helpers.html:45
+#: lib/rfk/templates/_helpers.html:88
 msgid "Saturday"
 msgstr ""
 
-#: var/template/_helpers.html:47
+#: lib/rfk/templates/_helpers.html:90
 msgid "Sunday"
 msgstr ""
 
-#: var/template/index.html:26
-msgid "Radio Freies Krautchan"
+#: lib/rfk/templates/listenergraph.html:5
+msgid "Current"
 msgstr ""
 
-#: var/template/listenergraph.html:2
-msgid "Listeners"
+#: lib/rfk/templates/listenergraph.html:9
+msgid "Total listeners"
 msgstr ""
 
-#: var/template/login.html:6
+#: lib/rfk/templates/listenergraph.html:21
+msgid "Traffic"
+msgstr ""
+
+#: lib/rfk/templates/listenergraph.html:21
+msgid "per second"
+msgstr ""
+
+#: lib/rfk/templates/listenergraph.html:22
+msgid "active"
+msgstr ""
+
+#: lib/rfk/templates/listenergraph.html:29
+msgid "Today"
+msgstr ""
+
+#: lib/rfk/templates/listenergraph.html:38
+msgid "Last week"
+msgstr ""
+
+#: lib/rfk/templates/login.html:9 lib/rfk/templates/menu.html:40
+#: lib/rfk/templates/menu.html:54
 msgid "Login"
 msgstr ""
 
-#: var/template/nowplaying.html:2
-msgid "On Air"
+#: lib/rfk/templates/menu.html:44
+msgid "Username"
 msgstr ""
 
-#: var/template/nowplaying.html:27
-msgid "... and there were silence ..."
+#: lib/rfk/templates/menu.html:47
+msgid "Password"
 msgstr ""
 
-#: var/template/register.html:6
+#: lib/rfk/templates/menu.html:51
+msgid "Remember me</small>"
+msgstr ""
+
+#: lib/rfk/templates/menu.html:58 lib/rfk/templates/register.html:9
 msgid "Register"
 msgstr ""
 
-#: var/template/register_success.html:6
-msgid "Registration was successful"
+#: lib/rfk/templates/register.html:17
+msgid "Create account"
 msgstr ""
 
-#: var/template/register_success.html:9
-msgid "Your registration was successful"
-msgstr ""
-
-#: var/template/register_success.html:11
-msgid "You can now login if you follow <a href=\"/login\">this link</a>"
-msgstr ""
-
-#: var/template/settings.html:5
-msgid "Settings"
-msgstr ""
-
-#: var/template/settings.html:13
+#: lib/rfk/templates/settings.html:4
 #, python-format
 msgid "Customize your very own %(username)s"
 msgstr ""
 
-#: var/template/settings.html:18
+#: lib/rfk/templates/settings.html:11
 msgid "User settings"
 msgstr ""
 
-#: var/template/settings.html:26
-msgid "Default show settings"
-msgstr ""
-
-#: var/template/settings.html:36
+#: lib/rfk/templates/settings.html:18
 msgid "Misc settings"
 msgstr ""
 
-#: var/template/settings.html:40
+#: lib/rfk/templates/settings.html:30
+msgid "Default show settings"
+msgstr ""
+
+#: lib/rfk/templates/settings.html:61
 msgid "Save changes"
 msgstr ""
 
-#: var/template/settings.html:41
+#: lib/rfk/templates/settings.html:62
 msgid "Cancel"
 msgstr ""
 
-#: var/template/timezoneselector.html:15
-msgid "Set"
-msgstr ""
-
-#: var/template/admin/sidebar.html:2
-msgid "Liquidsoap"
-msgstr ""
-
-#: var/template/admin/sidebar.html:3
-msgid "Manager"
-msgstr ""
-
-#: var/template/admin/sidebar.html:4
-msgid "Configuration"
-msgstr ""
-
-#: var/template/admin/sidebar.html:5
-msgid "Streaming"
-msgstr ""
-
-#: var/template/admin/sidebar.html:6
-msgid "Streams"
-msgstr ""
-
-#: var/template/admin/sidebar.html:7
-msgid "Relays"
-msgstr ""
-
-#: var/template/admin/sidebar.html:8
-msgid "Users"
-msgstr ""
-
-#: var/template/admin/sidebar.html:9
-msgid "List"
-msgstr ""
-
-#: var/template/admin/relay/list.html:30
-msgid "show"
-msgstr ""
-
-#: var/template/admin/relay/list.html:43
-#: var/template/admin/relay/relayform.html:12
-msgid "Add Relay"
-msgstr ""
-
-#: var/template/admin/relay/relayform.html:10
-msgid "Edit Relay"
-msgstr ""
-
-#: var/template/admin/relay/relayform.html:33
-#: var/template/admin/stream/streamform.html:28
+#: lib/rfk/templates/timezoneselector.html:19
+#: lib/rfk/templates/admin/relay/relayform.html:33
+#: lib/rfk/templates/admin/stream/streamform.html:28
 msgid "Save"
 msgstr ""
 
-#: var/template/admin/relay/relayform.html:35
-#: var/template/admin/stream/streamform.html:30
+#: lib/rfk/templates/admin/sidebar.html:2
+msgid "Liquidsoap"
+msgstr ""
+
+#: lib/rfk/templates/admin/sidebar.html:3
+msgid "Manager"
+msgstr ""
+
+#: lib/rfk/templates/admin/sidebar.html:4
+msgid "Configuration"
+msgstr ""
+
+#: lib/rfk/templates/admin/sidebar.html:5
+#: lib/rfk/templates/admin/loops/list.html:8
+msgid "Idle Loops"
+msgstr ""
+
+#: lib/rfk/templates/admin/sidebar.html:6
+msgid "Streaming"
+msgstr ""
+
+#: lib/rfk/templates/admin/sidebar.html:7
+msgid "Streams"
+msgstr ""
+
+#: lib/rfk/templates/admin/sidebar.html:8
+msgid "Relays"
+msgstr ""
+
+#: lib/rfk/templates/admin/sidebar.html:9
+msgid "Listener"
+msgstr ""
+
+#: lib/rfk/templates/admin/sidebar.html:10
+msgid "Misc"
+msgstr ""
+
+#: lib/rfk/templates/admin/sidebar.html:11
+msgid "Userlist"
+msgstr ""
+
+#: lib/rfk/templates/admin/sidebar.html:12
+#: lib/rfk/templates/shows/showform-inline.html:63
+msgid "Tags"
+msgstr ""
+
+#: lib/rfk/templates/admin/sidebar.html:13
+msgid "Logs"
+msgstr ""
+
+#: lib/rfk/templates/admin/tagform-inline.html:4
+msgid "Edit Tag"
+msgstr ""
+
+#: lib/rfk/templates/admin/tagform-inline.html:9
+msgid "Name"
+msgstr ""
+
+#: lib/rfk/templates/admin/tagform-inline.html:15
+#: lib/rfk/templates/admin/tagform-inline.html:22
+#: lib/rfk/templates/shows/showform-inline.html:57
+msgid "Description"
+msgstr ""
+
+#: lib/rfk/templates/admin/tagform-inline.html:35
+#: lib/rfk/templates/shows/show-inline.html:37
+#: lib/rfk/templates/shows/showform-inline.html:71
+msgid "Close"
+msgstr ""
+
+#: lib/rfk/templates/admin/tagform-inline.html:37
+#: lib/rfk/templates/shows/showform-inline.html:73
+msgid "Save Changes"
+msgstr ""
+
+#: lib/rfk/templates/admin/tagform-inline.html:45
+#: lib/rfk/templates/shows/showform-inline.html:87
+#: lib/rfk/templates/shows/showform-inline.html:106
+msgid "Please wait..."
+msgstr ""
+
+#: lib/rfk/templates/admin/loops/list.html:29
+msgid "Add new Loop"
+msgstr ""
+
+#: lib/rfk/templates/admin/loops/list.html:31
+msgid "start time"
+msgstr ""
+
+#: lib/rfk/templates/admin/loops/list.html:37
+msgid "end time"
+msgstr ""
+
+#: lib/rfk/templates/admin/loops/list.html:42
+msgid "filename"
+msgstr ""
+
+#: lib/rfk/templates/admin/loops/list.html:44
+#: lib/rfk/templates/admin/relay/relayform.html:35
+#: lib/rfk/templates/admin/stream/streamform.html:30
+#: lib/rfk/templates/user/apikeys.html:10
 msgid "Add"
 msgstr ""
 
-#: var/template/admin/stream/list.html:41
-#: var/template/admin/stream/streamform.html:12
-#: var/template/admin/user/list.html:72
+#: lib/rfk/templates/admin/loops/list.html:67
+msgid "delete"
+msgstr ""
+
+#: lib/rfk/templates/admin/relay/list.html:14
+msgid "Traffic (kbps)"
+msgstr ""
+
+#: lib/rfk/templates/admin/relay/list.html:15
+msgid "Address"
+msgstr ""
+
+#: lib/rfk/templates/admin/relay/list.html:16
+msgid "Type"
+msgstr ""
+
+#: lib/rfk/templates/admin/relay/list.html:17
+msgid "Bandwidth"
+msgstr ""
+
+#: lib/rfk/templates/admin/relay/list.html:18
+msgid "Usage"
+msgstr ""
+
+#: lib/rfk/templates/admin/relay/list.html:19
+msgid "Status"
+msgstr ""
+
+#: lib/rfk/templates/admin/relay/list.html:20
+msgid "Config"
+msgstr ""
+
+#: lib/rfk/templates/admin/relay/list.html:26
+msgid "Loading..."
+msgstr ""
+
+#: lib/rfk/templates/admin/relay/list.html:32
+msgid "show"
+msgstr ""
+
+#: lib/rfk/templates/admin/relay/list.html:45
+#: lib/rfk/templates/admin/relay/relayform.html:12
+msgid "Add Relay"
+msgstr ""
+
+#: lib/rfk/templates/admin/relay/relayform.html:10
+msgid "Edit Relay"
+msgstr ""
+
+#: lib/rfk/templates/admin/stream/list.html:41
+#: lib/rfk/templates/admin/stream/streamform.html:12
+#: lib/rfk/templates/admin/user/list.html:72
 msgid "Add Stream"
 msgstr ""
 
-#: var/template/admin/stream/streamform.html:10
+#: lib/rfk/templates/admin/stream/streamform.html:10
 msgid "Edit Stream"
 msgstr ""
 
-#: var/template/shows/seriesform.html:3
+#: lib/rfk/templates/shows/seriesform.html:9
 msgid "Series"
 msgstr ""
 
-#: var/template/shows/show-inline.html:21 var/template/shows/show.html:10
+#: lib/rfk/templates/shows/show-inline.html:21
+#: lib/rfk/templates/shows/show.html:9
 #, python-format
 msgid "by %(users)s"
 msgstr ""
 
-#: var/template/shows/show-inline.html:36
+#: lib/rfk/templates/shows/show-inline.html:36
 msgid "Edit"
 msgstr ""
 
-#: var/template/shows/show-inline.html:37
-#: var/template/shows/showform-inline.html:80
-msgid "Close"
-msgstr ""
-
-#: var/template/shows/showform-inline.html:3
+#: lib/rfk/templates/shows/showform-inline.html:3
 msgid "Edit Show"
 msgstr ""
 
-#: var/template/shows/showform-inline.html:3
+#: lib/rfk/templates/shows/showform-inline.html:3
 msgid "Add a new Show"
 msgstr ""
 
-#: var/template/shows/showform-inline.html:8
+#: lib/rfk/templates/shows/showform-inline.html:8
 msgid "Title"
 msgstr ""
 
-#: var/template/shows/showform-inline.html:17
+#: lib/rfk/templates/shows/showform-inline.html:17
 msgid "Begin"
 msgstr ""
 
-#: var/template/shows/showform-inline.html:26
+#: lib/rfk/templates/shows/showform-inline.html:21
 msgid "Length"
 msgstr ""
 
-#: var/template/shows/showform-inline.html:40
+#: lib/rfk/templates/shows/showform-inline.html:35
 msgid "Logo"
 msgstr ""
 
-#: var/template/shows/showform-inline.html:66
-msgid "Description"
+#: lib/rfk/templates/shows/showform-inline.html:72
+msgid "Delete"
 msgstr ""
 
-#: var/template/shows/showform-inline.html:72
-msgid "Tags"
-msgstr ""
-
-#: var/template/shows/showform-inline.html:81
-msgid "Save Changes"
-msgstr ""
-
-#: var/template/shows/showform-inline.html:81
+#: lib/rfk/templates/shows/showform-inline.html:73
+#: lib/rfk/templates/shows/sidebar.html:12
 msgid "Add Show"
 msgstr ""
 
-#: var/template/shows/showform-inline.html:94
-msgid "Please wait..."
+#: lib/rfk/templates/shows/sidebar.html:5
+#: lib/rfk/templates/shows/sidebar.html:6
+msgid "Search"
 msgstr ""
 
-#: var/template/shows/upcoming.html:2
+#: lib/rfk/templates/shows/sidebar.html:8
+msgid "Go!"
+msgstr ""
+
+#: lib/rfk/templates/shows/sidebar.html:13
+msgid "Add Series"
+msgstr ""
+
+#: lib/rfk/templates/shows/upcoming.html:2
 msgid "Upcoming Shows"
+msgstr ""
+
+#: lib/rfk/templates/user/apikeys.html:5
+msgid "Your Api Keys"
+msgstr ""
+
+#: lib/rfk/templates/user/apikeys.html:7
+msgid "Register Apikey"
+msgstr ""
+
+#: lib/rfk/templates/user/info.html:11
+msgid "Past Shows"
+msgstr ""
+
+#: lib/rfk/templates/user/info.html:24 lib/rfk/templates/user/info.html:43
+msgid "No shows"
+msgstr ""
+
+#: lib/rfk/templates/user/info.html:30
+msgid "Next Shows"
 msgstr ""
 
