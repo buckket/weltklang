@@ -1,0 +1,18 @@
+{% from "_helpers.html" import render_field_horizontal_register %}
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 col-md-offset-0">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h1 class="panel-title">{% trans %}IRC Service Information{% endtrans %}</h1>
+            </div>
+            <div class="panel-body text-center">
+                You can either join manually using your own IRC client (<a href="irc://irc.euirc.net/#RfK">#RfK @ irc.euirc.net</a>)
+                or by using <a href="http://webchat.euirc.net/?channels=RfK&uio=d4">qwebirc</a> in case you don’t have an IRC client installed.<br />
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
