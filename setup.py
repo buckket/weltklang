@@ -29,7 +29,7 @@ setup(
                       'pytz',
                       'passlib',
                       'bcrypt',
-                      'geoip2[DB]',
+                      'geoip2',
                       'postmarkup',
                       'sqlalchemy',
                       'parsedatetime',
