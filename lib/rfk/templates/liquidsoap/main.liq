@@ -70,7 +70,7 @@ def get_listener(~protocol,~data,~headers,uri) =
 end
 
 
-live = input.harbor(port = $port,on_connect = live_start, on_disconnect = live_stop, buffer=0., max = 10., auth = auth, "/live.ogg")
+live = input.harbor(port = $port,on_connect = live_start, on_disconnect = live_stop, buffer=5., max = 10., auth = auth, "/live.ogg")
 
 harbor.http.register(port=$port,method="GET",
                      "^/admin/listclients",
