@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, url_for, request
 from flask.ext.login import login_required, current_user
 
 from rfk.database.base import User
-from rfk.site.helper import permission_required, paginate, pagelinks
+from rfk.site.helper import permission_required, paginate_query, Pagination
 
 
 admin = Blueprint('admin', __name__)
@@ -23,13 +23,14 @@ def index():
     return render_template('admin/index.html')
 
 
-@admin.route('/user', methods=['GET'])
+@admin.route('/user/', defaults={'page': 1})
+@admin.route('/user/page/<int:page>')
 @login_required
 @permission_required(permission='manage-liquidsoap')
-def user_list():
-    page = int(request.args.get('page') or 0)
-    (users, total_pages) = paginate(User.query, page=page)
-    pagination = pagelinks('.user_list', page, total_pages)
+def user_list(page):
+    per_page = 25
+    (users, total_count) = paginate_query(User.query.order_by(User.register_date.asc()), page=page)
+    pagination = Pagination(page, per_page, total_count)
     return render_template('admin/user/list.html', users=users, pagination=pagination)
 
 

@@ -134,29 +134,45 @@ def emit_error(err_id, err_msg):
     return jsonify({'success': False, 'error': {'id': err_id, 'msg': err_msg}})
 
 
-def paginate(query, page=0, per_page=25):
-    result = query.limit(per_page).offset(page * per_page).all()
-    total_pages = int(math.ceil(query.count() / per_page))
-    return (result, total_pages)
+def paginate_query(query, page=0, per_page=25):
+    result = query.limit(per_page).offset((page - 1) * per_page).all()
+    total_count = query.count()
+    return (result, total_count)
 
 
-def pagelinks(url, page, total_pages, visible_pages=7, param='page'):
-    pagelinks = {'first': None,
-                 'last': None,
-                 'pages': []}
-    if page > 0:
-        pagelinks['first'] = url_for(url, **{param: 0})
-    if page < total_pages:
-        pagelinks['last'] = url_for(url, **{param: total_pages})
-    begin = int(page - (visible_pages / 2))
+def url_for_other_page(page):
+    args = request.view_args.copy()
+    args['page'] = page
+    return url_for(request.endpoint, **args)
 
-    if begin + visible_pages > total_pages + 1:
-        begin = total_pages + 1 - visible_pages
-    if begin < 0:
-        begin = 0
-    end = min(begin + visible_pages, total_pages + 1)
-    for pn in range(begin, end):
-        pagelinks['pages'].append({'name': pn + 1,
-                                   'active': pn == page,
-                                   'url': url_for(url, **{param: pn})})
-    return pagelinks
+
+class Pagination(object):
+
+    def __init__(self, page, per_page, total_count):
+        self.page = page
+        self.per_page = per_page
+        self.total_count = total_count
+
+    @property
+    def pages(self):
+        return int(math.ceil(self.total_count / float(self.per_page)))
+
+    @property
+    def has_prev(self):
+        return self.page > 1
+
+    @property
+    def has_next(self):
+        return self.page < self.pages
+
+    def iter_pages(self, left_edge=2, left_current=2, right_current=5, right_edge=2):
+        last = 0
+        for num in xrange(1, self.pages + 1):
+            if num <= left_edge or \
+               (num > self.page - left_current - 1 and \
+                num < self.page + right_current) or \
+                num > self.pages - right_edge:
+                if last + 1 != num:
+                    yield None
+                yield num
+                last = num

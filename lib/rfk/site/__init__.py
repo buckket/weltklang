@@ -11,6 +11,7 @@ import pytz
 
 import rfk.helper
 from rfk.helper import now, iso_country_to_countryball
+from rfk.site.helper import paginate_query, Pagination
 import rfk.database
 from rfk.database.base import User, Anonymous, News
 from rfk.database.donations import Donation
@@ -19,7 +20,7 @@ from rfk.site.forms.login import login_form, register_form
 from rfk.site.forms.settings import SettingsForm
 from rfk.exc.base import UserNameTakenException, UserNotFoundException
 from rfk.database.track import Track
-from rfk.database.show import Show
+from rfk.database.show import Show, UserShow
 from rfk.database.stats import Statistic
 from collections import OrderedDict
 
@@ -49,8 +50,9 @@ def get_datetime_format():
 app.jinja_env.filters.update(bbcode=helper.bbcode,
                              timedelta=helper.timedelta)
 
-app.jinja_env.globals.update(nowPlaying=helper.now_playing)
-app.jinja_env.globals.update(getDisco=helper.disco)
+app.jinja_env.globals['nowPlaying'] = helper.now_playing
+app.jinja_env.globals['getDisco'] = helper.disco
+app.jinja_env.globals['url_for_other_page'] = helper.url_for_other_page
 
 babel = Babel(app)
 
@@ -165,7 +167,7 @@ def before_request():
 @app.before_request
 def make_menu():
     request.menu = OrderedDict()
-    entries = [['index', 'Home'], ['listeners', 'Listeners']]
+    entries = [['index', 'Home'], ['listeners', 'Listeners'], ['history', 'History']]
 
     for entry in entries:
         request.menu['app.' + entry[0]] = {'name': entry[1],
@@ -289,6 +291,15 @@ def settings():
 @app.route('/irc')
 def irc():
     return render_template('irc.html', TITEL='IRC')
+
+
+@app.route('/history/', defaults={'page': 1})
+@app.route('/history/page/<int:page>')
+def history(page):
+    per_page = 25
+    (tracks, total_count) = paginate_query(Track.query.join(Show).join(UserShow).order_by(Track.end.desc()), page=page, per_page=per_page)
+    pagination = Pagination(page, per_page, total_count)
+    return render_template('history.html', tracks=tracks, pagination=pagination, TITLE='History')
 
 
 @app.route('/donations')

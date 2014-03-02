@@ -1,3 +1,4 @@
+{% from "_helpers.html" import render_pagination %}
 {% set sidebar=True %}
 {% extends "base.html" %}
 {% block sidebar %}
@@ -8,23 +9,7 @@
 <h2>Logs</h2>
 <div class="row-fluid">
 	<div class="span12">
-	<div class="pagination">
-        <ul>
-            {% if pagination.first %}
-            <li><a href="{{ pagination.first }}">&laquo;</a></li>
-            {% else %}
-            <li class="disabled"><a href="#">&laquo;</a></li>
-            {% endif %}
-            {% for page in pagination.pages %}
-            <li {%if page.active %}class="active"{% endif %}><a href="{{ page.url }}">{{ page.name }}</a></li>
-            {% endfor %}
-            {% if pagination.last %}
-            <li><a href="{{ pagination.last }}">&raquo;</a></li>
-            {% else %}
-            <li class="disabled"><a href="#">&raquo;</a></li>
-            {% endif %}
-    </ul>
-    </div>
+    {{ render_pagination(pagination) }}
 		<table class="table table-striped">
 		<thead>
 			<tr>
@@ -49,23 +34,7 @@
 			{% endfor %}
 		</tbody>
 		</table>
-	<div class="pagination">
-        <ul>
-            {% if pagination.first %}
-            <li><a href="{{ pagination.first }}">&laquo;</a></li>
-            {% else %}
-            <li class="disabled"><a href="#">&laquo;</a></li>
-            {% endif %}
-            {% for page in pagination.pages %}
-            <li {%if page.active %}class="active"{% endif %}><a href="{{ page.url }}">{{ page.name }}</a></li>
-            {% endfor %}
-            {% if pagination.last %}
-            <li><a href="{{ pagination.last }}">&raquo;</a></li>
-            {% else %}
-            <li class="disabled"><a href="#">&raquo;</a></li>
-            {% endif %}
-    </ul>
-    </div>
+    {{ render_pagination(pagination) }}
 	</div>
 	
 </div>

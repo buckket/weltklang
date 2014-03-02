@@ -9,17 +9,18 @@ import rfk.site
 import rfk.database
 import rfk.liquidsoap
 from rfk.helper import get_path
-from rfk.site.helper import permission_required, pagelinks, paginate
+from rfk.site.helper import permission_required, paginate_query, Pagination
 from rfk.database.base import Loop
 from rfk.database.streaming import Relay
 
 from ..admin import admin
 
 
-@admin.route('/liquidsoap/loops', methods=['GET', 'POST'])
+@admin.route('/liquidsoap/loops', defaults={'page': 1}, methods=['GET', 'POST'])
+@admin.route('/liquidsoap/loops/page/<int:page>', methods=['GET', 'POST'])
 @login_required
 @permission_required(permission='manage-liquidsoap')
-def loop_list():
+def loop_list(page):
     if request.method == 'POST':
         if request.form.get('action') == 'add':
         #           try:
@@ -40,8 +41,8 @@ def loop_list():
                 rfk.database.session.commit()
             except Exception as e:
                 flash('error while deleting Loop')
-    page = int(request.args.get('page') or 0)
-    (result, total_pages) = paginate(Loop.query, page=page)
+    per_page = 25
+    (result, total_count) = paginate_query(Loop.query, page=page)
     current_loop = Loop.get_current_loop()
     loops = []
     for loop in result:
@@ -51,6 +52,6 @@ def loop_list():
                       'current': loop == current_loop,
                       'filename': loop.filename,
                       'file_missing': not (loop.file_exists)})
-    pagination = pagelinks('.loop_list', page, total_pages)
+    pagination = Pagination(page, per_page, total_count)
     searchpath = get_path(rfk.CONFIG.get('liquidsoap', 'looppath'))
     return render_template('admin/loops/list.html', loops=loops, pagination=pagination, searchpath=searchpath)

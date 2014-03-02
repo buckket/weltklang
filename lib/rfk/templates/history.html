@@ -1,0 +1,40 @@
+{% from "_helpers.html" import render_pagination %}
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 col-md-offset-0">
+        <table class="table table-striped well">
+            <thead>
+            <tr>
+                <th>{% trans %}Time{% endtrans %}</th>
+                <th>{% trans %}DJ{% endtrans %}</th>
+                <th>{% trans %}Show{% endtrans %}</th>
+                <th>{% trans %}Artist{% endtrans %}</th>
+                <th>{% trans %}Title{% endtrans %}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for track in tracks %}
+            <tr>
+                <td>{{ track.begin | datetimeformat('short') }}</td>
+                <td>{{ track.show.users[0].user.username }}</td>
+                <td>{{ track.show.name }}</td>
+                <td>{{ track.title.artist.name }}</td>
+                <td>{{ track.title.name }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5">{% trans %}No track history available{% endtrans %}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 text-center">
+    {{ render_pagination(pagination) }}
+    </div>
+</div>
+{% endblock %}
