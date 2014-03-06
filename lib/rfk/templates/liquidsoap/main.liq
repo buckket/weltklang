@@ -70,7 +70,8 @@ def get_listener(~protocol,~data,~headers,uri) =
 end
 
 
-live = input.harbor(port = $port,on_connect = live_start, on_disconnect = live_stop, buffer=5., max = 10., auth = auth, "/live.ogg")
+live = input.harbor(port = $port,on_connect = live_start, on_disconnect = live_stop, buffer=2., max = 10., auth = auth, "/live.ogg")
+output.dummy(fallible=true, live)
 
 harbor.http.register(port=$port,method="GET",
                      "^/admin/listclients",
@@ -80,9 +81,11 @@ playlist = request.dynamic(get_playlist_item)
 playlist = drop_metadata(playlist)
 playlist = rewrite_metadata([("title","Kein Strömbernd")], playlist)
 playlist = rewrite_metadata([("artist","Radio freies Krautchan")], playlist)
-#playlist = mksave(playlist)
+playlist = mksafe(playlist)
 
-live = map_metadata(append_userid,live)
+live = map_metadata(append_userid, live)
 live = on_metadata(writemeta , live)
+
 $lastFM
-full = fallback(track_sensitive=false,transitions=[crossfade],[live,playlist])
+
+full = fallback(track_sensitive=false, transitions=[crossfade], [live, playlist])
