@@ -81,7 +81,7 @@ playlist = request.dynamic(get_playlist_item)
 playlist = drop_metadata(playlist)
 playlist = rewrite_metadata([("title","Kein Strömbernd")], playlist)
 playlist = rewrite_metadata([("artist","Radio freies Krautchan")], playlist)
-playlist = mksafe(playlist)
+#playlist = mksafe(playlist)
 
 live = map_metadata(append_userid, live)
 live = on_metadata(writemeta , live)
