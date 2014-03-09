@@ -74,6 +74,7 @@ harbor.http.register(port=$port, method="GET",
 
 playlist = request.dynamic(get_playlist_item)
 playlist = mksafe(playlist)
+playlist = merge_tracks(playlist)
 playlist = drop_metadata(playlist)
 playlist = rewrite_metadata([("title", "Kein Strömbernd")], playlist)
 playlist = rewrite_metadata([("artist", "Radio freies Krautchan")], playlist)
