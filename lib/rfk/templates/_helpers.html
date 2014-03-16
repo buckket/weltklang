@@ -1,3 +1,8 @@
+{% macro render_country_ball(country) %}
+  <img class="cb-baseline" title="{{ country }}" src="/static/img/cb/{{ country | countryball }}" />
+{% endmacro %}
+
+
 {% macro render_field_horizontal(field) %}
   <div class="form-group {% if field.errors %} has-error{% endif %}">
     {% if field.type != 'SubmitField' %}

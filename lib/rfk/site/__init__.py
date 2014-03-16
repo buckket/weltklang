@@ -11,7 +11,7 @@ import pytz
 
 import rfk.helper
 from rfk.helper import now, iso_country_to_countryball
-from rfk.site.helper import paginate_query, Pagination
+from rfk.site.helper import paginate_query, Pagination, permission_required
 import rfk.database
 from rfk.database.base import User, Anonymous, News
 from rfk.database.donations import Donation
@@ -47,12 +47,19 @@ def get_datetime_format():
         return locales['de']['datetime_format']
 
 
-app.jinja_env.filters.update(bbcode=helper.bbcode,
-                             timedelta=helper.timedelta)
+# Register Jinja2 filters
+app.jinja_env.filters['bbcode'] = helper.bbcode
+app.jinja_env.filters['timedelta'] = helper.timedelta
+app.jinja_env.filters['naturaltime'] = helper.naturaltime
+app.jinja_env.filters['naturaldelta'] = helper.naturaldelta
+app.jinja_env.filters['countryball'] = rfk.helper.iso_country_to_countryball
 
-app.jinja_env.globals['nowPlaying'] = helper.now_playing
-app.jinja_env.globals['getDisco'] = helper.disco
+
+# Register Jinja2 globals
+app.jinja_env.globals['now_playing'] = helper.now_playing
+app.jinja_env.globals['get_disco'] = helper.disco
 app.jinja_env.globals['url_for_other_page'] = helper.url_for_other_page
+
 
 babel = Babel(app)
 
@@ -167,7 +174,7 @@ def before_request():
 @app.before_request
 def make_menu():
     request.menu = OrderedDict()
-    entries = [['index', 'Home'], ['listeners', 'Listeners'], ['history', 'History']]
+    entries = [['index', 'Home'], ['listeners', 'Listeners']]
 
     for entry in entries:
         request.menu['app.' + entry[0]] = {'name': entry[1],
@@ -283,8 +290,7 @@ def settings():
         else:
             form.old_password.errors.append('Wrong password.')
 
-    ball = rfk.helper.iso_country_to_countryball(current_user.country)
-    return render_template('settings.html', form=form, TITLE='Settings', ball=ball,
+    return render_template('settings.html', form=form, TITLE='Settings',
                            imgur={'client': rfk.CONFIG.get('site', 'imgur-client')})
 
 
@@ -295,6 +301,7 @@ def irc():
 
 @app.route('/history/', defaults={'page': 1})
 @app.route('/history/page/<int:page>')
+@login_required
 def history(page):
     per_page = 25
     (tracks, total_count) = paginate_query(Track.query.join(Show).join(UserShow).order_by(Track.end.desc()), page=page, per_page=per_page)

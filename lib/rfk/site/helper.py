@@ -3,17 +3,19 @@ from functools import wraps, partial
 import math
 
 import postmarkup
+import humanize
 
 from rfk.database.track import Track
-from flask.ext.babel import format_time
+from flask.ext.babel import format_time, get_locale
 from flask import request, url_for, jsonify
 from flask.ext.login import current_user
 from rfk.database.show import Show
-from flask_babel import to_user_timezone
-from rfk.helper import now, iso_country_to_countryball, make_user_link,\
-    natural_join
+from flask_babel import to_user_timezone, to_utc
+from rfk.helper import now, iso_country_to_countryball, make_user_link, natural_join
 from rfk.database.streaming import Listener
 
+
+# Jinja2 global: get_disco
 def disco():
     show = Show.get_active_show()
     ret = {}
@@ -38,6 +40,7 @@ def disco():
                                               'countryball': iso_country_to_countryball(listener.country)}
     return ret
 
+# Jinja2 global: now_playing
 def now_playing():
     try:
         ret = {}
@@ -93,10 +96,11 @@ markup = postmarkup.PostMarkup()
 markup.default_tags()
 
 
+# Jinja2 filter: bbcode
 def bbcode(value):
     return markup.render_to_html(value)
 
-
+# Jinja2 filter: timedelta
 def timedelta(value):
     days = value.days
     hours, remainder = divmod(value.seconds, 3600)
@@ -105,7 +109,7 @@ def timedelta(value):
                                                                                          hours=hours,
                                                                                          minutes=minutes,
                                                                                          seconds=seconds)
-    # WTF!?
+    # WTF!? <- Double return? WTF, indeed.
     return format_time((datetime.datetime.min + value).time())
 
 
@@ -134,12 +138,16 @@ def emit_error(err_id, err_msg):
     return jsonify({'success': False, 'error': {'id': err_id, 'msg': err_msg}})
 
 
+# Pagination helper
+
+
 def paginate_query(query, page=0, per_page=25):
     result = query.limit(per_page).offset((page - 1) * per_page).all()
     total_count = query.count()
     return (result, total_count)
 
 
+# Jinja2 global: url_for_other_page
 def url_for_other_page(page):
     args = request.view_args.copy()
     args['page'] = page
@@ -176,3 +184,18 @@ class Pagination(object):
                     yield None
                 yield num
                 last = num
+
+
+def naturaltime(dt):
+    # i18n isnt working because of various fuckups
+    # will fix later
+
+    #locale = get_locale()
+    #locale_name = '_'.join([locale.language, locale.territory])
+    #humanize.i18n.activate(locale_name)
+
+    return humanize.time.naturaltime(now() - dt)
+
+
+def naturaldelta(dt):
+    return humanize.time.naturaldelta(now() - dt)
