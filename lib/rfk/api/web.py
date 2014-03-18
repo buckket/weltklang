@@ -15,6 +15,7 @@ from flask import jsonify, request, g
 
 from rfk.api import api
 from rfk import exc as rexc
+from rfk.database import session
 from rfk.database.base import User, ApiKey
 from rfk.database.show import Show, UserShow
 from rfk.database.track import Track
@@ -46,6 +47,7 @@ def check_auth(f=None, required_permissions=None):
 
         try:
             apikey = ApiKey.check_key(key)
+            session.commit()
         except rexc.api.KeyInvalidException:
             return raise_error('api key invalid')
         except rexc.api.KeyDisabledException:

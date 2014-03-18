@@ -338,7 +338,6 @@ class ApiKey(Base):
 
         apikey.counter += 1
         apikey.access = now()
-        rfk.database.session.commit()
         return apikey
 
 
