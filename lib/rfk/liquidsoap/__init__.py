@@ -55,9 +55,12 @@ class LiquidInterface(object):
                 return line
 
     def kick_harbor(self):
-        for source in self.get_sinks():
-            if source.type == 'input.harbor':
+        kicked = False
+        for source in self.get_sources():
+            if source.type == 'input.harbor' and source.status != 'no source client connected':
                 source.kick()
+                kicked = True
+        return kicked
 
     def _list(self, filter=None):
         list = self._execute_command('list')
@@ -96,7 +99,7 @@ class LiquidSource(object):
         return self.interface.get_status(self)
 
     def kick(self):
-        self.interface._execute_command("%s.kick" % (self.handler,))
+        self.interface._execute_command("%s.kick" % (self.handler))
 
     def __repr__(self):
         return "<rfk.liquidsoap.LiquidSource %s at %s>" % (self.type, self.handler)

@@ -43,11 +43,7 @@ def kick():
     """
     liquidsoap = LiquidInterface()
     liquidsoap.connect()
-    kicked = False
-    for source in liquidsoap.get_sources():
-        if source.status() != 'no source client connected':
-            source.kick()
-            kicked = True
+    kicked = liquidsoap.kick_harbor()
     liquidsoap.close()
     return kicked
 
