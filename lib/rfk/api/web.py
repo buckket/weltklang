@@ -47,6 +47,7 @@ def check_auth(f=None, required_permissions=None):
 
         try:
             apikey = ApiKey.check_key(key)
+            session.flush()
             session.commit()
         except rexc.api.KeyInvalidException:
             return raise_error('api key invalid')
@@ -143,9 +144,9 @@ def kick_dj():
         try:
             li = LiquidInterface()
             li.connect()
-            li.kick_harbor()
+            kicked = li.kick_harbor()
             li.close()
-            return True
+            return kicked
         except:
             return False
 
