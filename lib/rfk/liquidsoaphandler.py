@@ -76,7 +76,7 @@ def init_show(user):
             show = s
     us = show.get_usershow(user)
     us.status = UserShow.STATUS.STREAMING
-    rfk.database.session.flush()
+    rfk.database.session.commit()
     unfinished_shows = UserShow.query.filter(UserShow.status == UserShow.STATUS.STREAMING,
                                              UserShow.show != show).all()
     for us in unfinished_shows:
@@ -84,7 +84,7 @@ def init_show(user):
             us.show.end_show()
         if us.status == UserShow.STATUS.STREAMING:
             us.status = UserShow.STATUS.STREAMED
-        rfk.database.session.flush()
+        rfk.database.session.commit()
     return show
 
 
@@ -113,6 +113,7 @@ def doAuth(username, password):
             logger.info('cleaning harbor')
             if kick():
                 sys.stdout.write('false')
+                rfk.database.session.commit()
                 return
         logger.info('accepted auth for %s' % (username))
         sys.stdout.write('true')
@@ -123,15 +124,19 @@ def doAuth(username, password):
         logger.info('rejected auth for %s (invalid user)' % (username))
         sys.stdout.write('false')
 
+    rfk.database.session.commit()
+
 
 def doMetaData(data):
     logger.debug('meta %s' % (json.dumps(data),))
     if 'userid' not in data or data['userid'] == 'none':
         print 'no userid'
+        rfk.database.session.commit()
         return
     user = User.get_user(id=data['userid'])
     if user == None:
         print 'user not found'
+        rfk.database.session.commit()
         return
 
     if 'artist' in data:
@@ -150,6 +155,7 @@ def doMetaData(data):
             artist = song[0]
         if (title is None) or (len(title) == 0):
             title = song[1]
+
     show = init_show(user)
     if artist is None and title is None:
         track = Track.current_track()
@@ -157,6 +163,8 @@ def doMetaData(data):
             track.end_track()
     else:
         track = Track.new_track(show, artist, title)
+
+    rfk.database.session.commit()
 
 
 def doConnect(data):
@@ -167,6 +175,7 @@ def doConnect(data):
     
     """
     logger.info('connect request %s' % (json.dumps(data),))
+    rfk.database.session.commit()
     try:
         auth = data['Authorization'].strip().split(' ')
         if auth[0].lower() == 'basic':
@@ -193,12 +202,16 @@ def doConnect(data):
         logger.info('rejected connect')
         kick()
 
+    rfk.database.session.commit()
+
+
 
 def doDisconnect(userid):
     logger.info('diconnect for userid %s' % (userid,))
     if userid == "none" or userid == '':
         print "Whooops no userid?"
         logger.warn('no userid supplied!')
+        rfk.database.session.commit()
         return
     user = User.get_user(id=int(userid))
     if user:
@@ -208,11 +221,11 @@ def doDisconnect(userid):
             usershow.status = UserShow.STATUS.STREAMED
             if usershow.show.flags & Show.FLAGS.UNPLANNED:
                 usershow.show.end_show()
-        rfk.database.session.flush()
+        rfk.database.session.commit()
         track = Track.current_track()
         if track:
             track.end_track()
-        rfk.database.session.flush()
+        rfk.database.session.commit()
     else:
         print "no user found"
 
@@ -288,15 +301,17 @@ def main():
             doPlaylist()
         elif args.command == 'listenercount':
             doListenerCount()
+
     except Exception as e:
         rfk.database.session.rollback()
         exc_type, exc_value, exc_tb = sys.exc_info()
         import traceback
 
         logger.error(''.join(traceback.format_exception(exc_type, exc_value, exc_tb)))
+        rfk.database.session.commit()
 
     finally:
-        rfk.database.session.commit()
+        rfk.database.session.rollback()
         rfk.database.session.remove()
 
 
