@@ -28,6 +28,7 @@ class LiquidInterface(object):
             for line in self._execute_command('version').splitlines():
                 if len(line) > 0:
                     self._version = line
+                    return self._version
         return self._version
     version = property(get_version)
 
