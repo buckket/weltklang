@@ -39,20 +39,20 @@ def liquidsoap_status():
         ret = {}
         li = LiquidInterface()
         li.connect()
-        ret['version'] = li.get_version()
+        ret['version'] = li.version
         ret['uptime'] = li.get_uptime()
         ret['sources'] = []
-        for source in li.get_sources():
+        for source in li.sources:
             ret['sources'].append({'handler': source.handler,
                                    'type': source.type,
-                                   'status': (source.status() != 'no source client connected'),
-                                   'status_msg': source.status()})
+                                   'status': (source.status != 'no source client connected'),
+                                   'status_msg': source.status})
 
         ret['sinks'] = []
-        for sink in li.get_sinks():
+        for sink in li.sinks:
             ret['sinks'].append({'handler': sink.handler,
                                  'type': sink.type,
-                                 'status': (sink.status() == 'on')})
+                                 'status': (sink.status == 'on')})
         li.close()
         return jsonify(ret)
     except Exception as e:

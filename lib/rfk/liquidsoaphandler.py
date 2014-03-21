@@ -1,14 +1,19 @@
 #!/usr/bin/env python
 
-'''
-Flow is like this:
+"""
 
-Auth: streamingclient tries to authenticate
-Connect: streaming starts
-Meta: Metadata (ATTENTION: not all clients send metadata!)
-Disconnect: streamingclient disconnects
+    rfk.liquidsoaphandler
+    ~~~~~~~~~~~~~~~~~~~~~
 
-'''
+    ALL YOUR LIQUID SOAP ARE BELONG TO US
+
+    Flow is like this:
+        Auth: streaming client tries to authenticate
+        Connect: streaming of data starts
+        Meta: Metadata (ATTENTION: not all clients send metadata!)
+        Disconnect: streaming client disconnects
+
+"""
 
 import argparse
 import json
@@ -16,8 +21,6 @@ import sys
 import base64
 
 import os
-
-
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(basedir, 'lib'))
 
@@ -37,10 +40,12 @@ logger = None
 
 
 def kick():
-    """shorthand method for kicking the currently connected user
+    """Shorthand method for kicking the currently connected user
     
-    returns True if someone was kicked  
+    returns True if someone was kicked
+    returns False if harbor was empty or kick failed
     """
+
     logger.info('kick')
     liquidsoap = LiquidInterface()
     liquidsoap.connect()
@@ -51,11 +56,13 @@ def kick():
 
 
 def init_show(user):
-    """inititalizes a show
+    """Initializes a show
+
         it either takes a planned show or an unplanned show if it's still running
         if non of them is found a new unplanned show is added and initialized
-        if a new show was initialized the old one will be ended and the streamer staus will be resettet
+        if a new show was initialized the old one will be ended and the streamer status will be resetted
     """
+
     show = Show.get_current_show(user)
     if show is None:
         show = Show()
@@ -89,18 +96,19 @@ def init_show(user):
 
 
 def doAuth(username, password):
-    """authenticates the user
-    this function will also disconnect the current user
+    """Authenticates a user
+
+    This function will also disconnect the current user
     if the user to be authenticated has a show registered.
-    if that happened this function will print false to the
-    user since we need a graceperiod to actually disconnect
-    the other user.
+    If that happens this function will print false to the
+    user since we need a grace period to actually disconnect
+    the other user. (Which means that the user has to reconnect.)
     
     Keyword arguments:
-    username
-    password
-    
+        - username
+        - password
     """
+
     if username == 'source':
         try:
             username, password = password.split(username_delimiter)
@@ -113,8 +121,11 @@ def doAuth(username, password):
             logger.info('cleaning harbor')
             if kick():
                 sys.stdout.write('false')
+                logger.info('harbor is now clean, reconnect pl0x')
                 rfk.database.session.commit()
                 return
+            else:
+                logger.info('harbor was empty, go ahead')
         logger.info('accepted auth for %s' % (username))
         sys.stdout.write('true')
     except rexc.base.InvalidPasswordException:
@@ -168,12 +179,12 @@ def doMetaData(data):
 
 
 def doConnect(data):
-    """handles a connect from liquidsoap
+    """Handles a connect from liquidsoap
     
     Keyword arguments:
-    data -- list of headers
-    
+        data -- list of headers
     """
+
     logger.info('connect request %s' % (json.dumps(data),))
     rfk.database.session.commit()
     try:
