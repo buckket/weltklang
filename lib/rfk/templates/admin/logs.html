@@ -7,16 +7,16 @@
 
 {% block content %}
 <h2>Logs</h2>
-<div class="row-fluid">
-	<div class="span12">
+<div class="row">
+	<div class="col-md-12">
     {{ render_pagination(pagination) }}
 		<table class="table table-striped">
 		<thead>
 			<tr>
-				<th>Time</th>
-				<th>Module</th>
-				<th>Severity</th>
-				<th>message</th>
+				<th>{% trans %}Time{% endtrans %}</th>
+				<th>{% trans %}Module{% endtrans %}</th>
+				<th>{% trans %}Severity{% endtrans %}</th>
+				<th>{% trans %}Message{% endtrans %}</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -36,6 +36,5 @@
 		</table>
     {{ render_pagination(pagination) }}
 	</div>
-	
 </div>
 {% endblock content%}
