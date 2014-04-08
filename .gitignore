@@ -1,7 +1,37 @@
+# byte-compiled / optimized / DLL files
+*.py[cod]
+
+# distribution / packaging
+.Python
+env/
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+*.egg
+
+# translations
+*.mo
+
+# IDE (PyCharm, PyDev)
+.idea
+.settings
+.project
+.pydevproject
+
+# sqlite testing databases
 data.db
 pyrfk.db
-.settings
-*.pyc
-*.mo
-.pydevproject
-.project
+
+# OSX dot file trash
+.DS_Store
+.AppleDouble
+.LSOverride
+
