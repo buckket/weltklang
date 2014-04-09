@@ -364,13 +364,6 @@ def listeners():
                            total_bandwidth=total_bandwidth, active_relays=active_relays, average_listeners=average_listeners)
 
 
-def shutdown_server():
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
-
-
 @app.route('/player5')
 @app.route('/player')
 def html5player():
