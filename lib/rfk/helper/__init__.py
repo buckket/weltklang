@@ -106,5 +106,5 @@ def update_global_statistics():
     except sqlalchemy.orm.exc.NoResultFound:
         stat = rfk.database.stats.Statistic(name='Overall Listener', identifier='lst-total')
         rfk.database.session.add(stat)
-        rfk.database.session.commit()
+        rfk.database.session.flush()
     stat.set(now(), rfk.database.streaming.Listener.get_total_listener())
