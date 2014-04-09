@@ -22,6 +22,7 @@ import rfk.install
 def main():
     rfk.install.setup_permissions()
     rfk.install.setup_settings()
+    rfk.install.setup_statistics()
     rfk.install.setup_default_user('admin', 'admin')
     rfk.database.session.commit()
 
