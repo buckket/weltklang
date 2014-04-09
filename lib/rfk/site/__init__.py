@@ -5,6 +5,8 @@ from flask.ext.login import LoginManager, UserMixin, login_user, login_required,
 from flask.ext.babel import Babel, get_locale, get_timezone, refresh
 from flask_babel import to_user_timezone
 
+from sqlalchemy.orm import exc
+
 from . import helper
 
 import pytz
@@ -344,8 +346,12 @@ def listeners():
     per_country = sorted(per_country.iteritems(), key=lambda (k, v): v['count'], reverse=True)
 
     # get recent listener count to calculate a trend
-    stats_total = Statistic.query.filter(Statistic.identifier == 'lst-total').one()
-    stats = stats_total.get(start=now() - datetime.timedelta(minutes=2), stop=now())
+    try:
+        stats_total = Statistic.query.filter(Statistic.identifier == 'lst-total').one()
+        stats = stats_total.get(start=now() - datetime.timedelta(minutes=2), stop=now())
+    except exc.NoResultFound:
+        stats = None
+
     if stats and stats.count() > 0:
         listener_sum = 0
         for stat in stats:
