@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="utf-8">
 
@@ -15,16 +15,12 @@
     <link rel="stylesheet" href="/static/css/bootstrap-datetimepicker.min.css">
     <link rel="stylesheet" href="/static/css/select2-bootstrap.css">
     <link rel="stylesheet" href="/static/css/select2.css">
-    <link rel="stylesheet" href="/static/css/jquery.pnotify.default.css">
-    <link rel="stylesheet" href="/static/css/jquery.pnotify.default.icons.css">
 </head>
 
 <body>
-    <div class="container">
-        <img src="/static/img/banner.png"
-            style="z-index: 9001; position: absolute; top: 0px; left: 0px;">
+    <div class="container" id="main-container">
         <div class="banner clearfix">
-            <img class="pull-left" src="/static/img/logo.png">
+            <img class="pull-left img-responsive" src="/static/img/logo.png">
             <div class="disco pull-right">
                 <div class="background"></div>
                 <div class="hp">
@@ -40,6 +36,18 @@
             </div>
         </div>
         {% include "menu.html"%}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissable">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
         {% block pagetitle %}
         {% endblock pagetitle %}
         {% if sidebar %}
@@ -54,7 +62,7 @@
 
         <hr>
 
-        <footer>
+        <footer id="main-footer">
             <p>
                 &copy; 2009-2014 RfK Ltd. &laquo;&raquo;
                 <a href="https://github.com/TeddyDesTodes/PyRfK">Steal our work on GitHub</a>,
@@ -75,35 +83,10 @@
         <script src="/static/js/vendor/jquery.flot.crosshair.js"></script>
         <script src="/static/js/vendor/jquery.maphilight.min.js"></script>
         <script src="/static/js/vendor/jquery.timezone-picker.min.js"></script>
-        <script src="/static/js/vendor/jquery.pnotify.min.js"></script>
         <script src="/static/js/vendor/jquery.sparkline.min.js"></script>
         <script src="/static/js/vendor/moment.min.js"></script>
         <script src="/static/js/vendor/bootstrap-datetimepicker.min.js"></script>
         <script src="/static/js/main.js"></script>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        <script>
-        $(function(){
-           $.pnotify.defaults.history = false;
-           var stack_bar_top = {"dir1": "down", "dir2": "right", "push": "top", "spacing1": 0, "spacing2": 0};
-           {% for category, message in messages %}
-            $.pnotify({
-                closer: false,
-                sticker: false,
-                styling: "fontawesome",
-                title: 'RfK :: {{ TITLE }}',
-                text: '{{ message }}',
-                addclass: "stack-bar-top",
-                type: '{{ category }}',
-                cornerclass: "",
-                width: "100%",
-                stack: stack_bar_top
-            });
-            {% endfor %}
-        });
-        </script>
-        {% endif %}
-        {% endwith %}
         {% block js %}{% endblock %}
 </body>
 </html>

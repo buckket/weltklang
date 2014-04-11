@@ -1,13 +1,14 @@
-<div class="navbar navbar-default" role="navigation">
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
         <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
     </div>
-    <div class="navbar-collapse collapse">
+    <div class="collapse navbar-collapse" id="main-navbar">
       <ul class="nav navbar-nav">
       {% for name, item in request.menu.items() %}
           {% if item.submenu %}
@@ -62,7 +63,7 @@
                <div style="width:602px;" id="locale-placeholder" class="dropdown-menu"></div>
           </li>
       </ul>
-    </div><!--/.navbar-collapse -->
-</div>
-
+    </div>
+    </div>
+</nav>
 <div id="navbar-fixed-placeholder" style="height:42px;display:none;"></div>

@@ -9,8 +9,23 @@ body {
   font-family: 'Oswald Regular', sans-serif !important;
 }
 
-footer {
+footer#main-footer {
   text-align: center;
+}
+
+@media (min-width: 768px) {
+ .container#main-container {
+  margin-top: 15px;
+  margin-bottom: 15px;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
+ }
+}
+
+.banner {
+ padding-top: 10px;
+ padding-bottom: 10px;
 }
 
 /*
