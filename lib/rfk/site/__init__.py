@@ -203,12 +203,6 @@ def index():
     return render_template('index.html', TITLE='Index', news=news, streams=streams)
 
 
-@app.route('/shutdown')
-def shutdown():
-    shutdown_server()
-    return 'Server shutting down...'
-
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = login_form(request.form)
