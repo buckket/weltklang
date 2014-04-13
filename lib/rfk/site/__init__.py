@@ -198,7 +198,7 @@ def page_not_found(e):
 
 @app.route('/')
 def index():
-    news = News.query.all()
+    news = News.query.order_by(News.time.desc()).all()
     streams = Stream.query.all()
     return render_template('index.html', TITLE='Index', news=news, streams=streams)
 
