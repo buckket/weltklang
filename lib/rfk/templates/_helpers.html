@@ -1,84 +1,86 @@
 {% macro render_country_ball(country) %}
-  <img class="cb-baseline" title="{{ country }}" src="/static/img/cb/{{ country | countryball }}" />
+<img class="cb-baseline" title="{{ country }}" src="/static/img/cb/{{ country | countryball }}" />
 {% endmacro %}
 
 
 {% macro render_field_horizontal(field) %}
-  <div class="form-group {% if field.errors %} has-error{% endif %}">
+<div class="form-group {% if field.errors %} has-error{% endif %}">
     {% if field.type != 'SubmitField' %}
-      <label class="col-sm-2 control-label" for="{{ field.id }}">{{ field.label }}</label>
+        <label class="col-sm-2 control-label" for="{{ field.id }}">{{ field.label }}</label>
     {% endif %}
     <div class="col-sm-10">
-      {{ field(class_="form-control") | safe }}
-      {% if field.errors %}
-	    {% for error in field.errors %}
-	      <span class="help-inline">{{ error }}</span>
-	    {% endfor %}
-      {% endif %}
+        {{ field(class_="form-control") | safe }}
+        {% if field.errors %}
+            {% for error in field.errors %}
+                <span class="help-inline">{{ error }}</span>
+            {% endfor %}
+        {% endif %}
     </div>
-  </div>
+</div>
 {% endmacro %}
 
 
- {# WIP till I figure out what's best practice #}
+{# WIP till I figure out what's best practice #}
 {% macro render_field_horizontal_settings(field) %}
-  <div class="form-group {% if field.errors %} has-error{% endif %}">
+<div class="form-group {% if field.errors %} has-error{% endif %}">
     {% if field.type != 'SubmitField' %}
-      <label class="col-md-offset-1 control-label" for="{{ field.id }}">{{ field.label }}:</label>
+        <label class="col-md-offset-1 control-label" for="{{ field.id }}">{{ field.label }}:</label>
     {% endif %}
-      <div class="col-md-offset-1">
-      {{ field(class_="form-control") | safe }}
-      {% if field.errors %}
-	    {% for error in field.errors %}
-	      <span class="help-block">{{ error }}</span>
-	    {% endfor %}
-      {% endif %}
-     </div>
-  </div>
+    <div class="col-md-offset-1">
+        {{ field(class_="form-control") | safe }}
+        {% if field.errors %}
+            {% for error in field.errors %}
+                <span class="help-block">{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
 {% endmacro %}
 
 
 {% macro render_field_horizontal_register(field) %}
-  <div class="form-group {% if field.errors %} has-error{% endif %}">
+<div class="form-group {% if field.errors %} has-error{% endif %}">
     {% if field.type != 'SubmitField' %}
-      <label class="col-md-offset-0 control-label" for="{{ field.id }}">{{ field.label }}:</label>
+        <label class="col-md-offset-0 control-label" for="{{ field.id }}">{{ field.label }}:</label>
     {% endif %}
-      <div class="col-md-offset-0">
-      {{ field(class_="form-control") | safe }}
-      {% if field.errors %}
-	    {% for error in field.errors %}
-	      <span class="help-block">{{ error }}</span>
-	    {% endfor %}
-      {% endif %}
-     </div>
-  </div>
+    <div class="col-md-offset-0">
+        {{ field(class_="form-control") | safe }}
+        {% if field.errors %}
+            {% for error in field.errors %}
+                <span class="help-block">{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
 {% endmacro %}
 
+
 {% macro render_field_inline(field) %}
-      {{ field(**kwargs)|safe }}
-      {% if field.errors %}
+    {{ field(**kwargs)|safe }}
+    {% if field.errors %}
         {% for error in field.errors %}
           <span class="help-inline">{{ error }}</span>
         {% endfor %}
-      {% endif %}
+    {% endif %}
 {% endmacro %}
 
 
 {% macro render_fieldlist_horizontal(fieldlist) %}
-  <div class="control-group{% if fieldlist.errors %} error{% endif %}">
+<div class="control-group{% if fieldlist.errors %} error{% endif %}">
     <label class="control-label" for="{{ fieldlist.id }}">{{ fieldlist.label }}</label>
     <div class="controls">
-      {% for field in fieldlist.entries %}
-      {{ field(**kwargs)|safe }}
-      {% if field.errors %}
-        {% for error in field.errors %}
-          <span class="help-inline">{{ error }}</span>
+        {% for field in fieldlist.entries %}
+            {{ field(**kwargs)|safe }}
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    <span class="help-inline">{{ error }}</span>
+                {% endfor %}
+            {% endif %}<br>
         {% endfor %}
-      {% endif %}<br>
-      {% endfor %}
     </div>
-  </div>
+</div>
 {% endmacro %}
+
 
 {% macro weekday(dayofweek) %}
     {% if dayofweek == 0 %}
@@ -100,7 +102,8 @@
 
 
 {% macro render_pagination(pagination) %}
-<ul class=pagination>
+<div class="text-center">
+<ul class="pagination">
     {% if pagination.has_prev %}
         <li><a href="{{ url_for_other_page(pagination.page - 1) }}">&laquo;</a></li>
     {% else %}
@@ -123,4 +126,5 @@
         <li class="disabled"><a href="#">&raquo;</a></li>
     {% endif %}
 </ul>
+</div>
 {% endmacro %}
