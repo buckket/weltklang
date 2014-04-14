@@ -131,7 +131,9 @@ app.register_blueprint(streaming.streaming, url_prefix='/')
 from . import backend
 
 app.register_blueprint(backend.backend, url_prefix='/backend')
+from . import donation
 
+app.register_blueprint(donation.donation, url_prefix='/donations')
 
 def after_this_request(f):
     if not hasattr(g, 'after_request_callbacks'):

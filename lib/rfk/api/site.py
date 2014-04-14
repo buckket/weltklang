@@ -299,3 +299,14 @@ def now_playing():
     except Exception as e:
         raise e
         return jsonify({'success': False, 'data': unicode(e)})
+
+try:
+    from rfk.armor import get_serviceproxy
+    @api.route('/site/donation/getaddress')
+    def get_new_address():
+        sp = get_serviceproxy()
+        return jsonify({'success': True, 'address': sp.getnewaddress()})
+except ImportError:
+    @api.route('/site/donation/getaddress')
+    def get_new_address():
+        emit_error(1, 'Bitcoin is not available')
