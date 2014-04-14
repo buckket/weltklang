@@ -46,7 +46,7 @@
 
 <hr>
 
-<table class="table table-striped">
+<table class="table">
     <thead>
     <tr>
         <th>{% trans %}Begin{% endtrans %}</th>
@@ -65,7 +65,7 @@
             <form method="POST" class="form-inline">
                 <input type="hidden" value="{{ l.loop }}" name="loopid">
                 <input type="hidden" value="delete" name="action">
-                <button class="btn btn-danger">{% trans %}Delete{% endtrans %}</button>
+                <button class="btn btn-sm btn-danger">{% trans %}Delete{% endtrans %}</button>
             </form>
         </td>
     </tr>
