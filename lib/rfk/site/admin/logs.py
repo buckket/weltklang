@@ -15,4 +15,4 @@ def log_list(page):
     per_page = 25
     (logs, total_count) = paginate_query(Log.query.order_by(Log.timestamp.desc()), page=page)
     pagination = Pagination(page, per_page, total_count)
-    return render_template('admin/logs.html', logs=logs, pagination=pagination)
+    return render_template('admin/logs_list.html', logs=logs, pagination=pagination)

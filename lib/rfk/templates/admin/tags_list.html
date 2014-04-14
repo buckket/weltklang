@@ -1,46 +1,46 @@
+{% from "_helpers.html" import render_pagination %}
+
 {% set sidebar=True %}
 {% extends "base.html" %}
+
 {% block sidebar %}
-{% include "admin/sidebar.html" %}
+    {% set tag_active=True %}
+    {% include "admin/sidebar.html" %}
 {% endblock %}
 
 {% block content %}
 <div id="tagform" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="tagform-label" aria-hidden="true">
 </div>
-<h2>Tags</h2>
-<div class="row-fluid">
-	<div class="span12">
-		<table class="table table-striped">
-		<thead>
-			<tr>
-			    <th>Tag</th>
-				<th>Description</th>
-				<th>Icon</th>
-				<th>&nbsp;</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for tag in tags %}
-			<tr>
-				<td>{{ tag.name }}</td>
-				<td>{{ tag.description }}</td>
-				<td>{% if tag.icon %}
-				<i class="{{ tag.icon }}"></i> {{ tag.icon }}
-				{% else %}
-				{% endif %}
-				</td>
-				<td><a href='#' onclick='edit_tag({{ tag.tag }})'>edit</a></td>
-			</tr>
-			{% else %}
-			<tr>
-				<td colspan="5">No Tags</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-		</table>
-	</div>
-</div>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>{% trans %}Tag{% endtrans %}</th>
+        <th>{% trans %}Description{% endtrans %}</th>
+        <th>{% trans %}Icon{% endtrans %}</th>
+        <th>&nbsp;</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for tag in tags %}
+    <tr>
+        <td>{{ tag.name }}</td>
+        <td>{{ tag.description }}</td>
+        <td>{% if tag.icon %}
+            <i class="{{ tag.icon }}"></i> {{ tag.icon }}
+            {% else %}
+            {% endif %}
+        </td>
+        <td><a href='#' onclick='edit_tag({{ tag.tag }})'>{% trans %}edit{% endtrans %}</a></td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="5">{% trans %}No tags{% endtrans %}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
 {% endblock content%}
+
 {% block js %}
 <script>
 <!--

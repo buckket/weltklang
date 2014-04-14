@@ -1,44 +1,40 @@
+{% from "_helpers.html" import render_pagination %}
+
 {% set sidebar=True %}
 {% extends "base.html" %}
+
 {% block sidebar %}
-{% include "admin/sidebar.html" %}
+    {% set stream_active=True %}
+    {% include "admin/sidebar.html" %}
 {% endblock %}
 
 {% block content %}
-<h2>Streams</h2>
-<div class="row-fluid">
-	<div class="span12">
-		<table class="table table-striped">
-		<thead>
-			<tr>
-				<th>Name</th>
-				<th>Identifier</th>
-				<th>Mountpoint</th>
-				<th>Codec</th>
-				<th>Quality</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for stream in streams %}
-			<tr>
-				<td>{{ stream.name }}</td>
-				<td>{{ stream.code }}</td>
-				<td>{{ stream.mount }}</td>
-				<td>{{ stream.TYPES.indexof(stream.type) }}</td>
-				<td>{{ stream.quality }}</td>
-			</tr>
-			{% else %}
-			<tr>
-				<td colspan="5">No Streams Configured</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-		</table>
-	</div>
-</div>
-<div class="row-fluid">
-	<div class="span12">
-	<a class="btn" href="/admin/stream/add">{% trans %}Add Stream{% endtrans %}</a>
-	</div>
-</div>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>{% trans %}Name{% endtrans %}</th>
+        <th>{% trans %}Identifier{% endtrans %}</th>
+        <th>{% trans %}Mountpoint{% endtrans %}</th>
+        <th>{% trans %}Codec{% endtrans %}</th>
+        <th>{% trans %}Quality{% endtrans %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for stream in streams %}
+    <tr>
+        <td>{{ stream.name }}</td>
+        <td>{{ stream.code }}</td>
+        <td>{{ stream.mount }}</td>
+        <td>{{ stream.TYPES.indexof(stream.type) }}</td>
+        <td>{{ stream.quality }}</td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="5">{% trans %}No streams configured{% endtrans %}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<hr>
+<a class="btn btn-default" href="{{ url_for('.stream_add') }}" role="button">{% trans %}Add stream{% endtrans %}</a>
 {% endblock content%}

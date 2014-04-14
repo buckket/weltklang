@@ -1,8 +1,11 @@
+{% from "_helpers.html" import render_pagination %}
 
 {% set sidebar=True %}
 {% extends "base.html" %}
+
 {% block sidebar %}
-{% include "admin/sidebar.html" %}
+    {% set manage_active=True %}
+    {% include "admin/sidebar.html" %}
 {% endblock %}
 
 {% block content %}
@@ -49,7 +52,7 @@ background-color: #f5f5f5;
   vertical-align: middle;
 }
 .btn-toolbar2 >.btn-group + .btn-group {
-margin-left: -5px;
+margin-left: 0px;
 }
 
 .btn-toolbar2 > .btn-group > .btn, .btn-toolbar2 > .btn-group > .dropdown-toggle
@@ -78,39 +81,34 @@ margin-left: -5px;
 }
 
 </style>
-<h2>Liquidsoap Monitor</h2>
-<div class="row-fluid">
-<div class="span3">
-    <div class="well">
-        <strong>Version:</strong> <span id="liquidsoap-version">Unknown</span><br>
-        <strong>Uptime:</strong> <span id="liquidsoap-uptime">Unknown</span>
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <strong>{% trans %}Version{% endtrans %}:</strong> <span id="liquidsoap-version">Unknown</span><br>
+        <strong>{% trans %}Uptime{% endtrans %}:</strong> <span id="liquidsoap-uptime">Unknown</span>
     </div>
 </div>
-<div class="span9">
-<div class="btn-toolbar btn-toolbar2" id="liquidsoap-toolbar">
+
+<div class="btn-toolbar btn-toolbar2" id="liquidsoap-toolbar" role="toolbar">
     <div class="btn-group">
-        <button class="btn dropdown-toggle" data-toggle="dropdown">
-            <i class="icon-wrench"></i> Liquidsoap <span class="caret"></span>
+        <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            <i class="fa fa-power-off"></i> Liquidsoap <span class="caret"></span>
         </button>
         <ul class="dropdown-menu">
             <li>
-                <a href="#" onclick="start();">Start</a>
-			</li>
-			<li>
-                <a href="#" onclick="shutdown();">Stop</a>
-			</li>
+                <a href="#" onclick="start();">{% trans %}Start{% endtrans %}</a>
+            </li>
+            <li>
+                <a href="#" onclick="shutdown();">{% trans %}Stop{% endtrans %}</a>
+            </li>
         </ul>
     </div>
 </div>
-</div>
-</div>
-<div class="row-fluid">
-<div class="span12">
-<div class="log" id="logviewer" style="height:300px;"></div>
 
-</div>
-</div>
+<div class="log" id="logviewer" style="height:400px;"></div>
+
 {% endblock %}
+
 {% block js %}
 <script src="/static/js/liquidsoap.js"></script>
 {% endblock js %}

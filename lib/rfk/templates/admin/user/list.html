@@ -1,46 +1,37 @@
 {% from "_helpers.html" import render_pagination %}
+
 {% set sidebar=True %}
 {% extends "base.html" %}
+
 {% block sidebar %}
-{% include "admin/sidebar.html" %}
+    {% set user_active=True %}
+    {% include "admin/sidebar.html" %}
 {% endblock %}
 
 {% block content %}
-<h2>Users</h2>
-<div class="row">
-	<div class="col-md-12">
-    {{ render_pagination(pagination) }}
-		<table class="table table-striped">
-		<thead>
-			<tr>
-				<th>Name</th>
-                <th>Mail</th>
-				<th>Joined</th>
-				<th>Last Login</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for user in users %}
-			<tr>
-				<td>{{ user.username }}</td>
-                <td>{{ user.mail }}</td>
-				<td>{{ user.register_date | datetimeformat('short') }}</td>
-				<td>{% if user.last_login %}{{ user.last_login | datetimeformat('short') }}{% else %}Never{% endif %}</td>
-			</tr>
-			{% else %}
-			<tr>
-				<td colspan="4">No Users</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-		</table>
-    {{ render_pagination(pagination) }}
-	</div>
-	
-</div>
-<div class="row">
-	<div class="col-md-12">
-	<a class="btn" href="/admin/stream/add">{% trans %}Add Stream{% endtrans %}</a>
-	</div>
-</div>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>{% trans %}Name{% endtrans %}</th>
+        <th>{% trans %}Mail{% endtrans %}</th>
+        <th>{% trans %}Joined{% endtrans %}</th>
+        <th>{% trans %}Last Login{% endtrans %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for user in users %}
+    <tr>
+        <td>{{ user.username }}</td>
+        <td>{{ user.mail | default('None', True)}}</td>
+        <td>{{ user.register_date | datetimeformat('short') }}</td>
+        <td>{% if user.last_login %}{{ user.last_login | datetimeformat('short') }}{% else %}{% trans %}Never{% endtrans %}{% endif %}</td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="4">{% trans %}No users{% endtrans %}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{{ render_pagination(pagination) }}
 {% endblock content%}

@@ -1,14 +1,14 @@
-<ul class="nav nav-list">
-<li class="nav-header">{% trans %}Liquidsoap{% endtrans %}</li>
-<li><a href="/admin/liquidsoap/manage">{% trans %}Manager{% endtrans %}</a></li>
-<li><a href="/admin/liquidsoap/config">{% trans %}Configuration{% endtrans %}</a></li>
-<li><a href="/admin/liquidsoap/loops">{% trans %}Idle Loops{% endtrans %}</a></li>
-<li class="nav-header">{% trans %}Streaming{% endtrans %}</li>
-<li><a href="/admin/stream">{% trans %}Streams{% endtrans %}</a></li>
-<li><a href="/admin/relay">{% trans %}Relays{% endtrans %}</a></li>
-<li><a href="/admin/listener">{% trans %}Listener{% endtrans %}</a></li>
-<li class="nav-header">{% trans %}Misc{% endtrans %}</li>
-<li><a href="/admin/user">{% trans %}Userlist{% endtrans %}</a></li>
-<li><a href="/admin/tags">{% trans %}Tags{% endtrans %}</a></li>
-<li><a href="/admin/logs">{% trans %}Logs{% endtrans %}</a></li>
+<ul class="nav nav-stacked nav-pills">
+    <li><strong>{% trans %}Liquidsoap{% endtrans %}:</strong></li>
+    <li {%if manage_active %}class="active"{% endif %}><a href="/admin/liquidsoap/manage"><i class="fa fa-dashboard"></i> - {% trans %}Manager{% endtrans %}</a></li>
+    <li {%if config_active %}class="active"{% endif %}><a href="/admin/liquidsoap/config"><i class="fa fa-wrench"></i> - {% trans %}Config{% endtrans %}</a></li>
+    <li {%if loop_active %}class="active"{% endif %}><a href="/admin/liquidsoap/loops"><i class="fa fa-music"></i> - {% trans %}Loops{% endtrans %}</a></li>
+    <li><strong>{% trans %}Streaming{% endtrans %}:</strong></li>
+    <li {%if stream_active %}class="active"{% endif %}><a href="/admin/stream"><i class="fa fa-cogs"></i> - {% trans %}Streams{% endtrans %}</a></li>
+    <li {%if relay_active %}class="active"{% endif %}><a href="/admin/relay"><i class="fa fa-hdd-o"></i>  - {% trans %}Relays{% endtrans %}</a></li>
+    <li {%if listener_active %}class="active"{% endif %}><a href="/admin/listener"><i class="fa fa-volume-up"></i>  - {% trans %}Listener{% endtrans %}</a></li>
+    <li><strong>{% trans %}Misc{% endtrans %}:</strong></li>
+    <li {%if user_active %}class="active"{% endif %}><a href="/admin/user"><i class="fa fa-users"></i> - {% trans %}Userlist{% endtrans %}</a></li>
+    <li {%if tag_active %}class="active"{% endif %}><a href="/admin/tags"><i class="fa fa-tags"></i> - {% trans %}Tags{% endtrans %}</a></li>
+    <li {%if log_active %}class="active"{% endif %}><a href="/admin/logs"><i class="fa fa-bug"></i> - {% trans %}Logs{% endtrans %}</a></li>
 </ul>

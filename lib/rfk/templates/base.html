@@ -52,22 +52,26 @@
         {% endblock pagetitle %}
         {% if sidebar %}
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-2">
             {% block sidebar %} {% endblock sidebar %}
             </div>
-        </div>
+            <div class="col-md-10">
         {% endif %}
         {% block content %}
         {% endblock content %}
+        {% if sidebar %}
+            </div>
+        </div>
+        {% endif %}
 
         <hr>
 
         <footer id="main-footer">
             <p>
                 &copy; 2009-2014 RfK Ltd. &laquo;&raquo;
-                <a href="https://github.com/TeddyDesTodes/PyRfK">Steal our work on GitHub</a>,
-                <a href="https://twitter.com/krautradio">follow us on Twitter</a> or
-                <a href="/irc">join our IRC channel</a> &laquo;&raquo;
+                <a href="https://github.com/TeddyDesTodes/PyRfK">{% trans %}Steal our work on GitHub{% endtrans %} <i class="fa fa-github"></i></a> ,
+                <a href="https://twitter.com/krautradio">{% trans %}follow us on Twitter{% endtrans %} <i class="fa fa-twitter"></i></a> {% trans %}or{% endtrans %}
+                <a href="/irc">{% trans %}join our IRC channel{% endtrans %} <i class="fa fa-comments-o"></i></a> &laquo;&raquo;
                 Weltklang-&beta;
             </p>
         </footer>

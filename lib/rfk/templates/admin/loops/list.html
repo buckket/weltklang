@@ -1,69 +1,84 @@
 {% from "_helpers.html" import render_pagination %}
+
 {% set sidebar=True %}
 {% extends "base.html" %}
+
 {% block sidebar %}
-{% include "admin/sidebar.html" %}
+    {% set loop_active=True %}
+    {% include "admin/sidebar.html" %}
 {% endblock %}
 
 {% block content %}
-<h2>{% trans %}Idle Loops{% endtrans %}</h2>
-<div class="row-fluid">
-	<div class="span12">
-    {{ render_pagination(pagination) }}
-        <form class="form-inline well" method="POST">
-	        <h4>{% trans %}Add new Loop{% endtrans %}</h4>
-	        <div id="loop-begin" class="input-append date">
-	            <input data-format="hh:mm" type="text" name="begin" placeholder="{% trans %}start time{% endtrans %}"/>
-	            <span class="add-on btn">
-	                <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
-	            </span>
-	        </div>
-	        <div id="loop-end" class="input-append date">
-	            <input data-format="hh:mm" type="text" name="end" placeholder="{% trans %}end time{% endtrans %}"/>
-	            <span class="add-on btn">
-	                <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
-	            </span>
-	        </div>
-	        <input type="text" placeholder="{% trans %}filename{% endtrans %}" name="filename"/>
-	        <input type="hidden" name="action" value="add"/>
-			<button class="btn" type="submit">{% trans %}Add{% endtrans %}</button>
-		</form>
-        <pre>Path: {{ searchpath }}</pre>
-        
-		<table class="table table-striped">
-		<thead>
-			<tr>
-				<th>Begin</th>
-				<th>End</th>
-				<th>Filename</th>
-				<th> </th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for l in loops %}
-			<tr class="{% if l.current %}success{% endif %}{% if l.file_missing %} error{% endif %}">
-				<td>{{ l.begin }}</td>
-				<td>{{ l.end }}</td>
-				<td>{{ l.filename }}</td>
-				<td>
-				    <form method="POST" class="form-inline">
-				        <input type="hidden" value="{{ l.loop }}" name="loopid">
-				        <input type="hidden" value="delete" name="action">
-				        <button class="btn">{% trans %}delete{% endtrans %}</button>
-				    </form>
-				</td>
-			</tr>
-			{% else %}
-			<tr>
-				<td colspan="5">No Loops</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-		</table>
-    {{ render_pagination(pagination) }}
-	</div>
+<div class="panel panel-default">
+    <div class="panel-heading">{% trans %}Add new loop{% endtrans %}:</div>
+    <div class="panel-body">
+        <form class="form-inline" method="POST" role="form">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <input  id="loop-begin" class="form-control" data-format="HH:mm" type="text" name="begin" placeholder="{% trans %}start time{% endtrans %}"/>
+                            <span class="input-group-addon"><i class="fa fa-clock-o"></i></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <input id="loop-end" class="form-control" data-format="HH:mm" type="text" name="end" placeholder="{% trans %}end time{% endtrans %}"/>
+                            <span class="input-group-addon"><i class="fa fa-clock-o"></i></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <input class="form-control" type="text" placeholder="{% trans %}filename{% endtrans %}" name="filename"/>
+                </div>
+                <div class="col-md-2">
+                    <input type="hidden" name="action" value="add"/>
+                    <button class="btn btn-default" type="submit">{% trans %}Add loop{% endtrans %}</button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
+
+<pre><strong>{% trans %}Path{% endtrans %}</strong>: {{ searchpath }}</pre>
+
+<hr>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>{% trans %}Begin{% endtrans %}</th>
+        <th>{% trans %}End{% endtrans %}</th>
+        <th>{% trans %}Filename{% endtrans %}</th>
+        <th> </th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for l in loops %}
+    <tr class="{% if l.current %}success{% endif %}{% if l.file_missing %}error{% endif %}">
+        <td>{{ l.begin }}</td>
+        <td>{{ l.end }}</td>
+        <td>{{ l.filename }}</td>
+        <td>
+            <form method="POST" class="form-inline">
+                <input type="hidden" value="{{ l.loop }}" name="loopid">
+                <input type="hidden" value="delete" name="action">
+                <button class="btn btn-danger">{% trans %}Delete{% endtrans %}</button>
+            </form>
+        </td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="4">{% trans %}No loops{% endtrans %}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{{ render_pagination(pagination) }}
 {% endblock content%}
+
 {% block js %}
 <script>
 $(function() {

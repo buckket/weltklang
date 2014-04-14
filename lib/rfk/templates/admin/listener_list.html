@@ -1,42 +1,41 @@
+{% from "_helpers.html" import render_pagination %}
 {% from "_helpers.html" import render_country_ball %}
+
 {% set sidebar=True %}
 {% extends "base.html" %}
+
 {% block sidebar %}
-{% include "admin/sidebar.html" %}
+    {% set listener_active=True %}
+    {% include "admin/sidebar.html" %}
 {% endblock %}
 
 {% block content %}
-<h2>Listener</h2>
-<div class="row">
-	<div class="col-md-12">
-		<table class="table table-striped table-condensed">
-		<thead>
-			<tr>
-			    <th>{% trans %}Connected{% endtrans %}</th>
-				<th>{% trans %}Relay{% endtrans %}</th>
-				<th>{% trans %}Mount{% endtrans %}</th>
-                <th>{% trans %}Useragent{% endtrans %}</th>
-				<th>{% trans %}Country{% endtrans %}</th>
-				<th>{% trans %}City{% endtrans %}</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for li in listeners %}
-			<tr>
-				<td>{{ li.connect | datetimeformat('short') }}<br />{{ li.connect | naturaltime }}</td>
-				<td>{{ li.stream_relay.relay.address }}</td>
-				<td>{{ li.stream_relay.stream.name }}</td>
-                <td>{{ li.useragent | truncate(60, True)}}</td>
-				<td>{{ render_country_ball(li.country) }}</td>
-				<td>{{ li.city | default('unknown', True) }}</td>
-			</tr>
-			{% else %}
-			<tr>
-				<td colspan="6">No Listeners</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-		</table>
-	</div>
-</div>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>{% trans %}Connected{% endtrans %}</th>
+        <th>{% trans %}Relay{% endtrans %}</th>
+        <th>{% trans %}Mount{% endtrans %}</th>
+        <th>{% trans %}Useragent{% endtrans %}</th>
+        <th>{% trans %}Country{% endtrans %}</th>
+        <th>{% trans %}City{% endtrans %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for li in listeners %}
+    <tr>
+        <td>{{ li.connect | datetimeformat('short') }}<br />{{ li.connect | naturaltime }}</td>
+        <td>{{ li.stream_relay.relay.address }}</td>
+        <td>{{ li.stream_relay.stream.name }}</td>
+        <td>{{ li.useragent | truncate(60, True)}}</td>
+        <td>{{ render_country_ball(li.country) }}</td>
+        <td>{{ li.city | default('unknown', True) }}</td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="6">{% trans %}No listeners{% endtrans %}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
 {% endblock content%}

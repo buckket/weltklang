@@ -1,19 +1,19 @@
+{% from "_helpers.html" import render_pagination %}
+
 {% set sidebar=True %}
 {% extends "base.html" %}
+
 {% block sidebar %}
-{% include "admin/sidebar.html" %}
+    {% set config_active=True %}
+    {% include "admin/sidebar.html" %}
 {% endblock %}
 
 {% block content %}
-<h2>Liquidsoap Config</h2>
-<div class="row-fluid">
-<div class="span12">
-<pre class="prettyprint linenums languague-ocaml">
+<pre class="prettyprint linenums">
 {{ liq_config }}
 </pre>
-</div>
-</div>
 {% endblock %}
+
 {% block js %}
 <script src="/static/js/vendor/prettify.js"></script>
 <script>
