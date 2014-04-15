@@ -1,7 +1,9 @@
-{% set sidebar=True %}
 {% from "_helpers.html" import weekday %}
 {% extends '/shows/calendar/base.html' %}
+
 {% block content %}
+{% include "shows/topbar.html" %}
+
 <div class="row">
     <div class="col-md-12 calendar-head clearfix">
         <a href="{{ prev_week }}" class="prev"><i class="fa fa-angle-left"></i></a>

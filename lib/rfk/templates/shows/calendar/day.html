@@ -1,43 +1,44 @@
-{% set sidebar=True %}
 {% from "_helpers.html" import weekday %}
 {% extends '/shows/calendar/base.html' %}
 
 {% block content %}
+{% include "shows/topbar.html" %}
+
 <div class="row">
-<div class="col-md-12">
-<a href="#" class="btn btn-default" onclick="add_show(); return false;">add show</a>
-</div>
+    <div class="col-md-12">
+        <a href="#" class="btn btn-default" onclick="add_show(); return false;">add show</a>
+    </div>
 </div>
 <div class="row calendar-head">
-<a href="{{ prev_week }}" class="prev"><i class="fa fa-angle-left"></i></a>
-<a href="{{ next_week }}" class="next"><i class="fa fa-angle-right"></i></a>
-<div>{{ monday | dateformat('long') }} - {{ sunday | dateformat('long') }}</div>
+    <a href="{{ prev_week }}" class="prev"><i class="fa fa-angle-left"></i></a>
+    <a href="{{ next_week }}" class="next"><i class="fa fa-angle-right"></i></a>
+    <div>{{ monday | dateformat('long') }} - {{ sunday | dateformat('long') }}</div>
 </div>
 <div class="row calendar week">
     {% for d in range(7) %}
     <div class="day">
         <div class="heading">{{ weekday(d) }}</div>
         <div class="hours">
-		    {% for h in range(24) %}
-		    <div class="hour">{{ (h + 8)%24  }}</div>
-		    {% endfor %}
-		    {% for show in shows[d][0] %}
-		    <div class="entry" data-show="{{ show.show }}" style="top:{{ (show.offset/3600)*40 }}px;height:{{ (show.duration/3600)*40 }}px;">
-              <div class="content">{{ show.description }}</div>              
-              <div class="footer">
-                {% for tag in show.tags %}
-                <i class="{{ tag.icon }}" title="{{tag.alt}}"></i>
-                {% endfor %}
-              </div>
-              <div class="header">{{ show.name }}</div>
+            {% for h in range(24) %}
+            <div class="hour">{{ (h + 8)%24  }}</div>
+            {% endfor %}
+            {% for show in shows[d][0] %}
+            <div class="entry" data-show="{{ show.show }}" style="top:{{ (show.offset/3600)*40 }}px;height:{{ (show.duration/3600)*40 }}px;">
+                <div class="content">{{ show.description }}</div>
+                <div class="footer">
+                    {% for tag in show.tags %}
+                    <i class="{{ tag.icon }}" title="{{tag.alt}}"></i>
+                    {% endfor %}
+                </div>
+                <div class="header">{{ show.name }}</div>
             </div>
-		    {% endfor %}
-		    {% for show in shows[d][1] %}
-		    <div class="entry-unplanned" data-show="{{ show.show }}" style="top:{{ (show.offset/3600)*40 }}px;height:{{ (show.duration/3600)*40 }}px;">
+            {% endfor %}
+            {% for show in shows[d][1] %}
+            <div class="entry-unplanned" data-show="{{ show.show }}" style="top:{{ (show.offset/3600)*40 }}px;height:{{ (show.duration/3600)*40 }}px;">
                 <span>{{ show.name }}</span>
             </div>
-		    {% endfor %}
-	    </div>
+            {% endfor %}
+        </div>
     </div>
     {% endfor %}
 </div>

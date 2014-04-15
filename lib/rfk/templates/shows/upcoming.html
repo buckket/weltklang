@@ -1,12 +1,13 @@
 {% extends "base.html" %}
-{% block content %}<h1>{% trans %}Upcoming Shows{% endtrans %}</h1>
+
+{% block content %}
+<h1>{% trans %}Upcoming Shows{% endtrans %}</h1>
 {% for show in shows %}
 <div class="panel">
-<h3>{{ show.name }}</h3>
-
-<p>
-{{ show.description }}
-</p>
+    <h3>{{ show.name }}</h3>
+    <p>
+        {{ show.description }}
+    </p>
 </div>
 {% endfor %}
 {% endblock %}
