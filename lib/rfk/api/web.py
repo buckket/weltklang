@@ -15,11 +15,13 @@ from flask import jsonify, request, g
 
 from rfk.api import api
 from rfk import exc as rexc
-from rfk.database import session
+
+import rfk.database
 from rfk.database.base import User, ApiKey
 from rfk.database.show import Show, UserShow
 from rfk.database.track import Track
 from rfk.database.streaming import Listener, Relay
+
 from rfk.liquidsoap import LiquidInterface
 from rfk.exc.base import UserNotFoundException
 
@@ -47,8 +49,7 @@ def check_auth(f=None, required_permissions=None):
 
         try:
             apikey = ApiKey.check_key(key)
-            session.flush()
-            session.commit()
+            rfk.database.session.commit()
         except rexc.api.KeyInvalidException:
             return raise_error('api key invalid')
         except rexc.api.KeyDisabledException:
