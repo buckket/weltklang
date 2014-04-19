@@ -24,6 +24,9 @@
                 <td>{{ donation.comment }}</td>
             </tr>
             {% else %}
+            <tr>
+                <td colspan="4">{% trans %}No Donations, gibe moni!{% endtrans %}</td>
+            </tr>
             {% endfor %}
             </tbody>
         </table>
@@ -55,15 +58,14 @@
             <div class="tab-pane" id="donate-btc">
                 <div id="btc-donation-panel" class="row">
                     <div class="col-md-12">
-                        <p>
-                            Thank you for taking this important step of supporting your local radio channel.<br>
-                            Your money will be spend wisely on drugs, hookers and, if something is left, on the server bills
+                        <p>{% trans %}Thank you for taking this important step of supporting your local radio channel.<br>
+                            Your money will be spend wisely on drugs, hookers and, if something is left, on the server bills{% endtrans %}
                         </p>
                     </div>
                     <div class="col-md-12">
                         <div class="form-group">
                             <label class="col-sm-5 control-label">
-                                Please send your coins to this address
+                                {% trans %}Please send your coins to this address{% endtrans %}
                             </label>
                             <div class="col-sm-7">
                                 <input class="form-control" type="text" value="" id="btc-address">
@@ -74,7 +76,7 @@
             </div>
             <div class="tab-pane" id="donate-real-money">
                 <p>
-                Y U NO USE BITCOIN
+                {% trans %}Y U NO USE BITCOIN{% endtrans %}
                 </p>
             </div>
         </div>
