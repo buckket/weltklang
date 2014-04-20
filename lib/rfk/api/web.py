@@ -42,7 +42,7 @@ def check_auth(f=None, required_permissions=None):
             response.status_code = 403
             return response
 
-        if not request.args.has_key('key'):
+        if not 'key' in request.args:
             return raise_error('api key missing')
 
         key = request.args.get('key')
