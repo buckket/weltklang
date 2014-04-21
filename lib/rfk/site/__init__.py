@@ -2,7 +2,7 @@ import datetime
 
 from flask import Flask, g, render_template, flash, redirect, url_for, request, jsonify, abort, send_from_directory
 from flask.ext.login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from flask.ext.babel import Babel, get_locale, get_timezone, refresh
+from flask.ext.babel import Babel, get_locale, get_timezone, refresh, lazy_gettext, gettext
 from flask_babel import to_user_timezone
 
 from sqlalchemy.orm import exc
@@ -99,7 +99,7 @@ login_manager.setup_app(app)
 
 login_manager.anonymous_user = Anonymous
 login_manager.login_view = "login"
-login_manager.login_message = u"Please log in to access this page."
+login_manager.login_message = gettext("Please log in to access this page.")
 #login_manager.refresh_view = "reauth"
 
 @login_manager.user_loader
@@ -108,32 +108,32 @@ def load_user(userid):
 
 
 from . import user
-
 app.register_blueprint(user.user, url_prefix='/user')
+
 from . import show
-
 app.register_blueprint(show.show)
+
 from . import admin
-
 app.register_blueprint(admin.admin, url_prefix='/admin')
+
 from . import listen
-
 app.register_blueprint(listen.listen, url_prefix='/listen')
+
 from rfk.api import api
-
 app.register_blueprint(api, url_prefix='/api')
+
 from rfk.feeds import feeds
-
 app.register_blueprint(feeds, url_prefix='/feeds')
+
 from . import streaming
-
 app.register_blueprint(streaming.streaming, url_prefix='/')
+
 from . import backend
-
 app.register_blueprint(backend.backend, url_prefix='/backend')
-from . import donation
 
+from . import donation
 app.register_blueprint(donation.donation, url_prefix='/donations')
+
 
 def after_this_request(f):
     if not hasattr(g, 'after_request_callbacks'):
@@ -178,7 +178,7 @@ def before_request():
 @app.before_request
 def make_menu():
     request.menu = OrderedDict()
-    entries = [['index', 'Home'], ['listeners', 'Listeners']]
+    entries = [['index', 'Home'], ['listeners', 'Listeners'], ['history', 'History']]
 
     for entry in entries:
         request.menu['app.' + entry[0]] = {'name': entry[1],
@@ -224,14 +224,14 @@ def login():
                     flash('Logged in!', 'success')
                     return redirect(request.args.get('next') or url_for('index'))
                 else:
-                    form.username.errors.append('There was an error while logging you in.')
-                    flash('There was an error while logging you in.', 'error')
+                    form.username.errors.append(gettext('There was an error while logging you in.'))
+                    #flash('There was an error while logging you in.', 'error')
             else:
-                form.username.errors.append('Invalid User or Password.')
-                flash('Invalid username or password.')
+                form.username.errors.append(gettext('Invalid User or Password.'))
+                #flash('Invalid username or password.')
         except UserNotFoundException:
-            form.username.errors.append('Invalid User or Password.')
-            flash('Invalid username or password.')
+            form.username.errors.append(gettext('Invalid User or Password.'))
+            #flash('Invalid username or password.')
     return render_template('login.html', form=form, TITLE='Login')
 
 
@@ -239,7 +239,7 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash('Logged out.', 'success')
+    flash(gettext('Logged out.'), 'success')
     return redirect(url_for('index'))
 
 
@@ -252,10 +252,10 @@ def register():
             if form.email.data:
                 user.mail = form.email.data
             rfk.database.session.commit()
-            flash('Registration successful.', 'success')
+            flash(gettext('Registration successful.'), 'success')
             return redirect(url_for("login"))
         except UserNameTakenException:
-            form.username.errors.append('Username already taken!')
+            form.username.errors.append(gettext('Username already taken!'))
 
     return render_template("register.html", form=form, TITLE='Register')
 
@@ -283,10 +283,10 @@ def settings():
             current_user.set_setting(code='show_def_logo', value=form.show_def_logo.data)
             current_user.set_setting(code='use_icy', value=form.use_icy.data)
             rfk.database.session.commit()
-            flash('Settings successfully updated.', 'success')
+            flash(gettext('Settings successfully updated.'), 'success')
             return redirect(url_for('settings'))
         else:
-            form.old_password.errors.append('Wrong password.')
+            form.old_password.errors.append(gettext('Wrong password.'))
 
     return render_template('settings.html', form=form, TITLE='Settings',
                            imgur={'client': rfk.CONFIG.get('site', 'imgur-client')})
@@ -294,7 +294,7 @@ def settings():
 
 @app.route('/irc')
 def irc():
-    return render_template('irc.html', TITEL='IRC')
+    return render_template('irc.html', TITLE='IRC')
 
 
 @app.route('/history/', defaults={'page': 1})
@@ -309,15 +309,21 @@ def history(page):
 
 @app.route('/donations')
 def donations():
-    donations = Donation.query.all()
-    if donations:
-        return render_template('donations.html', TITLE='Donations', donations=donations)
-    else:
-        abort(500)
+    return redirect(url_for("donation.list"))
 
 
 @app.route('/listeners')
 def listeners():
+
+    # check if current_user is logged in and if user is streaming or if user is admin
+    if not current_user.is_anonymous():
+        is_streaming = UserShow.query.join(User).filter(UserShow.status == UserShow.STATUS.STREAMING, UserShow.user == current_user).first()
+        if is_streaming or current_user.has_permission('admin'):
+            show_listener_list = True
+        else:
+            show_listener_list = False
+    else:
+        show_listener_list = False
 
     # get current bandwidth of all active relays
     total_bandwidth = 0
@@ -356,8 +362,9 @@ def listeners():
     else:
         average_listeners = len(current_listener)
 
-    return render_template('listenergraph.html', TITLE='Listeners', listeners=current_listener, per_country=per_country,
-                           total_bandwidth=total_bandwidth, active_relays=active_relays, average_listeners=average_listeners)
+    return render_template('listenergraph.html', TITLE='Listeners', show_listener_list=show_listener_list,
+                           listeners=current_listener, per_country=per_country, total_bandwidth=total_bandwidth,
+                           active_relays=active_relays, average_listeners=average_listeners)
 
 
 @app.route('/player5')

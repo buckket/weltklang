@@ -1,3 +1,6 @@
+{% from "_helpers.html" import render_country_ball %}
+
+
 {% extends "base.html" %}
 {% block content %}
 <div class="panel panel-default">
@@ -29,6 +32,40 @@
         </div>
     </div>
 </div>
+
+{% if show_listener_list %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">{% trans %}List{% endtrans %}:</h3>
+    </div>
+    <div class="panel-body">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>{% trans %}Connected{% endtrans %}</th>
+                <th>{% trans %}Useragent{% endtrans %}</th>
+                <th>{% trans %}Country{% endtrans %}</th>
+                <th>{% trans %}City{% endtrans %}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for li in listeners %}
+            <tr>
+                <td>{{ li.connect | datetimeformat('short') }}<br />{{ li.connect | naturaltime }}</td>
+                <td>{{ li.useragent | truncate(60, True)}}</td>
+                <td>{{ render_country_ball(li.country) }}</td>
+                <td>{{ li.city | default('unknown', True) }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4">{% trans %}No listeners{% endtrans %}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
 
 <div class="panel panel-default">
     <div class="panel-heading">
