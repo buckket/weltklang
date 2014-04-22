@@ -25,6 +25,7 @@ try:
                 'active': endpoint == 'donation.list',
                 'url': url_for('donation.list')}
         return menu
-except ImportError:
-    pass
+    donation.create_menu = create_menu
 
+except ImportError as e:
+    print e
