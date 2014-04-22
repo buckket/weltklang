@@ -19,7 +19,8 @@
             {% endif %}
             {% if listeners %}
             &mdash;	[
-                {% for country in per_country %}<img class="cb-baseline" src="static/img/cb/{{ country[1]['ball'] }}">
+                {% for country in per_country %}
+                {{ render_country_ball(country[1]['ball']) }}
                 &raquo; <strong>{{ country[1]['count'] }}</strong>
                 {% if not loop.last	%} |{% endif %}
                 {% endfor %}
@@ -36,7 +37,7 @@
 {% if show_listener_list and listeners %}
 <div class="panel panel-default">
     <div class="panel-body">
-        <table class="table table-striped">
+        <table class="table table-striped table-condensed">
             <thead>
             <tr>
                 <th>{% trans %}Connected{% endtrans %}</th>
@@ -49,7 +50,7 @@
             {% for li in listeners %}
             <tr>
                 <td>{{ li.connect | datetimeformat('short') }}<br />{{ li.connect | naturaltime }}</td>
-                <td>{{ li.useragent | truncate(60, True)}}</td>
+                <td>{{ li.useragent }}</td>
                 <td>{{ render_country_ball(li.country) }}</td>
                 <td>{{ li.city | default('unknown', True) }}</td>
             </tr>

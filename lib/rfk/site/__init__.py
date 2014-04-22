@@ -344,7 +344,7 @@ def listeners():
             per_country[country]['count'] += 1
         except KeyError:
             per_country[country] = {'count': 1}
-            per_country[country]['ball'] = iso_country_to_countryball(country)
+            per_country[country]['ball'] = country
     per_country = sorted(per_country.iteritems(), key=lambda (k, v): v['count'], reverse=True)
 
     # get recent listener count to calculate a trend
