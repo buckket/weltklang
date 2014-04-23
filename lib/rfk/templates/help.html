@@ -4,20 +4,20 @@
 <div class="row">
     <div class="col-md-10 col-md-offset-1">
 
-        <h2>RfK Help Desk</h2>
+        <h1>RfK Help Desk</h1>
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h1 class="panel-title"><b>1.</b> {% trans %}Installing the streaming software{% endtrans %}:</h1>
+                <h1 class="panel-title"><strong>1.</strong> {% trans %}Installing the streaming software{% endtrans %}:</h1>
             </div>
 
             <div class="panel-body">
                 <p>
-                In order to participate you need a program which transmits your audio signal to our server.
-                We suggest that you use one of the following clients, but you can look for alternatives <a href="http://www.icecast.org/3rdparty.php">here</a> or by browsing the Internet yourself.
+                    In order to participate you need a piece of software which transmits your audio signal (music, speech, whatever) to our streaming server.
+                    We suggest that you use one of the following clients, but you can also look for alternatives <a href="http://www.icecast.org/3rdparty.php">here</a> or by browsing the Internet yourself.
                 </p>
                 <p>
-                Our backend supports the <strong>icecast2 streaming protocol</strong>, so every client which supports <strong>icecast2</strong> should be working fine with RfK.
+                    Our backend supports the <strong>icecast2 streaming protocol</strong>, so every client which supports <strong>icecast2</strong> should be working just fine with RfK.
                 </p>
 
                 <div class="alert alert-info">
@@ -37,51 +37,91 @@
                 </ul>
                 <h4>Mac OS X:</h4>
                 <ul>
-                    <li>Nicecast (unable to transmit metadata)</li>
-                    <li>Ladiocast (unable to transmit metadata)</li>
+                    <li><a href="https://www.rogueamoeba.com/nicecast/">Nicecast (unable to transmit metadata)</a></li>
+                    <li><a href="https://itunes.apple.com/app/ladiocast/id411213048?mt=12&uo=4">Ladiocast (unable to transmit metadata)</a></li>
                 </ul>
 
             </div>
         </div>
+
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h1 class="panel-title"><b>2.</b> {% trans %}Setting up your streaming software{% endtrans %}:</h1>
+                <h1 class="panel-title"><strong>2.</strong> {% trans %}Setting up your streaming software{% endtrans %}:</h1>
             </div>
 
             <div class="panel-body">
-                <h4>Connection settings</h4>
+                <h4>Connection settings:</h4>
                 <p>
-                    Here are the settings you need to enter in your streaming client.
-                    The exact names will depend on your software
+                    After installing the appropriate software you have to configure your client to connect to our streaming server.
+                    Here are the basic settings you need to enter in your streaming client.
+                    But beware: some settings may be called different depending on your client.
                 </p>
                 <table class="table table-striped table-bordered table-responsive">
                     <tr>
-                        <th>hostname</th>
+                        <th>Hostname</th>
                         <td>radio.krautchan.net</td>
                     </tr>
                     <tr>
-                        <th>port</th>
+                        <th>Port</th>
                         <td>8080</td>
                     </tr>
                     <tr>
-                        <th>mountpoint</th>
+                        <th>Mountpoint</th>
                         <td>/live.ogg</td>
                     </tr>
                     <tr>
-                        <th>username</th>
-                        <td>your RfK-login</td>
+                        <th>Username</th>
+                        <td>your RfK username</td>
                     </tr>
                     <tr>
-                        <th>password</th>
-                        <td>your RfK-password</td>
+                        <th>Password</th>
+                        <td>your RfK password</td>
                     </tr>
                 </table>
-                <h4>Encodings</h4>
+
+                <div class="alert alert-info">
+                    <strong>Tip:</strong> Some clients won’t let you specify a separate username;
+                    you then have to enter a combination of your username and password in the password field of your client.
+                    The Syntax we use is as follows: <strong>username|password</strong>, where "|" (<a href="http://en.wikipedia.org/wiki/Vertical_bar">vertical bar</a>) is the delimiter.
+                </div>
+
+                <h4>Encodings:</h4>
                 <p>
-                    Despite the fact that the mountpoint is called <b>/live.ogg</b>, the server accepts many containers not just Ogg.
+                    Despite the fact that the mountpoint is called <b>/live.ogg</b>, the server accepts many containers not and just ogg.
                     <br>
-                    Anyhow: we recommend you to use Ogg/Vorbis to be sure since we've encountered some problems when using MP3.
+                    Anyhow: we recommend using ogg/vorbis to be on the safe side, since we've encountered some problems with clients using mp3.
                 </p>
+
+                <h4>Examples:</h4>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" href="#collapseEdcast">
+                                edcast:
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseEdcast" class="panel-collapse collapse in">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-6"><img src="/static/img/help/edcast_1.png" class="img-rounded img-responsive"></div>
+                                <div class="col-md-6"><img src="/static/img/help/edcast_2.png" class="img-rounded img-responsive">
+                                    <p>
+                                    <ol>
+                                        <li>Open the edcast main window</li>
+                                        <li>Click <strong>Add Encoder</strong></li>
+                                        <li>Double click the newly added encoder</li>
+                                        <li>Enter your settings (see above)</li>
+                                        <li>Confirm by clicking <strong>OK</strong></li>
+                                        <li>Press <strong>Connect</strong> to stream</li>
+                                    </ol>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

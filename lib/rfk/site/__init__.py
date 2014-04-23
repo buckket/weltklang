@@ -219,12 +219,14 @@ def login():
                 user.authenticated = True
                 remember = form.remember.data
                 if login_user(user, remember=remember):
+                    if not user.last_login:
+                        flash(gettext('<strong>Tip:</strong> It appears that this is your first login, if you need any help please visit our help section by clicking <a href="/help">here</a>.'), 'info')
                     user.last_login = now()
                     loc = rfk.helper.get_location(request.remote_addr)
                     if 'country_code' in loc and loc['country_code'] is not None:
                         user.country = loc['country_code']
                     rfk.database.session.commit()
-                    flash('Logged in!', 'success')
+                    flash(gettext('Login successful. Welcome %s!' % user.username), 'success')
                     return redirect(request.args.get('next') or url_for('index'))
                 else:
                     form.username.errors.append(gettext('There was an error while logging you in.'))
@@ -242,7 +244,7 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash(gettext('Logged out.'), 'success')
+    flash(gettext('Logout successful. See you soon!'), 'success')
     return redirect(url_for('index'))
 
 
@@ -255,7 +257,7 @@ def register():
             if form.email.data:
                 user.mail = form.email.data
             rfk.database.session.commit()
-            flash(gettext('Registration successful.'), 'success')
+            flash(gettext('Registration successful. You can now login'), 'success')
             return redirect(url_for("login"))
         except UserNameTakenException:
             form.username.errors.append(gettext('Username already taken!'))
@@ -298,6 +300,11 @@ def settings():
 @app.route('/irc')
 def irc():
     return render_template('irc.html', TITLE='IRC')
+
+
+@app.route('/help')
+def help():
+    return render_template('help.html', TITLE='Help')
 
 
 @app.route('/history/', defaults={'page': 1})
@@ -448,11 +455,6 @@ def api_legacy():
         ret['shows'].append(arr)
 
     return jsonify(ret)
-
-
-@app.route('/help')
-def help():
-    return render_template('help.html', TITLE='Help')
 
 
 @app.route('/robots.txt')

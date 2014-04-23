@@ -34,9 +34,6 @@
               <a href="/settings"><i class="fa fa-cogs"></i></a>
             </li>
             <li>
-              <a href="/help"><i class="fa fa-question"></i></a>
-            </li>
-            <li>
               <a href="/logout"><i class="fa fa-sign-out"></i></a>
             </li>
           {% else %}
@@ -61,6 +58,9 @@
           </li>
           <li><a href="/register">{% trans %}Register{% endtrans %} <i class="fa fa-key"></i></a></li>
           {% endif %}
+          <li>
+            <a href="/help">{% trans %}Help{% endtrans %}<i class="fa fa-question"></i></a>
+          </li>
           <li class="dropdown">
                <a id="locale-button" data-toggle="dropdown" class="dropdown-toggle" href="#"><i class="fa fa-globe"></i></a>
                <div style="width:602px;" id="locale-placeholder" class="dropdown-menu"></div>
