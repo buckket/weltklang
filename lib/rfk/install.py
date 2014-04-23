@@ -26,6 +26,7 @@ def setup_permissions():
     permissions.append(Permission.add_permission('manage-liquidsoap', 'Manage Liquidsoap'))
     permissions.append(Permission.add_permission('manage-relays', 'Manage Relays'))
     permissions.append(Permission.add_permission('manage-users', 'Manage Users'))
+    permissions.append(Permission.add_permission('manage-donations', 'Manage Donations'))
     permissions.append(Permission.add_permission('admin', 'Admin'))
     for permission in permissions:
         rfk.database.session.add(permission)

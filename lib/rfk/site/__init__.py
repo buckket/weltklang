@@ -178,7 +178,10 @@ def before_request():
 @app.before_request
 def make_menu():
     request.menu = OrderedDict()
-    entries = [['index', 'Home'], ['listeners', 'Listeners'], ['history', 'History']]
+    entries = [['index', 'Home'], ['listeners', 'Listeners']]
+
+    if current_user.is_authenticated():
+        entries.append(['history', 'History'])
 
     for entry in entries:
         request.menu['app.' + entry[0]] = {'name': entry[1],

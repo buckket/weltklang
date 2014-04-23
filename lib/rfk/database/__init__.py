@@ -29,6 +29,7 @@ import show
 import streaming
 import track
 import stats
+import donations
 
 
 def init_db(db_uri, debug=False):
