@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 col-md-offset-1">
+
+        <h3>RfK Help Desk</h3>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h1 class="panel-title">1) {% trans %}Installing the streaming software{% endtrans %}:</h1>
+            </div>
+
+            <div class="panel-body">
+                <p>
+                In order to participate you need a program which transmits your audio signal to our server.
+                We suggest that you use one of the following clients, but you can look for alternatives <a href="http://www.icecast.org/3rdparty.php">here</a> or by browsing the Internet yourself.
+                </p>
+                <p>
+                Our backend supports the <strong>icecast2 streaming protocol</strong>, so every client which supports <strong>icecast2</strong> should be working fine with RfK.
+                </p>
+
+                <div class="alert alert-info">
+                    <strong>Tip:</strong> We highly recommend <strong>edcast</strong> when using Windows and <strong>idjc</strong> when using Linux. Don’t use OSX if you don’t have to. We’re serious.
+                </div>
+
+                <h4>Windows:</h4>
+                <ul>
+                    <li><a href="http://radio.krautchan.net/files/">edcast</a> (<a href="http://radio.krautchan.net/files/edcast_foobar_3.1.23.exe">foobar2000 plugin</a>, <a href="http://radio.krautchan.net/files/edcast_winamp_3.1.21.exe">WinAmp plugin</a>, <a href="http://radio.krautchan.net/files/edcast_standalone_3.1.21.exe">Standalone</a>)</li>
+                    <li><a href="https://code.google.com/p/edcast-reborn/">edcast-reborn</a> (<a href="https://edcast-reborn.googlecode.com/files/edcast_winamp_3.37.2011.1214.exe">WinAmp plugin</a>, <a href="https://edcast-reborn.googlecode.com/files/edcast_standalone_3.37.2011.1214.exe">Standalone</a>)</li>
+                    <li><a href="http://mixxx.org/">Mixxx (DJ software with streaming support)</a></li>
+                </ul>
+                <h4>Linux:</h4>
+                <ul>
+                    <li><a href="http://idjc.sourceforge.net/">idjc (Internet DJ Console, experts only)</a></li>
+                    <li><a href="https://code.google.com/p/darkice/">darkice (command-line interface)</a></li>
+                </ul>
+                <h4>Mac OS X:</h4>
+                <ul>
+                    <li>Nicecast (unable to transmit metadata)</li>
+                    <li>Ladiocast (unable to transmit metadata)</li>
+                </ul>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
