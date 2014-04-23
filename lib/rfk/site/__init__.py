@@ -447,6 +447,11 @@ def api_legacy():
     return jsonify(ret)
 
 
+@app.route('/help')
+def help():
+    return render_template('help.html', TITLE='Help')
+
+
 @app.route('/robots.txt')
 @app.route('/favicon.ico')
 def static_from_root():
