@@ -198,4 +198,4 @@ def naturaltime(dt):
 
 
 def naturaldelta(dt):
-    return humanize.time.naturaldelta(now() - dt)
+    return humanize.time.naturaldelta(dt)
