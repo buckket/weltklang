@@ -85,24 +85,32 @@
                     The Syntax we use is as follows: <strong>username|password</strong>, where "|" (<a href="http://en.wikipedia.org/wiki/Vertical_bar">vertical bar</a>) is the delimiter.
                 </div>
 
-                <h4>Encodings:</h4>
+                <h4>Encoding:</h4>
                 <p>
-                    Despite the fact that the mountpoint is called <b>/live.ogg</b>, the server accepts many containers not and just ogg.
+                    Despite the fact that the mountpoint is called <b>/live.ogg</b>, the server accepts many containers and not just ogg.
                     <br>
                     Anyhow: we recommend using ogg/vorbis to be on the safe side, since we've encountered some problems with clients using mp3.
+                </p>
+
+                <h4>Quality:</h4>
+                <p>
+                    Depending on your available upstream you can set the bitrate, and hence the quality of your audio signal.
+                    <br>
+                    We recommend using at least <strong>192kbps</strong> or <strong>q4</strong> when using ogg/vorbis.
                 </p>
 
                 <h4>Examples:</h4>
 
                 <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h4 class="panel-title">
+                    <div class="panel-heading clearfix">
+                        <h4 class="panel-title pull-left">
                             <a data-toggle="collapse" href="#collapseEdcast">
                                 edcast:
                             </a>
                         </h4>
+                        <h4 class="panel-title pull-right"><span class="caret"></span></h4>
                     </div>
-                    <div id="collapseEdcast" class="panel-collapse collapse in">
+                    <div id="collapseEdcast" class="panel-collapse collapse">
                         <div class="panel-body">
                             <div class="row">
                                 <div class="col-md-6"><img src="/static/img/help/edcast_1.png" class="img-rounded img-responsive"></div>
@@ -122,8 +130,51 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading clearfix">
+                        <h4 class="panel-title pull-left">
+                            <a data-toggle="collapse" href="#collapseNicecast">
+                                Nicecast:
+                            </a>
+                        </h4>
+                        <h4 class="panel-title pull-right"><span class="caret"></span></h4>
+                    </div>
+                    <div id="collapseNicecast" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            TODO, stay tuned.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading clearfix">
+                        <h4 class="panel-title pull-left">
+                            <a data-toggle="collapse" href="#collapseIDJC">
+                                idjc:
+                            </a>
+                        </h4>
+                        <h4 class="panel-title pull-right"><span class="caret"></span></h4>
+                    </div>
+                    <div id="collapseIDJC" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            TODO, stay tuned.
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block js %}
+<script>
+$(function() {
+    if (navigator.appVersion.indexOf("Win")!=-1) $('#collapseEdcast').collapse('show');
+    if (navigator.appVersion.indexOf("Mac")!=-1) $('#collapseNicecast').collapse('show');
+    if (navigator.appVersion.indexOf("Linux")!=-1) $('#collapseIDJC').collapse('show');
+});
+</script>
 {% endblock %}
