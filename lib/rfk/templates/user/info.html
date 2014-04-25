@@ -64,6 +64,19 @@
             </div>
 
         </div>
+        <div class="row">
+            <div class="col-md-12">
+                <h3>Random Facts</h3>
+                <p>
+                    {% if stats.listenerhours %}
+                        {{ user.username }} has generated <b>{{ stats.listenerhours }}</b> of Listenerhours.<br>
+                    {% endif %}
+                    {% if stats.missedshowratio %}
+                        {{ user.username }} has missed <b>{{ stats.missedshowratio }}</b>% of his shows.<br>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
     </div>
 </div>
 

@@ -49,11 +49,12 @@ def generate_missed_show_ratio(user):
         if usershow.status != UserShow.STATUS.STREAMED:
             missed_shows += 1
 
-    missed_show_ratio = (float(missed_shows)/float(total_shows))*100
+    if total_shows > 0:
+        missed_show_ratio = (float(missed_shows)/float(total_shows))*100
 
-    us = UserStatistic.get_userstatistic(user, 'missedshowratio')
-    us.statistic.set(now(), missed_show_ratio)
-    rfk.database.session.flush()
+        us = UserStatistic.get_userstatistic(user, 'missedshowratio')
+        us.statistic.set(now(), missed_show_ratio)
+        rfk.database.session.flush()
 
 stats = [generate_listenerhours,
          generate_missed_show_ratio]

@@ -43,7 +43,7 @@ class Statistic(Base):
 
     def current_value(self):
         ret = self.get(stop=now(), num=1, reverse=True)
-        if len(ret) == 1:
+        if ret:
             return ret[0]
         else:
             return None
