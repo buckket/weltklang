@@ -86,3 +86,31 @@ class RelayStatistic(Base):
             rfk.database.session.add(rs)
             rfk.database.session.flush()
             return rs
+
+
+class UserStatistic(Base):
+    __tablename__ = 'user_statistics'
+    user_statistic = Column(Integer(unsigned=True), primary_key=True, autoincrement=True)
+    user_id = Column("user", Integer(unsigned=True), ForeignKey('users.user',
+                                                                onupdate="CASCADE",
+                                                                ondelete="RESTRICT"))
+    user = relationship("User", cascade="all")
+    statistic_id = Column("statistic", Integer(unsigned=True), ForeignKey('statistics.statistic',
+                                                                          onupdate="CASCADE",
+                                                                          ondelete="RESTRICT"))
+    statistic = relationship("Statistic", cascade="all")
+    code = Column(String(20), nullable=False)
+
+    @staticmethod
+    def get_userstatistic(user, code):
+        try:
+            return UserStatistic.query.filter(UserStatistic.user == user,
+                                              UserStatistic.code == code).one()
+        except exc.NoResultFound:
+            s = Statistic(name='user-{user}-{code}'.format(user=user.user, code=code),
+                          identifier='user-{user}-{code}'.format(user=user.user, code=code))
+            rfk.database.session.add(s)
+            rs = UserStatistic(user=user, code=code, statistic=s)
+            rfk.database.session.add(rs)
+            rfk.database.session.flush()
+            return rs

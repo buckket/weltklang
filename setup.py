@@ -23,6 +23,7 @@ setup(
                                       'rfk-geoipdbupdate = rfk.geoipdbupdate:main',
                                       'rfk-liquidsoaphandler = rfk.liquidsoaphandler:main',
                                       'rfk-liquidsoap = rfk.liquidsoapdaemon:main',
+                                      'rfk-userstats = rfk.userstats:main',
                                       'rfk-setup = rfk.setup:main']},
     install_requires=['Flask', 'Flask-Login', 'Flask-Babel',
                       'wtforms',
