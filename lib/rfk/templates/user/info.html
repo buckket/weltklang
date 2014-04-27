@@ -28,8 +28,8 @@
             {% trans %}Rank{% endtrans %}: <strong>{{ rank }}</strong> &mdash;
             {% trans %}Registered{% endtrans %}: <strong>{{ user.register_date | naturaltime }}</strong> &mdash;
             {% trans %}Last login{% endtrans %}: <strong>{{ user.last_login | naturaltime }}</strong> &mdash;
-            {% trans %}Shows in total{% endtrans %}: <strong>{{ total_shows }}</strong> ({% trans %}planned{% endtrans %}: <strong>{{ planned_shows }}</strong>, {% trans %}unplanned{% endtrans %}: <strong>{{ unplanned_shows }}</strong>) &mdash;
-            {% trans %}Personal record{% endtrans %}: <strong># TODO #</strong>
+            {% trans %}Shows in total{% endtrans %}: <strong>{{ total_shows }}</strong> ({% trans %}planned{% endtrans %}: <strong>{{ planned_shows }}</strong>, {% trans %}unplanned{% endtrans %}: <strong>{{ unplanned_shows }}</strong>)
+            {% if stats.listenerpeak %} &mdash; {% trans %}Personal record{% endtrans %}: <strong>{{ stats.listenerpeak }} {% trans %}listener{% endtrans %}</strong>{% endif %}
             </div>
         </div>
 
@@ -41,11 +41,11 @@
                     {% if loop.first %}<ul>{% endif %}
                     <li>
                         {% if show.series %}<small>[{{ show.series.name }}]</small>{% endif %}
-                        <strong>{{ show.name }}</strong> ({{ show.begin | naturaltime }}, duration: {{ show.length | naturaldelta }})
+                        <strong>{{ show.name | default('???', True) }}</strong> ({{ show.begin | naturaltime }}, duration: {{ show.length | naturaldelta }})
                     </li>
                     {% if loop.last %}</ul>{% endif %}
                 {% else %}
-                   <h5>{% trans %}No shows{% endtrans %}</h5>
+                   <h5>{% trans %}No upcoming shows{% endtrans %}</h5>
                 {% endfor %}
             </div>
 
@@ -55,28 +55,32 @@
                     {% if loop.first %}<ul>{% endif %}
                     <li>
                         {% if show.series %}<small>[{{ show.series.name }}]</small>{% endif %}
-                        <strong>{{ show.name }}</strong> ({{ show.begin | naturaltime }}, duration: {{ show.length | naturaldelta }})
+                        <strong>{{ show.name | default('???', True) }}</strong> ({{ show.begin | naturaltime }}, duration: {{ show.length | naturaldelta }})
                     </li>
                     {% if loop.last %}</ul>{% endif %}
                 {% else %}
-                    <h5>{% trans %}No shows{% endtrans %}</h5>
+                    <h5>{% trans %}No past shows{% endtrans %}</h5>
                 {% endfor %}
             </div>
 
         </div>
+
         <div class="row">
+
             <div class="col-md-12">
-                <h3>Random Facts</h3>
-                <p>
+                <h3>{% trans %}Random facts{% endtrans %}:</h3>
+                <ul>
                     {% if stats.listenerhours %}
-                        {{ user.username }} has generated <b>{{ stats.listenerhours }}</b> of Listenerhours.<br>
+                        <li>{{ user.username }} has generated <strong>{{ stats.listenerhours }}</strong> listener hours</li>
                     {% endif %}
                     {% if stats.missedshowratio %}
-                        {{ user.username }} has missed <b>{{ stats.missedshowratio }}</b>% of his shows.<br>
+                        <li>{{ user.username }} has missed <strong>{{ stats.missedshowratio }}</strong>% of his planned shows</li>
                     {% endif %}
-                </p>
+                </ul>
             </div>
+
         </div>
+
     </div>
 </div>
 
