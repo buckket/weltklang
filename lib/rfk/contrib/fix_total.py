@@ -1,7 +1,5 @@
 from sqlalchemy.orm.exc import NoResultFound
 
-__author__ = 'teddydestodes'
-
 import rfk
 import rfk.database
 from rfk.database.streaming import Listener
