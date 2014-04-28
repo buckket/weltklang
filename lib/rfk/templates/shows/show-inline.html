@@ -15,24 +15,24 @@
 -->
 </style>
 <div class="modal-header show-inline-header" {% if show.logo %}style="background-image: url('{{show.logo}}');"{% endif %}>
-   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-   <h2 class="outline">{%if show.series %}{{ show.series.name }} <small>{{ show.name }}</small>{% else %}{{ show.name }}{% endif %}</h2>
-   <h4 class="outline">{{ show.begin | datetimeformat }}</h4>
-   <h6 class="outline">{% trans users=show.users|safe %}by {{ users }}{% endtrans %}</h6>
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h2 class="outline">{%if show.series %}{{ show.series.name }} <small>{{ show.name }}</small>{% else %}{{ show.name }}{% endif %}</h2>
+    <h4 class="outline">{{ show.begin | datetimeformat }}</h4>
+    <h6 class="outline">{% trans users=show.users|safe %}by {{ users }}{% endtrans %}</h6>
 </div>
 <div class="modal-body">
-<div class="row-fluid">
-<div class="span12">{{show.description | bbcode | safe }}</div>
-</div>
-<div class="row-fluid">
-<div class="span12" ><p class="muted">
-{% for tag in show.tags %}
-<abbr title="{{ tag.tag.description }}">{{ tag.tag.name }}</abbr>
-{% endfor %}</p></div>
-</div>
+    <div class="row">
+        <div class="col-md-12">{{show.description | bbcode | safe }}</div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" ><p class="muted">
+            {% for tag in show.tags %}
+            <abbr title="{{ tag.tag.description }}">{{ tag.tag.name }}</abbr>
+            {% endfor %}</p></div>
+    </div>
 </div>
 <div class="modal-footer">
     <a class="pull-left" href="{{ show.link }}">permalink</a>
-    {% if current_user in show.user %}<button class="btn" onclick="edit_show({{show.show}})">{% trans %}Edit{% endtrans %}</button>{% endif %}
-    <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans %}Close{% endtrans %}</button>
+    {% if current_user in show.user %}<button class="btn btn-default" onclick="edit_show({{show.show}})">{% trans %}Edit{% endtrans %}</button>{% endif %}
+    <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">{% trans %}Close{% endtrans %}</button>
 </div>
