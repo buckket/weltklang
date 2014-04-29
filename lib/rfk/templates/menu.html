@@ -62,6 +62,15 @@
             <a href="/help">{% trans %}Help{% endtrans %}<i class="fa fa-question"></i></a>
           </li>
           <li class="dropdown">
+            <a data-toggle="dropdown" class="dropdown-toggle" href="#"><i class="fa fa-rss"></i></a>
+            <ul class="dropdown-menu" role="menu">
+                <li><a href="{{ url_for('feeds.ical') }}"><i style="margin-right: 0.5em;" class="fa fa-calendar"></i> iCal Feed</a></li>
+                <li><a href="{{ url_for('feeds.atom') }}"><i style="margin-right: 0.5em;" class="fa fa-rss"></i> Atom Feed</a></li>
+                <li class="divider"></li>
+                <li class="text-center"><small>{% trans %}Subscribe to this URLs{% endtrans %}</small></li>
+            </ul>
+          </li>
+          <li class="dropdown">
                <a id="locale-button" data-toggle="dropdown" class="dropdown-toggle" href="#"><i class="fa fa-globe"></i></a>
                <div style="width:602px;" id="locale-placeholder" class="dropdown-menu"></div>
           </li>

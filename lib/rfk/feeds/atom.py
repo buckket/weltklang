@@ -23,4 +23,5 @@ def atom():
                      url=url_for('show.show_view', show=show.show),
                      updated=show.begin,
                      published=show.begin)
+
     return feed.get_response()
