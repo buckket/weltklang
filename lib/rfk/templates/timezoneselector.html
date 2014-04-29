@@ -8,14 +8,14 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-4">
             <select class="form-control input-sm" name="lang" id="lang">
                 {% for name, item in locales.items() %}
                 <option value="{{ name }}" {% if name == request.current_locale %}selected="selected"{% endif %}>{{ item.name }}</option>
                 {% endfor %}
             </select>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
             <button class="btn btn-default btn-block btn-sm">{% trans %}Save{% endtrans %}</button>
         </div>
 </form>
