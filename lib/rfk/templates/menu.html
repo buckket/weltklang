@@ -64,10 +64,10 @@
           <li class="dropdown">
             <a data-toggle="dropdown" class="dropdown-toggle" href="#"><i class="fa fa-rss"></i></a>
             <ul class="dropdown-menu" role="menu">
+                <li class="text-center"><small>{% trans %}Subscribe to these URLs{% endtrans %}:</small></li>
+                <li class="divider"></li>
                 <li><a href="{{ url_for('feeds.ical') }}"><i style="margin-right: 0.5em;" class="fa fa-calendar"></i> iCal Feed</a></li>
                 <li><a href="{{ url_for('feeds.atom') }}"><i style="margin-right: 0.5em;" class="fa fa-rss"></i> Atom Feed</a></li>
-                <li class="divider"></li>
-                <li class="text-center"><small>{% trans %}Subscribe to this URLs{% endtrans %}</small></li>
             </ul>
           </li>
           <li class="dropdown">
