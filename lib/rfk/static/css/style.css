@@ -71,15 +71,10 @@ Calendar
 	.calendar .day {
 		width: 14.28571428571428571428%;
 	}
-    .calendar .day .hours .entry-unplanned {
-		width: 83% !important;
-    }
 }
 
 @media ( min-width : 980px) and (max-width: 1199px) {
-    .calendar .day .hours .entry-unplanned {
-		width: 80% !important;
-    }    
+
 }
 
 @media ( min-width : 768px) and (max-width: 979px) {
@@ -90,9 +85,6 @@ Calendar
 		-moz-box-sizing: border-box;
 		box-sizing: border-box;
 	}
-    .calendar .day .hours .entry-unplanned {
-		width: 96% !important;
-    }
 }
 
 @media ( max-width : 767px) {
@@ -103,9 +95,6 @@ Calendar
 		-moz-box-sizing: border-box;
 		box-sizing: border-box;
 	}
-    .calendar .day .hours .entry-unplanned {
-		width: 94% !important;
-    }
 }
 
 .week .heading {
@@ -206,7 +195,7 @@ Calendar
 .calendar .day .hours .entry-unplanned {
 	position: absolute;
 	right: 0px;
-	width: 100%;
+	left: 1.9em;
 /* 	border-top: 1px solid #A0A0A0; */
 /* 	border-left: 1px solid #A0A0A0; */
 /* 	border-bottom: 1px solid #A0A0A0; */
@@ -241,12 +230,6 @@ Calendar
 }
 
 .calendar-head {
-	-webkit-border-top-left-radius: 2px;
-	-webkit-border-top-right-radius: 2px;
-	-moz-border-radius-topleft: 2px;
-	-moz-border-radius-topright: 2px;
-	border-top-left-radius: 2px;
-	border-top-right-radius: 2px;
 }
 
 .calendar-head div {
@@ -257,11 +240,11 @@ Calendar
 	font-weight: bold;
 	font-size: 18px;
 	padding: 0px;
-	-webkit-border-top-left-radius: 5px;
-	-moz-border-radius-topleft: 5px;
-	border-top-left-radius: 2px;
+    -webkit-border-top-left-radius: 5px;
 	-webkit-border-top-right-radius: 5px;
+	-moz-border-radius-topleft: 5px;
 	-moz-border-radius-topright: 5px;
+	border-top-left-radius: 5px;
 	border-top-right-radius: 5px;
     background-image: linear-gradient(to bottom, #F5F5F5 0%, #E8E8E8 100%);
 }
@@ -313,7 +296,7 @@ Calendar
 	padding-right: 20px;
 	-webkit-border-top-left-radius: 5px;
 	-moz-border-radius-topleft: 5px;
-	border-top-left-radius: 2px;
+	border-top-left-radius: 5px;
 }
 
 /*

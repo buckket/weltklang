@@ -9,7 +9,11 @@
 {% endblock %}
 
 {% block content %}
-<div id="tagform" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="tagform-label" aria-hidden="true">
+<div id="tagform" class="modal fade" role="dialog" aria-labelledby="tagform-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
 </div>
 <table class="table table-striped">
     <thead>
@@ -26,7 +30,7 @@
         <td>{{ tag.name }}</td>
         <td>{{ tag.description }}</td>
         <td>{% if tag.icon %}
-            <i class="{{ tag.icon }}"></i> {{ tag.icon }}
+            <i class="fa {{ tag.icon }}"></i> {{ tag.icon }}
             {% else %}
             {% endif %}
         </td>
@@ -46,7 +50,7 @@
 <!--
 function edit_tag(tagid) {
     $.get('/admin/tag/'+tagid+'/edit',{ inline: true }, function(data) {
-        $('#tagform').html(data);
+        $('#tagform .modal-dialog .modal-content').html(data);
         $('#tagform').modal('show');
     });
 }
