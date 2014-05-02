@@ -93,5 +93,10 @@
         <script src="/static/js/vendor/bootstrap-datetimepicker.min.js"></script>
         <script src="/static/js/main.js"></script>
         {% block js %}{% endblock %}
+
+        {% if piwik_url %}
+            {% include "piwik.html" %}
+        {% endif %}
+
 </body>
 </html>

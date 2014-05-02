@@ -58,6 +58,7 @@ app.jinja_env.filters['countryball'] = rfk.helper.iso_country_to_countryball
 
 
 # Register Jinja2 globals
+app.jinja_env.globals['piwik_url'] = helper.piwik_url()
 app.jinja_env.globals['now_playing'] = helper.now_playing
 app.jinja_env.globals['get_disco'] = helper.disco
 app.jinja_env.globals['url_for_other_page'] = helper.url_for_other_page

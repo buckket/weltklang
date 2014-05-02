@@ -5,6 +5,7 @@ import math
 import postmarkup
 import humanize
 
+import rfk
 from rfk.database.track import Track
 from flask.ext.babel import format_time, get_locale
 from flask import request, url_for, jsonify
@@ -14,6 +15,13 @@ from flask_babel import to_user_timezone, to_utc
 from rfk.helper import now, iso_country_to_countryball, make_user_link, natural_join
 from rfk.database.streaming import Listener
 
+
+# Jinja 2 global: piwik_url
+def piwik_url():
+    if rfk.CONFIG.has_option('site', 'piwik-url'):
+        return rfk.CONFIG.get('site', 'piwik-url')
+    else:
+        return None
 
 # Jinja2 global: get_disco
 def disco():
