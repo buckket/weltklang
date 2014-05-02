@@ -153,6 +153,18 @@ class Show(Base):
         elif self.series is not None:
             return self.series.logo
 
+    def is_fulfilled(self):
+        """ this function returns True under the folling circumstances:
+          somebody streamed or is streaming, or
+          this show has not ended yet
+        """
+        if self.end > now():
+            return True
+        for user in self.users:
+            if user.status > UserShow.STATUS.UNKNOWN:
+                return True
+        return False
+
     def __repr__(self):
         return "<rfk.database.show.Show id=%d flags=%s name=%s >" % (self.show, Show.FLAGS.name(self.flags), self.name)
 

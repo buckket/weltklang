@@ -124,7 +124,8 @@ def show_view(show):
                                  'user': users,
                                  'show': s.show,
                                  'duration': (s.end - s.begin).total_seconds(),
-                                 'link': url_for('.show_view', show=s.show)})
+                                 'link': url_for('.show_view', show=s.show),
+                                 'fulfilled': s.is_fulfilled()})
 
 
 @show.route('/show/<int:show>/edit')
@@ -171,6 +172,7 @@ def _get_shows(begin, end):
              'duration': (e - b).total_seconds(),
              'name': show.name,
              'description': show.description,
+             'fulfilled': show.is_fulfilled(),
              'tags': []}
         for tag in show.tags:
             if tag.tag.icon and len(tag.tag.icon) > 0:

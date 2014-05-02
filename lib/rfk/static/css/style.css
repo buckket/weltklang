@@ -587,3 +587,25 @@ END nowplaying Banner
 	right: 0;
 	top: 0;
 }
+
+.show-canceled div{
+    -webkit-transform: rotate(331deg);
+    -moz-transform: rotate(331deg);
+    -o-transform: rotate(331deg);
+    writing-mode: lr-tb;
+    color: red;
+    font-weight: bold;
+    font-size: 2em;
+    text-shadow: 1px 1px 1px black, 1px -1px 1px black, -1px 1px 1px black,
+    -1px -1px 1px black;
+}
+
+.show-canceled-small div{
+    -webkit-transform: rotate(331deg);
+    -moz-transform: rotate(331deg);
+    -o-transform: rotate(331deg);
+    writing-mode: lr-tb;
+    color: red;
+    font-weight: bold;
+    font-size: 1.5em;
+}

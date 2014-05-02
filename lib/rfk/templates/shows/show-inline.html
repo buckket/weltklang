@@ -19,6 +19,13 @@
     <h2 class="outline">{%if show.series %}{{ show.series.name }} <small>{{ show.name }}</small>{% else %}{{ show.name }}{% endif %}</h2>
     <h4 class="outline">{{ show.begin | datetimeformat }}</h4>
     <h6 class="outline">{% trans users=show.users|safe %}by {{ users }}{% endtrans %}</h6>
+    {% if not show.fulfilled %}
+    <div class="show-canceled-small" style="position: absolute; top: 50px;">
+        <div>
+            <i class="fa fa-ban"></i> {% trans %}CANCELED{% endtrans %}
+        </div>
+    </div>
+    {% endif%}
 </div>
 <div class="modal-body">
     <div class="row">
