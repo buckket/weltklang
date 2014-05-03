@@ -12,7 +12,7 @@ from . import helper
 import pytz
 
 import rfk.helper
-from rfk.helper import now, iso_country_to_countryball, iso_country_to_countryname
+from rfk.helper import now
 from rfk.site.helper import paginate_query, Pagination, permission_required
 import rfk.database
 from rfk.database.base import User, Anonymous, News
