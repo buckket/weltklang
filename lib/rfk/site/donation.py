@@ -18,7 +18,7 @@ try:
                                      'amount': transaction['amount'],
                                      'currency': 'BTC',
                                      'comment': ''})
-        return render_template('donations.html', donations=transactions)
+        return render_template('donations.html', TITLE='Donations', donations=transactions)
 
     def create_menu(endpoint):
         menu = {'name': 'Donations',

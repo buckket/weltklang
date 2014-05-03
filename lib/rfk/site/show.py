@@ -20,7 +20,7 @@ show = Blueprint('show', __name__)
 @show.route('/shows/upcoming/<int:page>')
 def upcoming(page):
     shows = Show.query.filter(Show.end > now()).order_by(Show.end.asc()).all()
-    return render_template('shows/upcoming.html', shows=shows)
+    return render_template('shows/upcoming.html', TITLE='Shows', shows=shows)
 
 
 @show.route('/show/last')
@@ -31,7 +31,7 @@ def last():
 @show.route('/series')
 def list_series():
     series = Series.query.order_by(Series.name.asc()).all()
-    return render_template('shows/series.html', series=series)
+    return render_template('shows/series.html', TITLE='Series', series=series)
 
 
 @show.route('/series/new', methods=["GET", "POST"])
@@ -75,6 +75,7 @@ def calendar_week_spec(year, week):
     next_week = (sunday + datetime.timedelta(days=1))
     prev_week = (sunday + datetime.timedelta(days=-7))
     return render_template('shows/calendar/week.html',
+                           TITLE='Schedule :: Week',
                            shows=days,
                            year=year,
                            week=week,
