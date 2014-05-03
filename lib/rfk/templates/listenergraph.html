@@ -51,7 +51,7 @@
             <tr>
                 <td>{{ li.connect | naturaltime }}</td>
                 <td>{{ li.useragent | truncate(80, True) }}</td>
-                <td>{{ render_country_ball(li.country) }}</td>
+                <td>{{ render_country_ball(li.country) }} - {{ li.country | countryname }}</td>
                 <td>{{ li.city | default('<unknown>', True) }}</td>
             </tr>
             {% else %}
