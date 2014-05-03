@@ -13,6 +13,7 @@ from flask import url_for
 from flask.helpers import find_package
 
 import rfk
+import rfk.database
 
 
 def now():
