@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from flask import url_for
+
 from sqlalchemy import *
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm import relationship, backref, exc
@@ -152,6 +154,10 @@ class Show(Base):
             return self.logo
         elif self.series is not None:
             return self.series.logo
+
+    @property
+    def link(self):
+        return url_for('show.show_view', show=self.show)
 
     def is_fulfilled(self):
         """ this function returns True under the folling circumstances:

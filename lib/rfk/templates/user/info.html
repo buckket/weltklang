@@ -41,7 +41,7 @@
                     {% if loop.first %}<ul>{% endif %}
                     <li>
                         {% if show.series %}<small>[{{ show.series.name }}]</small>{% endif %}
-                        <strong>{{ show.name | default('???', True) }}</strong> ({{ show.begin | naturaltime }}, duration: {{ show.length | naturaldelta }})
+                        <strong><a href="{{ show.link }}">{{ show.name | default('???', True) }}</a></strong> ({{ show.begin | naturaltime }}, duration: {{ show.length | naturaldelta }})
                     </li>
                     {% if loop.last %}</ul>{% endif %}
                 {% else %}
@@ -55,7 +55,7 @@
                     {% if loop.first %}<ul>{% endif %}
                     <li>
                         {% if show.series %}<small>[{{ show.series.name }}]</small>{% endif %}
-                        <strong>{{ show.name | default('???', True) }}</strong> ({{ show.begin | naturaltime }}, duration: {{ show.length | naturaldelta }})
+                        <strong><a href="{{ show.link }}">{{ show.name | default('???', True) }}</a></strong> ({{ show.begin | naturaltime }}, duration: {{ show.length | naturaldelta }})
                     </li>
                     {% if loop.last %}</ul>{% endif %}
                 {% else %}
