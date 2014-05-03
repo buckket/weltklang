@@ -74,7 +74,7 @@ def init_show(user):
             show.add_tags(Tag.parse_tags(user.get_setting(code='show_def_tags') or ''))
             show.description = user.get_setting(code='show_def_desc') or ''
             show.name = user.get_setting(code='show_def_name') or ''
-            show.logo = user.get_setting(code='show_def_logo') or None
+        show.logo = user.get_setting(code='show_def_logo') or None
         show.flags = Show.FLAGS.UNPLANNED
         show.add_user(user)
     elif show.flags == Show.FLAGS.UNPLANNED:
