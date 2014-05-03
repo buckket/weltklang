@@ -12,7 +12,7 @@ from . import helper
 import pytz
 
 import rfk.helper
-from rfk.helper import now, iso_country_to_countryball
+from rfk.helper import now, iso_country_to_countryball, iso_country_to_countryname
 from rfk.site.helper import paginate_query, Pagination, permission_required
 import rfk.database
 from rfk.database.base import User, Anonymous, News
@@ -55,6 +55,7 @@ app.jinja_env.filters['timedelta'] = helper.timedelta
 app.jinja_env.filters['naturaltime'] = helper.naturaltime
 app.jinja_env.filters['naturaldelta'] = helper.naturaldelta
 app.jinja_env.filters['countryball'] = rfk.helper.iso_country_to_countryball
+app.jinja_env.filters['countryname'] = rfk.helper.iso_country_to_countryname
 
 
 # Register Jinja2 globals

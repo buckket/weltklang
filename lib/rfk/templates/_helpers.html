@@ -1,5 +1,5 @@
 {% macro render_country_ball(country) %}
-<img class="cb-baseline" title="{{ country }}" src="/static/img/cb/{{ country | countryball }}" />
+<img class="cb-baseline" title="{{ country | countryname }}" src="/static/img/cb/{{ country | countryball }}" />
 {% endmacro %}
 
 

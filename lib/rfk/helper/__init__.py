@@ -5,6 +5,7 @@ from posixpath import dirname
 import os
 import pytz
 
+import pycountry
 import geoip2.errors
 import sqlalchemy.orm.exc
 
@@ -99,6 +100,22 @@ def iso_country_to_countryball(isocode):
         return '{}.png'.format(isocode)
     else:
         return 'unknown.png'
+
+
+def iso_country_to_countryname(isocode):
+    isocode = isocode.upper()
+
+    if isocode == 'BAY':
+        country = 'Bavaria'
+    elif isocode == 'TEX':
+        country = 'Texas'
+    else:
+        try:
+            country = pycountry.countries.get(alpha2=isocode).name
+        except KeyError:
+            country = 'Omsk'
+
+    return country
 
 
 def update_global_statistics():

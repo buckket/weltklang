@@ -30,6 +30,7 @@ setup(
                       'pytz',
                       'passlib',
                       'bcrypt',
+                      'pycountry',
                       'geoip2',
                       'postmarkup',
                       'sqlalchemy',
