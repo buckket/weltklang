@@ -502,13 +502,13 @@ END nowplaying Banner
 }
 
 .outline {
-	color: #dedede;
+	color: #dedede !important;
 	text-shadow: 1px 1px 1px black, 1px -1px 1px black, -1px 1px 1px black,
 		-1px -1px 1px black;
 }
 
 .outline-white {
-	color: #121212;
+	color: #121212 !important;
 	text-shadow: 1px 1px 1px white, 1px -1px 1px white, -1px 1px 1px white,
 		-1px -1px 1px white;
 }
