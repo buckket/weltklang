@@ -7,7 +7,7 @@ from sqlalchemy import or_
 import parsedatetime as pdt
 
 from flask import jsonify, request
-from flask.ext.babel import to_user_timezone, to_utc, format_datetime
+from flask.ext.babel import to_user_timezone, to_utc, format_datetime, get_timezone
 from flask_login import current_user
 
 import rfk.database
@@ -130,7 +130,7 @@ def show_add():
             if len(request.form['description']) == 0:
                 return emit_error(3, 'Description is empty')
 
-            begin = to_utc(datetime.fromtimestamp(int(request.form['begin'])))
+            begin = to_utc(get_timezone().localize(datetime.utcfromtimestamp(int(request.form['begin']))))
             begin = begin.replace(second=0)
             end = begin + timedelta(minutes=int(request.form['duration']))
             if begin < now():
@@ -176,7 +176,7 @@ def show_edit(show):
             return emit_error(7, 'Whoop, invalid show!')
         if show.get_usershow(current_user) is None:
             return emit_error(8, 'Trying to edit another user\'s show, eh?!')
-        begin = to_utc(datetime.fromtimestamp(int(request.form['begin'])))
+        begin = to_utc(get_timezone().localize(datetime.utcfromtimestamp(int(request.form['begin']))))
         begin = begin.replace(second=0)
         if begin < now():
             return jsonify({'success': False, 'error': 'You cannot enter a past date!'})
@@ -299,6 +299,7 @@ def now_playing():
     except Exception as e:
         raise e
         return jsonify({'success': False, 'data': unicode(e)})
+
 
 try:
     from rfk.armor import get_serviceproxy

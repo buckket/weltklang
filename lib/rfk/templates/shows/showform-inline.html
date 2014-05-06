@@ -108,7 +108,7 @@ function submit_show() {
 	$('#statusbar').show();
 	var picker = $('#show-date').data('DateTimePicker');
 	$.post(posturl,
-		   {begin: Math.floor(picker.getDate().toDate().getTime()/1000),
+		   {begin: (picker.getDate().unix() - (60 * picker.getDate().zone())),
 		    duration: length,
 		    title: $("#title").val(),
 		    description: $("#description").val(),
