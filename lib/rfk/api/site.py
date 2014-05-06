@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 
 from sqlalchemy.sql.expression import between
 from sqlalchemy import or_
+
+import dateutil.parser
 import parsedatetime as pdt
 
 from flask import jsonify, request
@@ -21,8 +23,11 @@ from rfk.api import api
 
 
 def parse_datetimestring(datestring):
-    cal = pdt.Calendar()
-    return datetime.fromtimestamp(mktime(cal.parse(datestring)[0]), tz=pytz.utc)
+    try:
+        return dateutil.parser.parse(datestring).astimezone(pytz.utc)
+    except TypeError:
+        cal = pdt.Calendar()
+        return datetime.fromtimestamp(mktime(cal.parse(datestring)[0]), tz=pytz.utc)
 
 
 @api.route("/site/listenergraphdata/<string:start>", methods=['GET'], defaults={'stop': 'now'})

@@ -121,6 +121,7 @@ def show_view(show):
                                  'users': natural_join(link_users),
                                  'tags': s.tags,
                                  'begin': s.begin,
+                                 'end': s.end,
                                  'logo': s.get_logo(),
                                  'user': users,
                                  'show': s.show,
