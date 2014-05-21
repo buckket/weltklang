@@ -1,6 +1,6 @@
 import datetime
 
-from flask import Flask, g, render_template, flash, redirect, url_for, request, jsonify, abort, send_from_directory
+from flask import Flask, g, render_template, flash, redirect, url_for, request, jsonify, abort, send_from_directory, session
 from flask.ext.login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask.ext.babel import Babel, get_locale, get_timezone, refresh, lazy_gettext, gettext
 from flask_babel import to_user_timezone
@@ -10,9 +10,10 @@ from sqlalchemy.orm import exc
 from . import helper
 
 import pytz
+import os
 
 import rfk.helper
-from rfk.helper import now
+from rfk.helper import now, get_secret_key
 from rfk.site.helper import paginate_query, Pagination, permission_required
 import rfk.database
 from rfk.database.base import User, Anonymous, News
@@ -32,7 +33,7 @@ app.config['DEBUG'] = True
 app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europe/Berlin'
 app.config['BABEL_DEFAULT_LOCALE'] = 'de'
 app.config['BABEL_LOCALE_PATH'] = 'de'
-app.secret_key = 'PENISPENISPENISPENISPENIS'
+app.secret_key = get_secret_key()
 
 locales = {'de': {'name': 'Bernd',
                   'img': '/static/img/cb/de.png',

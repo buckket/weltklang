@@ -4,6 +4,7 @@ from posixpath import dirname
 
 import os
 import pytz
+import lockfile
 
 import pycountry
 import geoip2.errors
@@ -126,3 +127,14 @@ def update_global_statistics():
         rfk.database.session.add(stat)
         rfk.database.session.flush()
     stat.set(now(), rfk.database.streaming.Listener.get_total_listener())
+
+
+def get_secret_key():
+    secretfile = os.path.join('/tmp', 'rfksecret')
+    with lockfile.FileLock(secretfile):
+        if not os.path.exists(secretfile):
+            with open(secretfile,'wb') as f:
+                f.write(os.urandom(64))
+        with open(secretfile) as f:
+            return f.read()
+

@@ -38,5 +38,6 @@ setup(
                       'icalendar',
                       'humanize',
                       'netaddr',
-                      'chardet']
+                      'chardet',
+                      'lockfile']
 )
