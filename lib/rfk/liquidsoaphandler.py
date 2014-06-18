@@ -46,12 +46,12 @@ def kick():
     returns False if harbor was empty or kick failed
     """
 
-    logger.info('kick')
+    logger.info('kick: trying to kick source')
     liquidsoap = LiquidInterface()
     liquidsoap.connect()
     kicked = liquidsoap.kick_harbor()
     liquidsoap.close()
-    logger.info('kick result: %s' % (kicked))
+    logger.info('kick: result is %s' % kicked)
     return kicked
 
 
@@ -119,28 +119,28 @@ def doAuth(username, password):
         user = User.authenticate(username, password)
         show = Show.get_current_show(user)
         if show is not None and show.flags & Show.FLAGS.PLANNED:
-            logger.info('cleaning harbor')
+            logger.info('doAuth: cleaning harbor because of planned show')
             if kick():
                 sys.stdout.write('false')
-                logger.info('harbor is now clean, reconnect pl0x')
+                logger.info('doAuth: harbor is now clean, reconnect pl0x')
                 rfk.database.session.commit()
                 return
             else:
-                logger.info('harbor was empty, go ahead')
-        logger.info('accepted auth for %s' % (username))
+                logger.info('doAuth: harbor was empty, go ahead')
+        logger.info('doAuth: accepted auth for %s' % username)
         sys.stdout.write('true')
     except rexc.base.InvalidPasswordException:
-        logger.info('rejected auth for %s (invalid password)' % (username))
+        logger.info('doAuth: rejected auth for %s (invalid password)' % username)
         sys.stdout.write('false')
     except rexc.base.UserNotFoundException:
-        logger.info('rejected auth for %s (invalid user)' % (username))
+        logger.info('doAuth: rejected auth for %s (invalid user)' % username)
         sys.stdout.write('false')
 
     rfk.database.session.commit()
 
 
 def doMetaData(data):
-    logger.debug('meta %s' % (json.dumps(data),))
+    logger.debug('doMetaData: %s' % (json.dumps(data),))
     if 'userid' not in data or data['userid'] == 'none':
         print 'no userid'
         rfk.database.session.commit()
@@ -186,7 +186,11 @@ def doConnect(data):
         data -- list of headers
     """
 
-    logger.info('connect request %s' % (json.dumps(data),))
+    # better to not store any passwords in our logs
+    safe_dump = data.copy()
+    safe_dump.pop('Authorization', None)
+    logger.info('doConnect: connect request %s' % (json.dumps(safe_dump),))
+
     rfk.database.session.commit()
     try:
         auth = data['Authorization'].strip().split(' ')
@@ -208,10 +212,10 @@ def doConnect(data):
             if 'ice-description' in data:
                 user.set_setting(data['ice-description'], code='icy_show_description')
         show = init_show(user)
-        logger.info('accepted connect for %s' % (user.username,))
+        logger.info('doConnect: accepted connect for %s' % (user.username,))
         print user.user
     except (rexc.base.UserNotFoundException, rexc.base.InvalidPasswordException, KeyError):
-        logger.info('rejected connect')
+        logger.info('doConnect: rejected connect, initiate kick...')
         kick()
 
     rfk.database.session.commit()
@@ -219,10 +223,10 @@ def doConnect(data):
 
 
 def doDisconnect(userid):
-    logger.info('diconnect for userid %s' % (userid,))
+    logger.info('doDisconnect: diconnect for userid %s' % (userid,))
     if userid == "none" or userid == '':
         print "Whooops no userid?"
-        logger.warn('no userid supplied!')
+        logger.warn('doDisconnect: no userid supplied!')
         rfk.database.session.commit()
         return
     user = User.get_user(id=int(userid))
@@ -261,7 +265,7 @@ def decode_json(jsonstr):
     try:
         return json.loads(jsonstr)
     except ValueError:
-        logger.warn('failed to decode json {}'.format(repr(jsonstr)))
+        logger.warn('decode_json: failed to decode json {}'.format(repr(jsonstr)))
         raise
 
 
