@@ -74,7 +74,7 @@ def check_auth(f=None, required_permissions=None):
 
 @api.route('/web/<path:path>')
 def page_not_found(path):
-    response = jsonify(wrapper(None, 404, "'%s' not found" % (path)))
+    response = jsonify(wrapper(None, 404, "'%s' not found" % path))
     response.status_code = 404
     return response
 
@@ -172,8 +172,7 @@ def current_show():
         - None
     """
 
-    clauses = []
-    clauses.append((between(datetime.utcnow(), Show.begin, Show.end)) | (Show.end == None))
+    clauses = [(between(datetime.utcnow(), Show.begin, Show.end)) | (Show.end == None)]
     result = Show.query.filter(*clauses).order_by(Show.begin.desc(), Show.end.asc()).all()
 
     data = {'current_show': {}}
@@ -195,7 +194,7 @@ def current_show():
 
             if (show.flags & Show.FLAGS.UNPLANNED and len(result) == 2) or len(result) == 1:
                 target = 'running_show'
-            if (show.flags & Show.FLAGS.PLANNED and len(result) == 2):
+            if show.flags & Show.FLAGS.PLANNED and len(result) == 2:
                 target = 'planned_show'
 
             data['current_show'][target] = {
@@ -229,8 +228,8 @@ def next_shows():
     dj_name = request.args.get('dj_name', None)
     limit = request.args.get('limit', 5)
 
-    clauses = []
-    clauses.append(Show.begin > datetime.utcnow())
+    clauses = [Show.begin > datetime.utcnow()]
+
     try:
         if dj_id:
             clauses.append(UserShow.user == User.get_user(id=dj_id))
@@ -283,8 +282,7 @@ def last_shows():
     dj_name = request.args.get('dj_name', None)
     limit = request.args.get('limit', 5)
 
-    clauses = []
-    clauses.append(Show.end < datetime.utcnow())
+    clauses = [Show.end < datetime.utcnow()]
 
     if dj_id:
         clauses.append(UserShow.user == User.get_user(id=dj_id))
@@ -358,8 +356,7 @@ def last_tracks():
     limit = int(request.args.get('limit', 5))
     limit = limit if limit <= 50 else 50
 
-    clauses = []
-    clauses.append(Track.end < datetime.utcnow())
+    clauses = [Track.end < datetime.utcnow()]
 
     if dj_id is not None:
         clauses.append(UserShow.user == User.get_user(id=dj_id))
@@ -396,9 +393,7 @@ def listener():
         - None
     """
 
-    clauses = []
-    clauses.append(Listener.disconnect == None)
-
+    clauses = [Listener.disconnect == None]
     result = Listener.query.filter(*clauses).all()
 
     data = {'listener': {'listener': []}}
