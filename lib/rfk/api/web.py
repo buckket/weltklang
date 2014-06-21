@@ -21,6 +21,7 @@ from rfk.database.base import User, ApiKey
 from rfk.database.show import Show, UserShow
 from rfk.database.track import Track
 from rfk.database.streaming import Listener, Relay
+from rfk.database.stats import Statistic, StatsistcsData
 
 from rfk.liquidsoap import LiquidInterface
 from rfk.exc.base import UserNotFoundException
@@ -247,8 +248,7 @@ def next_shows():
 
                 dj = []
                 for usershow in show.users:
-                    dj.append(
-                        {'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status})
+                    dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status})
 
                 data['next_shows']['shows'].append({
                     'show_id': show.show,
@@ -284,36 +284,39 @@ def last_shows():
 
     clauses = [Show.end < datetime.utcnow()]
 
-    if dj_id:
-        clauses.append(UserShow.user == User.get_user(id=dj_id))
-    if dj_name:
-        clauses.append(UserShow.user == User.get_user(username=dj_name))
+    try:
+        if dj_id:
+            clauses.append(UserShow.user == User.get_user(id=dj_id))
+        if dj_name:
+            clauses.append(UserShow.user == User.get_user(username=dj_name))
 
-    result = Show.query.join(UserShow).filter(*clauses).order_by(Show.begin.desc()).limit(limit).all()
+        result = Show.query.join(UserShow).filter(*clauses).order_by(Show.begin.desc()).limit(limit).all()
 
-    data = {'last_shows': {'shows': []}}
-    if result:
-        for show in result:
+        data = {'last_shows': {'shows': []}}
+        if result:
+            for show in result:
 
-            begin = show.begin.isoformat()
-            end = show.end.isoformat()
+                begin = show.begin.isoformat()
+                end = show.end.isoformat()
 
-            dj = []
-            for usershow in show.users:
-                dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status})
+                dj = []
+                for usershow in show.users:
+                    dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status})
 
-            data['last_shows']['shows'].append({
-                'show_id': show.show,
-                'show_name': show.name,
-                'show_description': show.description,
-                'show_flags': show.flags,
-                'show_begin': begin,
-                'show_end': end,
-                'dj': dj
-            })
-    else:
-        data = {'last_shows': None}
-    return jsonify(wrapper(data))
+                data['last_shows']['shows'].append({
+                    'show_id': show.show,
+                    'show_name': show.name,
+                    'show_description': show.description,
+                    'show_flags': show.flags,
+                    'show_begin': begin,
+                    'show_end': end,
+                    'dj': dj
+                })
+        else:
+            data = {'last_shows': None}
+        return jsonify(wrapper(data))
+    except UserNotFoundException:
+        return jsonify(wrapper({'last_shows': None}))
 
 
 @api.route('/web/current_track')
@@ -445,4 +448,40 @@ def active_relays():
             data['active_relays']['total_bandwidth'] += relay.usage
     else:
         data = {'active_relays': None}
+    return jsonify(wrapper(data))
+
+
+@api.route('/web/listener_peak')
+@check_auth
+## DONE ##
+def listener_peak():
+    """Return the global listener peak
+
+    Keyword arguments:
+        - None
+    """
+
+    peak = StatsistcsData.query.join(Statistic).filter(Statistic.identifier == 'lst-total').order_by(StatsistcsData.value.desc()).first()
+    if peak:
+        data = {'listener_peak': {'peak_value': peak.value, 'peak_time': peak.timestamp.isoformat()}}
+
+        show = Show.query.join(UserShow).filter(between(peak.timestamp, Show.begin, Show.end)).first()
+        if show:
+            dj = []
+            for usershow in show.users:
+                dj.append({'dj_name': usershow.user.username, 'dj_id': usershow.user.user, 'status': usershow.status})
+
+            data['listener_peak']['peak_show'] = {
+                'show_id': show.show,
+                'show_name': show.name,
+                'show_description': show.description,
+                'show_flags': show.flags,
+                'show_begin': show.begin.isoformat(),
+                'show_end': show.end.isoformat(),
+                'dj': dj
+            }
+        else:
+            data['listener_peak']['peak_show'] = None
+    else:
+        data = {'listener_peak': None}
     return jsonify(wrapper(data))
