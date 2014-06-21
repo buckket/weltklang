@@ -33,6 +33,7 @@ setup(
                       'pycountry',
                       'geoip2',
                       'postmarkup',
+                      'progressbar',
                       'sqlalchemy',
                       'parsedatetime',
                       'icalendar',
