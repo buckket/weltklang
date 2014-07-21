@@ -13,9 +13,9 @@
                     {% for stream in streams %}
                     <li>
                         {% if stream.get_status() %}
-                        <a href="/listen/{{ stream.code }}"><i class="fa fa-play-circle"></i> {% trans %}Listen{% endtrans %} ({{ stream.name }})</a>
+                        <a href="/listen/{{ stream.code }}.m3u"><i class="fa fa-play-circle"></i> {% trans %}Listen{% endtrans %} ({{ stream.name }})</a>
                         {% else %}
-                        <a href="/listen/{{ stream.code }}"><i class="fa fa-frown"></i> {% trans %}Offline{% endtrans %} ({{ stream.name }})</a>
+                        <a href="/listen/{{ stream.code }}.m3u"><i class="fa fa-frown"></i> {% trans %}Offline{% endtrans %} ({{ stream.name }})</a>
                         {% endif %}
                     </li>
                     {% else %}

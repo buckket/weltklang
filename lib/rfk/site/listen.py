@@ -13,25 +13,26 @@ def html5_player():
     return render_template('html5player.html')
 
 
-@listen.route('/<stream>')
+@listen.route('/<string:stream>.m3u')
 def playlist(stream):
     """Return a m3u playlist pointing to our load balancer"""
 
     stream = Stream.query.filter(Stream.code == stream).first()
     if stream is None:
         return make_response('I\'m sorry ;_; (Invalid stream)', 404)
+
     m3u = "#EXTM3U\r\n"
-    m3u += "#EXTINF:0, Radio freies Krautchan %s\r\n" % stream.name
-    m3u += "http://%s/listen/stream/%s\r\n" % (rfk.CONFIG.get('site', 'url'), stream.stream)
+    m3u += "#EXTINF:-1,Radio freies Krautchan %s\r\n" % stream.name
+    m3u += "http://%s/listen/%s\r\n" % (rfk.CONFIG.get('site', 'url'), stream.code)
     return make_response(m3u, 200, {'Content-Type': 'application/x-mpegurl',
                                     'Content-Disposition': 'attachment; filename="%s.m3u"' % stream.mount[1:]})
 
 
-@listen.route('/stream/<stream>')
+@listen.route('/<string:stream>')
 def stream(stream):
     """Redirect listener to relay with least traffic usage"""
 
-    stream = Stream.query.get(int(stream))
+    stream = Stream.query.filter(Stream.code == stream).first()
     if stream is None:
         return make_response('I\'m sorry ;_; (Invalid stream)', 404)
 

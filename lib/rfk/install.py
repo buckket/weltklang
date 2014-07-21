@@ -34,8 +34,7 @@ def setup_permissions():
 
 
 def setup_default_user(username, password):
-    users = []
-    users.append(User.add_user(username, password))
+    users = [User.add_user(username, password)]
     for user in users:
         rfk.database.session.add(user)
         user.add_permission(code='manage-liquidsoap')
