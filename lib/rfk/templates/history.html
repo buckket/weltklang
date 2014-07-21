@@ -18,8 +18,16 @@
             {% for track in tracks %}
             <tr>
                 <td>{{ track.begin | datetimeformat('short') }}</td>
-                <td>{{ track.show.users[0].user.username }}</td>
-                <td>{{ track.show.name }}</td>
+                <td>
+                    <a href="{{ url_for('user.info', user=track.show.users[0].user.username) }}">
+                        {{ track.show.users[0].user.username }}
+                    </a>
+                </td>
+                <td>
+                    <a href="{{ track.show.link }}">
+                        {{ track.show.name }}
+                    </a>
+                </td>
                 <td>{{ track.title.artist.name }}</td>
                 <td>{{ track.title.name }}</td>
             </tr>
