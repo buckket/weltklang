@@ -265,14 +265,14 @@ def now_playing():
                            'logo': show.get_logo(),
                            'type': Show.FLAGS.name(show.flags),
                            'user': {'countryball': iso_country_to_countryball(user.country)}
-            }
+                           }
             if show.series:
-                ret['show'] = {'series': {'name': show.series.name,
-                                          'series': show.series.series}}
+                ret['show']['series'] = {'name': show.series.name,
+                                          'series': show.series.series}
             link_users = []
             for ushow in show.users:
                 link_users.append(make_user_link(ushow.user))
-            ret['show']['user'] = {'links': natural_join(link_users)}
+            ret['show']['user']['links'] = natural_join(link_users)
 
         #gather trackinfos
         track = Track.current_track()
@@ -305,6 +305,7 @@ def now_playing():
                                                   'countryball': iso_country_to_countryball(listener.country)}
         return jsonify({'success': True, 'data': ret})
     except Exception as e:
+        raise e
         return jsonify({'success': False, 'error': unicode(e)})
 
 
