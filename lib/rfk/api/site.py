@@ -256,6 +256,7 @@ def now_playing():
                 end = to_timestamp(to_user_timezone(show.end))
             else:
                 end = None
+
             ret['show'] = {'id': show.show,
                            'name': show.name,
                            'begin': to_timestamp(to_user_timezone(show.begin)),
@@ -266,11 +267,12 @@ def now_playing():
                            'user': {'countryball': iso_country_to_countryball(user.country)}
             }
             if show.series:
-                ret['series'] = {'name': show.series.name}
+                ret['show'] = {'series': {'name': show.series.name,
+                                          'series': show.series.series}}
             link_users = []
             for ushow in show.users:
                 link_users.append(make_user_link(ushow.user))
-            ret['users'] = {'links': natural_join(link_users)}
+            ret['show']['user'] = {'links': natural_join(link_users)}
 
         #gather trackinfos
         track = Track.current_track()
@@ -285,13 +287,14 @@ def now_playing():
         else:
             filter_begin = now()
         if request.args.get('full') == 'true':
-            nextshow = Show.query.filter(Show.begin >= filter_begin).order_by(Show.begin.asc()).first();
+            nextshow = Show.query.filter(Show.begin >= filter_begin).order_by(Show.begin.asc()).first()
             if nextshow:
                 ret['nextshow'] = {'name': nextshow.name,
                                    'begin': to_timestamp(to_user_timezone(nextshow.begin)),
                                    'logo': nextshow.get_logo()}
                 if nextshow.series:
-                    ret['nextshow']['series'] = nextshow.series.name
+                    ret['nextshow']['series'] = {'series': {'name': show.series.name,
+                                                            'series': show.series.series}}
 
         #get listenerinfo for disco
         listeners = Listener.get_current_listeners()
@@ -302,8 +305,7 @@ def now_playing():
                                                   'countryball': iso_country_to_countryball(listener.country)}
         return jsonify({'success': True, 'data': ret})
     except Exception as e:
-        raise e
-        return jsonify({'success': False, 'data': unicode(e)})
+        return jsonify({'success': False, 'error': unicode(e)})
 
 
 try:
