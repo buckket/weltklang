@@ -273,7 +273,7 @@ def now_playing():
             name_users = []
             for ushow in show.users:
                 link_users.append(make_user_link(ushow.user))
-                name_users.append(ushow.username)
+                name_users.append(ushow.user.username)
 
             ret['show']['user']['links'] = natural_join(link_users)
             ret['show']['user']['names'] = natural_join(name_users)
