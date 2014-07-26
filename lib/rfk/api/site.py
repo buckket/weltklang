@@ -270,9 +270,13 @@ def now_playing():
                 ret['show']['series'] = {'name': show.series.name,
                                           'series': show.series.series}
             link_users = []
+            name_users = []
             for ushow in show.users:
                 link_users.append(make_user_link(ushow.user))
+                name_users.append(ushow.username)
+
             ret['show']['user']['links'] = natural_join(link_users)
+            ret['show']['user']['names'] = natural_join(name_users)
 
         #gather trackinfos
         track = Track.current_track()
