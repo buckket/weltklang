@@ -297,8 +297,8 @@ def now_playing():
                                    'begin': to_timestamp(to_user_timezone(nextshow.begin)),
                                    'logo': nextshow.get_logo()}
                 if nextshow.series:
-                    ret['nextshow']['series'] = {'name': show.series.name,
-                                                 'series': show.series.series}
+                    ret['nextshow']['series'] = {'name': nextshow.series.name,
+                                                 'series': nextshow.series.series}
 
         #get listenerinfo for disco
         listeners = Listener.get_current_listeners()
@@ -309,7 +309,6 @@ def now_playing():
                                                   'countryball': iso_country_to_countryball(listener.country)}
         return jsonify({'success': True, 'data': ret})
     except Exception as e:
-        raise e
         return jsonify({'success': False, 'error': unicode(e)})
 
 
