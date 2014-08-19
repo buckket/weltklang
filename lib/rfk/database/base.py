@@ -98,7 +98,7 @@ class User(Base):
 
     @staticmethod
     def check_username(username):
-        if re.match('^[0-9a-zA-Z_-]{3,}$', username) == None:
+        if re.match('^[0-9a-zA-Z_-]{3,}$', username) is None:
             return False
         else:
             return True
@@ -109,6 +109,8 @@ class User(Base):
 
     @staticmethod
     def add_user(username, password):
+        if not User.check_username(username):
+            raise rexc.base.InvalidUsernameException
         try:
             User.query.filter(User.username == username).one()
             raise rexc.base.UserNameTakenException()

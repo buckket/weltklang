@@ -1,10 +1,12 @@
 import datetime
+import json
 
 from flask import Flask, g, render_template, flash, redirect, url_for, request, jsonify, abort, send_from_directory, session
 from flask.ext.login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask.ext.babel import Babel, get_locale, get_timezone, refresh, lazy_gettext, gettext
 from flask_babel import to_user_timezone
 
+from sqlalchemy import func
 from sqlalchemy.orm import exc
 
 from . import helper
@@ -21,7 +23,7 @@ from rfk.database.donations import Donation
 from rfk.database.streaming import Stream, Listener, Relay
 from rfk.site.forms.login import login_form, register_form
 from rfk.site.forms.settings import SettingsForm
-from rfk.exc.base import UserNameTakenException, UserNotFoundException
+from rfk.exc.base import UserNameTakenException, UserNotFoundException, InvalidUsernameException
 from rfk.database.track import Track
 from rfk.database.show import Show, UserShow
 from rfk.database.stats import Statistic
@@ -260,10 +262,12 @@ def register():
             if form.email.data:
                 user.mail = form.email.data
             rfk.database.session.commit()
-            flash(gettext('Registration successful. You can now login'), 'success')
+            flash(gettext('Registration successful. You can now login!'), 'success')
             return redirect(url_for("login"))
         except UserNameTakenException:
             form.username.errors.append(gettext('Username already taken!'))
+        except InvalidUsernameException:
+            form.username.errors.append(gettext('Username invalid!'))
 
     return render_template("register.html", form=form, TITLE='Register')
 
@@ -363,7 +367,7 @@ def listeners():
     # get recent listener count to calculate a trend
     try:
         stats_total = Statistic.query.filter(Statistic.identifier == 'lst-total').one()
-        stats = stats_total.get(start=now() - datetime.timedelta(minutes=2), stop=now())
+        stats = stats_total.get(start=now() - datetime.timedelta(minutes=5), stop=now())
     except exc.NoResultFound:
         stats = None
 
