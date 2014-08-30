@@ -1,12 +1,24 @@
+import sqlalchemy.orm.exc
 from flask import Blueprint, request, make_response
 
-from rfk.helper import update_global_statistics
+import rfk.database
 from rfk.database.streaming import Relay, Stream, StreamRelay, Listener
 from rfk.database import session
+from rfk.helper import now
 from rfk.log import init_db_logging
 
 backend = Blueprint('icecast', __name__)
 logger = init_db_logging('IcecastBackend')
+
+
+def update_global_statistics():
+    try:
+        stat = rfk.database.stats.Statistic.query.filter(rfk.database.stats.Statistic.identifier == 'lst-total').one()
+    except sqlalchemy.orm.exc.NoResultFound:
+        stat = rfk.database.stats.Statistic(name='Overall Listener', identifier='lst-total')
+        rfk.database.session.add(stat)
+        rfk.database.session.flush()
+    stat.set(now(), rfk.database.streaming.Listener.get_total_listener())
 
 
 @backend.route('/icecast/auth', methods=['POST'])
