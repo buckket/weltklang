@@ -56,6 +56,7 @@ class Track(Base):
         track = Track(title=title, begin=begin, show=show)
         rfk.database.session.add(track)
         rfk.database.session.flush()
+        return track
 
 
 """Track Indices"""
