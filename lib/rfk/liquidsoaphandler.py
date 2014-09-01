@@ -20,6 +20,9 @@ import json
 import sys
 import base64
 
+import redis
+import redis.exceptions
+
 import os
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(basedir, 'lib'))
@@ -35,7 +38,31 @@ from rfk import exc as rexc
 from rfk.helper import get_path
 from rfk.log import init_db_logging
 
+
+class RfKRedisPub(object):
+    """Publish changes of tracks or shows via redis"""
+
+    def __init__(self, channel='rfk-event'):
+        self.redis = redis.StrictRedis(host='127.0.0.1', port=6379)
+        self.channel = channel
+
+    def _publish(self, channel, message):
+        try:
+            return self.redis.publish(channel, message)
+        except redis.exceptions.ConnectionError:
+            return False
+
+    def track_change(self, track_id=None):
+        if track_id is not False:
+            self._publish(self.channel, {'event': 'track_change', 'track_id': track_id})
+
+    def show_change(self, show_id=None):
+        if show_id is not False:
+            self._publish(self.channel, {'event': 'show_change', 'show_id': show_id})
+
+
 username_delimiter = '|'
+publish = None
 logger = None
 
 
@@ -140,6 +167,7 @@ def doAuth(username, password):
 
 
 def doMetaData(data):
+    publish_track = False
     logger.debug('doMetaData: %s' % (json.dumps(data),))
     if 'userid' not in data or data['userid'] == 'none':
         print 'no userid'
@@ -173,10 +201,13 @@ def doMetaData(data):
         track = Track.current_track()
         if track:
             track.end_track()
+            publish_track = None
     else:
         track = Track.new_track(show, artist, title)
+        publish_track = track.track
 
     rfk.database.session.commit()
+    publish.track_change(publish_track)
 
 
 def doConnect(data):
@@ -185,6 +216,7 @@ def doConnect(data):
     Keyword arguments:
         data -- list of headers
     """
+    publish_show = False
 
     # better to not store any passwords in our logs
     safe_dump = data.copy()
@@ -212,6 +244,7 @@ def doConnect(data):
             if 'ice-description' in data:
                 user.set_setting(data['ice-description'], code='icy_show_description')
         show = init_show(user)
+        publish_show = show.show
         logger.info('doConnect: accepted connect for %s' % (user.username,))
         print user.user
     except (rexc.base.UserNotFoundException, rexc.base.InvalidPasswordException, KeyError):
@@ -219,6 +252,7 @@ def doConnect(data):
         kick()
 
     rfk.database.session.commit()
+    publish.show_change(publish_show)
 
 
 
@@ -241,6 +275,8 @@ def doDisconnect(userid):
         track = Track.current_track()
         if track:
             track.end_track()
+            publish.track_change()
+        publish.show_change()
         rfk.database.session.commit()
     else:
         print "no user found"
@@ -297,6 +333,9 @@ def main():
                                                rfk.CONFIG.get('database', 'host'),
                                                rfk.CONFIG.get('database', 'database')))
     try:
+        global publish
+        publish = RfKRedisPub()
+
         global logger
         logger = init_db_logging('liquidsoaphandler')
 

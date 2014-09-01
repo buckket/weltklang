@@ -21,6 +21,8 @@ setup(
     entry_points={'console_scripts': ['rfk-werkzeug = rfk.app:main',
                                       'rfk-collectstats = rfk.collectstats:main',
                                       'rfk-geoipdbupdate = rfk.geoipdbupdate:main',
+                                      'rfk-eventdispatcher = rfk.eventdispatcher:main',
+                                      'rfk-xmpp-bot = rfk.xmpp_bot:main',
                                       'rfk-liquidsoaphandler = rfk.liquidsoaphandler:main',
                                       'rfk-liquidsoap = rfk.liquidsoapdaemon:main',
                                       'rfk-userstats = rfk.userstats:main',
