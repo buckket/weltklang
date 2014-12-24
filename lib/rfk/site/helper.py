@@ -102,11 +102,12 @@ def menu():
 
 markup = postmarkup.PostMarkup()
 markup.default_tags()
+markup.tag_factory.set_default_tag(postmarkup.DefaultTag)
 
 
 # Jinja2 filter: bbcode
 def bbcode(value):
-    return markup.render_to_html(value)
+    return markup.render_to_html(value, render_unknown_tags=True)
 
 # Jinja2 filter: timedelta
 def timedelta(value):
