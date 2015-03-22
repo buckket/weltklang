@@ -19,4 +19,25 @@
         </div>
         {% endfor %}
 </div>
+<div id="showform" class="modal fade" role="dialog" aria-labelledby="showform-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+                        
 {% endblock %}
+
+{% block js %}
+<script>
+<!--
+function add_show() {
+	$.get('/show/new',{ inline: true }, function(data) {
+		$('#showform').find('.modal-content').html(data);
+		$('#showform').modal('show');                    
+	});
+}
+//-->
+</script>
+{% endblock js %}
+                                            
