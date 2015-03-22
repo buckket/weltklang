@@ -25,7 +25,7 @@ from rfk.api import api
 def parse_datetimestring(datestring):
     try:
         return dateutil.parser.parse(datestring).astimezone(pytz.utc)
-    except TypeError:
+    except (TypeError, ValueError):
         cal = pdt.Calendar()
         return datetime.fromtimestamp(mktime(cal.parse(datestring)[0]), tz=pytz.utc)
 
@@ -48,6 +48,7 @@ def listenerdata(start, stop):
         ret['data'][str(stream.mount)] = []
         #just set an initial stating point from before the starting point
         stats = stream.statistic.get(stop=start, num=1, reverse=True)
+        c = 0
         for stat in stats:
             c = stat.value
         if not stats:
