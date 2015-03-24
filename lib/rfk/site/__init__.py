@@ -329,6 +329,13 @@ def donations():
     return redirect(url_for("donation.list"))
 
 
+@app.route('/stats')
+def stats():
+    #>>> session.query(Listener).filter(Listener.useragent.like('%iTunes%')).count()
+    countries = rfk.database.session.query(Listener.country, func.count('*')).group_by(Listener.country).filter(Listener.country != None, Listener.country != 'DE').all()
+    return render_template('stats.html', countries=json.dumps(countries), TITLE=gettext('Stats'))
+
+
 @app.route('/listeners')
 def listeners():
 

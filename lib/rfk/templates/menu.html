@@ -66,7 +66,7 @@
             <ul class="dropdown-menu" role="menu">
                 <li class="text-center"><small>{% trans %}Subscribe to these URLs{% endtrans %}:</small></li>
                 <li class="divider"></li>
-                <li><a href="{{ url_for('feeds.ical') }}"><i style="margin-right: 0.5em;" class="fa fa-calendar"></i> iCal Feed</a></li>
+                <li><a href="webcal://radio.krautchan.net/feeds/ical"><i style="margin-right: 0.5em;" class="fa fa-calendar"></i> iCal Feed</a></li>
                 <li><a href="{{ url_for('feeds.atom') }}"><i style="margin-right: 0.5em;" class="fa fa-rss"></i> Atom Feed</a></li>
                 <li class="divider"></li>
                 <li class="text-center"><a id="request_permission" href="#">{% trans %}HTML5 Notifications{% endtrans %}</a></li>
