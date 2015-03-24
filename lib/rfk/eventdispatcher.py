@@ -16,6 +16,7 @@ import rfk.helper.daemonize
 
 
 redis_client = None
+last_show_id = None
 
 
 class XMPP(object):
@@ -53,21 +54,31 @@ def handle_track_change(track_id):
         track = Track.query.filter(Track.track == track_id).first()
         if track:
             XMPP.update_tune(artist=track.title.artist.name, title=track.title.name)
+
     # DJ disconnected -> no more tracks
     else:
         XMPP.update_tune()
 
 
 def handle_show_change(show_id):
+    global last_show_id
+
     # show changed
-    if show_id:
+    if show_id != last_show_id:
         show = Show.query.filter(Show.show == show_id).first()
         if show:
             message = u"{} just started streaming {}".format(show.get_active_user().username, show.name)
             XMPP.send_messages(['buckket@jabber.ccc.de'], message)
-    # show stopped
+        last_show_id = show_id
+
+    # show changed but we already processed it
+    elif show_id == last_show_id:
+        pass
+
+    # show ended
     else:
         pass
+
 
 @click.command()
 @click.option('-f', '--foreground', help='run in foreground', is_flag=True, default=False)
