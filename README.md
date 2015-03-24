@@ -11,7 +11,7 @@ Requirements:
 License (BSD):
 --------
 ```
-Copyright (c) 20012-2015, TeddyDesTodes, buckket
+Copyright (c) 2012-2015, TeddyDesTodes, buckket
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
