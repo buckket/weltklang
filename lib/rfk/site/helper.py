@@ -108,6 +108,7 @@ markup.default_tags()
 def bbcode(value):
     return markup.render_to_html(value)
 
+
 # Jinja2 filter: timedelta
 def timedelta(value):
     days = value.days

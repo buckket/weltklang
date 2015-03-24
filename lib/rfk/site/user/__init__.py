@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, abort
+from flask.ext.babel import gettext
 
 import rfk.exc
 
@@ -20,9 +21,9 @@ def info(user):
 
     # checking user rank
     if user.has_permission('admin'):
-        rank = 'Admin'
+        rank = gettext('Admin')
     else:
-        rank = 'User'
+        rank = gettext('User')
 
     # count planned and unplanned shows
     planned_shows = Show.query.join(UserShow).filter(UserShow.user == user, Show.flags == Show.FLAGS.PLANNED).count()

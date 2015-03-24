@@ -1,7 +1,8 @@
 import datetime
+
 from flask import Blueprint, render_template, url_for
+from flask.ext.babel import gettext
 from rfk.database.donations import Donation
-__author__ = 'teddydestodes'
 
 donation = Blueprint('donation', __name__)
 
@@ -18,10 +19,10 @@ try:
                                      'amount': transaction['amount'],
                                      'currency': 'BTC',
                                      'comment': ''})
-        return render_template('donations.html', TITLE='Donations', donations=transactions)
+        return render_template('donations.html', TITLE=gettext('Donations'), donations=transactions)
 
     def create_menu(endpoint):
-        menu = {'name': 'Donations',
+        menu = {'name': gettext('Donations'),
                 'active': endpoint == 'donation.list',
                 'url': url_for('donation.list')}
         return menu

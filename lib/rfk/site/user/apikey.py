@@ -1,6 +1,6 @@
 from flask import render_template, flash, request
 from flask.ext.login import login_required, current_user
-from flask.ext.babel import lazy_gettext
+from flask.ext.babel import gettext
 
 import rfk.database
 from rfk.database.base import ApiKey
@@ -22,6 +22,6 @@ def apikey_list(user):
         rfk.database.session.commit()
         form.application.data = ''
         form.description.data = ''
-        flash(lazy_gettext('Added Apikey'))
+        flash(gettext('Successfully added new apikey'), 'success')
     apikeys = ApiKey.query.filter(ApiKey.user == current_user).all()
     return render_template('user/apikeys.html', apikeys=apikeys, form=form)

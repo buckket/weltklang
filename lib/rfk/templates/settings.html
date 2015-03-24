@@ -1,5 +1,6 @@
 {% from "_helpers.html" import render_field_horizontal_settings %}
 {% from "_helpers.html" import render_country_ball %}
+
 {% extends "base.html" %}
 {% block content %}
 <h3>{% trans username=current_user.username %}Customize your very own {{ username }}{% endtrans %}
@@ -65,6 +66,7 @@
     </div>
 </form>
 {% endblock %}
+
 {% block js %}
 <script>
     $('#imguruploader').imgurUploader({

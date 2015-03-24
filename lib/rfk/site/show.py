@@ -2,7 +2,7 @@ import datetime
 
 from flask import Blueprint, render_template, url_for, request, redirect, flash
 from flask.ext.login import login_required, current_user
-from flask.ext.babel import to_user_timezone, to_utc
+from flask.ext.babel import to_user_timezone, to_utc, gettext
 
 from rfk import CONFIG
 import rfk.database
@@ -20,18 +20,18 @@ show = Blueprint('show', __name__)
 @show.route('/shows/upcoming/<int:page>')
 def upcoming(page):
     shows = Show.query.filter(Show.end > now()).order_by(Show.end.asc()).all()
-    return render_template('shows/upcoming.html', TITLE='Shows', shows=shows)
+    return render_template('shows/upcoming.html', TITLE=gettext('Shows'), shows=shows)
 
 
 @show.route('/show/last')
 def last():
-    return 'blah'
+    return 'blah'  # whatever :--D
 
 
 @show.route('/series')
 def list_series():
     series = Series.query.order_by(Series.name.asc()).all()
-    return render_template('shows/series.html', TITLE='Series', series=series)
+    return render_template('shows/series.html', TITLE=gettext('Series'), series=series)
 
 
 @show.route('/series/new', methods=["GET", "POST"])
@@ -46,7 +46,7 @@ def new_series():
                         logo=form.image.data)
         rfk.database.session.add(series)
         rfk.database.session.commit()
-        flash('Series added successfully', 'info')
+        flash(gettext('Series added successfully'), 'info')
         return redirect(url_for('.list_series'))
     return render_template('shows/seriesform.html', form=form,
                            imgur={'client': CONFIG.get('site', 'imgur-client')})
@@ -75,7 +75,7 @@ def calendar_week_spec(year, week):
     next_week = (sunday + datetime.timedelta(days=1))
     prev_week = (sunday + datetime.timedelta(days=-7))
     return render_template('shows/calendar/week.html',
-                           TITLE='Schedule :: Week',
+                           TITLE=gettext('Schedule :: Week'),
                            shows=days,
                            year=year,
                            week=week,
@@ -104,6 +104,7 @@ def show_view(show):
     s = Show.query.get(show)
     if s is None:
         return 'no show found'
+        # TODO: proper error page
     if request.args.get('inline'):
         template = '/shows/show-inline.html'
     else:
@@ -135,6 +136,7 @@ def show_edit(show):
     s = Show.query.get(show)
     if s is None:
         return 'no show found'
+        # TODO: proper error page
     if request.args.get('inline'):
         template = '/shows/showform-inline.html'
     else:
@@ -189,10 +191,10 @@ def _get_shows(begin, end):
 
 
 def create_menu(endpoint):
-    menu = {'name': 'Programme', 'submenu': [], 'active': False}
-    entries = [['show.upcoming', 'Upcoming Shows'],
-               ['show.list_series', 'Series'],
-               ['show.calendar_week', 'Schedule']]
+    menu = {'name': gettext('Programme'), 'submenu': [], 'active': False}
+    entries = [['show.upcoming', gettext('Upcoming Shows')],
+               ['show.list_series', gettext('Series')],
+               ['show.calendar_week', gettext('Schedule')]]
     for entry in entries:
         active = endpoint == entry[0]
         menu['submenu'].append({'name': entry[1],

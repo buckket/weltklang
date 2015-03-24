@@ -96,7 +96,7 @@ def babel_timezoneselector():
         return request.cookies.get('timezone')
     elif current_user is not None:
         return current_user.get_timezone()
-    return 'Europe/Berlin';
+    return 'Europe/Berlin'
 
 
 login_manager = LoginManager()
@@ -183,10 +183,10 @@ def before_request():
 @app.before_request
 def make_menu():
     request.menu = OrderedDict()
-    entries = [['index', 'Home'], ['listeners', 'Listeners']]
+    entries = [['index', gettext('Home')], ['listeners', gettext('Listeners')]]
 
     if current_user.is_authenticated():
-        entries.append(['history', 'History'])
+        entries.append(['history', gettext('History')])
 
     for entry in entries:
         request.menu['app.' + entry[0]] = {'name': entry[1],
@@ -210,7 +210,7 @@ def page_not_found(e):
 def index():
     news = News.query.order_by(News.time.desc()).all()
     streams = Stream.query.all()
-    return render_template('index.html', TITLE='Index', news=news, streams=streams)
+    return render_template('index.html', TITLE=gettext('Index'), news=news, streams=streams)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -242,7 +242,7 @@ def login():
         except UserNotFoundException:
             form.username.errors.append(gettext('Invalid User or Password.'))
             #flash('Invalid username or password.')
-    return render_template('login.html', form=form, TITLE='Login')
+    return render_template('login.html', form=form, TITLE=gettext('Login'))
 
 
 @app.route('/logout')
@@ -269,7 +269,7 @@ def register():
         except InvalidUsernameException:
             form.username.errors.append(gettext('Username invalid!'))
 
-    return render_template("register.html", form=form, TITLE='Register')
+    return render_template("register.html", form=form, TITLE=gettext('Register'))
 
 
 @app.route('/settings', methods=['get', 'post'])
@@ -300,7 +300,7 @@ def settings():
         else:
             form.old_password.errors.append(gettext('Wrong password.'))
 
-    return render_template('settings.html', form=form, TITLE='Settings',
+    return render_template('settings.html', form=form, TITLE=gettext('Settings'),
                            imgur={'client': rfk.CONFIG.get('site', 'imgur-client')})
 
 
@@ -321,7 +321,7 @@ def history(page):
     per_page = 25
     (tracks, total_count) = paginate_query(Track.query.join(Show).join(UserShow).order_by(Track.end.desc()), page=page, per_page=per_page)
     pagination = Pagination(page, per_page, total_count)
-    return render_template('history.html', tracks=tracks, pagination=pagination, TITLE='History')
+    return render_template('history.html', tracks=tracks, pagination=pagination, TITLE=gettext('History'))
 
 
 @app.route('/donations')
@@ -386,7 +386,7 @@ def listeners():
     else:
         average_listeners = len(current_listener)
 
-    return render_template('listenergraph.html', TITLE='Listeners', show_listener_list=show_listener_list,
+    return render_template('listenergraph.html', TITLE=gettext('Listeners'), show_listener_list=show_listener_list,
                            listeners=current_listener, per_country=per_country, total_bandwidth=total_bandwidth,
                            active_relays=active_relays, average_listeners=average_listeners)
 
@@ -438,11 +438,11 @@ def api_legacy():
             ret['showend'] = int(to_user_timezone(show.end).strftime("%s"))
         else:
             ret['showend'] = None
-        ret['showtype'] = 'PLANNED';
+        ret['showtype'] = 'PLANNED'
         ret['showname'] = show.name
         ret['showdescription'] = show.description
         ret['showid'] = show.show
-        ret['showthread'] = None;
+        ret['showthread'] = None
         ret['showdj'] = user.username
         ret['showdjid'] = user.user
 
@@ -459,13 +459,13 @@ def api_legacy():
             arr['showend'] = int(to_user_timezone(nextshow.end).strftime("%s"))
         else:
             arr['showend'] = None
-        arr['showtype'] = 'PLANNED';
-        arr['showname'] = nextshow.name;
-        arr['showdescription'] = nextshow.description;
-        arr['showid'] = nextshow.show;
-        arr['showdj'] = nextshow.users[0].user.username;
-        arr['showdjid'] = nextshow.users[0].user.user;
-        arr['showthread'] = None;
+        arr['showtype'] = 'PLANNED'
+        arr['showname'] = nextshow.name
+        arr['showdescription'] = nextshow.description
+        arr['showid'] = nextshow.show
+        arr['showdj'] = nextshow.users[0].user.username
+        arr['showdjid'] = nextshow.users[0].user.user
+        arr['showthread'] = None
         ret['shows'].append(arr)
 
     return jsonify(ret)
