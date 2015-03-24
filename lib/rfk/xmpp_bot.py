@@ -4,7 +4,8 @@ import logging
 
 import click
 
-import zmq
+from redis import StrictRedis
+from redis.exceptions import ConnectionError
 
 from sleekxmpp import ClientXMPP
 from sleekxmpp.exceptions import XMPPError
