@@ -51,8 +51,6 @@ def listenerdata(start, stop):
         c = 0
         for stat in stats:
             c = stat.value
-        if not stats:
-            c = 0
         ret['data'][str(stream.mount)].append((to_timestamp(to_user_timezone(start)), int(c)))
 
     #fill in the actual datapoints
