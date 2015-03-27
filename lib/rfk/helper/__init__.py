@@ -103,6 +103,9 @@ def iso_country_to_countryball(isocode):
 
 
 def iso_country_to_countryname(isocode):
+    if isocode is None:
+        return 'Omsk'
+        
     isocode = isocode.upper()
 
     if isocode == 'BAY':
