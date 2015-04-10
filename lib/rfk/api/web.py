@@ -20,7 +20,7 @@ import rfk.database
 from rfk.database.base import User, ApiKey
 from rfk.database.show import Show, UserShow
 from rfk.database.track import Track
-from rfk.database.streaming import Listener, Relay
+from rfk.database.streaming import Listener, Relay, Stream
 from rfk.database.stats import Statistic, StatsistcsData
 
 from rfk.liquidsoap import LiquidInterface
@@ -448,6 +448,35 @@ def active_relays():
             data['active_relays']['total_bandwidth'] += relay.usage
     else:
         data = {'active_relays': None}
+    return jsonify(wrapper(data))
+
+
+@api.route('/web/active_streams')
+@check_auth
+## DONE ##
+def active_streams():
+    """Return all available streams
+
+    Keyword arguments:
+        - None
+    """
+
+    result = Stream.query.all()
+
+    data = {'active_streams': []}
+
+    if result:
+        for stream in result:
+            data['active_streams'].append({
+                'stream_id': stream.stream,
+                'stream_mount': stream.mount,
+                'stream_code': stream.code,
+                'stream_name': stream.name,
+                'stream_type': stream.type,
+                'stream_quality': stream.quality
+            })
+    else:
+        data = {'active_streams': None}
     return jsonify(wrapper(data))
 
 
