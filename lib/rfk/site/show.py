@@ -126,7 +126,7 @@ def show_view(show):
                                  'logo': s.get_logo(),
                                  'user': users,
                                  'show': s.show,
-                                 'duration': (s.end - s.begin).total_seconds(),
+                                 'duration': s.get_duartion(),
                                  'link': url_for('.show_view', show=s.show),
                                  'fulfilled': s.is_fulfilled()})
 
@@ -155,7 +155,7 @@ def show_edit(show):
                                  'begin': to_user_timezone(s.begin).strftime('%s'),
                                  'logo': s.logo,
                                  'show': s.show,
-                                 'duration': (s.end - s.begin).total_seconds() / 60},
+                                 'duration': s.get_duartion() / 60},
                            imgur={'client': CONFIG.get('site', 'imgur-client')},
                            format=get_datetime_format())
 

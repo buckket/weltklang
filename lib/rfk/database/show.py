@@ -155,6 +155,12 @@ class Show(Base):
         elif self.series is not None:
             return self.series.logo
 
+    def get_duration(self):
+        if self.end is not None:
+            return (self.end - self.begin).total_seconds()
+        else:
+            return 0
+
     @property
     def link(self):
         return url_for('show.show_view', show=self.show)
